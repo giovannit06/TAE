@@ -1,0 +1,66 @@
+---
+title: "TAE - Unit 1"
+author: "GT"
+date: "12 avril 2016"
+output: html_document
+---
+
+## Unit 1
+
+### Getting started with R
+
+```{r}
+# R can be used as a basic calculator
+8*6
+2^16
+# R works in terms of functions and variables
+# A function can take in several arguments, or input and returns
+# an output value
+sqrt(2)
+abs(-65)
+# To save the output of a function, it's possible to saving it to a variable
+SquareRoot2 = sqrt(2)
+SquareRoot2
+# Don't use spaces in variable names, don't start variable names with a number
+# It's possible to do assignement with '=' or '<-'
+HoursYear <- 365*24
+HoursYear
+
+# List all variable created in the session
+ls()
+```
+
+### Vectors and Data Frames
+
+```{r}
+# A vector is a series of numbers or characters stored as the same object
+# You can creat a vector in R using the 'c' function (combine)
+c(2, 3, 5, 8, 13)
+# Create a vector of country names
+Country = c("Brazil", "China", "India", "Switzerland", "USA")
+# Then enter the life expectancies in the same order
+LifeExpectancy = c(74, 76, 65, 83, 79)
+Country
+LifeExpectancy
+# If you want to display an element of a vector, use square brackets
+Country[1] # To get the first
+LifeExpectancy[3] # To get the third
+# Another nice function to create vectors is the 'seq' function
+seq(0, 100, 2) # This give a sequence of numbers from 0 to 100 and the numbers increment of two
+# Some algorithms require all of the data to be in a sigle object like a data frame
+CountryData = data.frame(Country, LifeExpectancy)
+CountryData
+# To add another variable to the data
+CountryData$Population=c(199000, 1390000, 1240000, 7997, 318000)
+CountryData
+# To add two new observations
+Country = c("Australia", "Greece")
+LifeExpectancy = c(82, 81)
+Population = c(23050, 11125)
+# Then we create a new data frame
+NewCountryData = data.frame(Country, LifeExpectancy, Population)
+NewCountryData
+# The 'rbind' function combines both data frames by stacking the rows
+AllCountryData = rbind(CountryData, NewCountryData)
+AllCountryData
+```
