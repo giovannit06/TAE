@@ -64,3 +64,30 @@ NewCountryData
 AllCountryData = rbind(CountryData, NewCountryData)
 AllCountryData
 ```
+### Loading Data Files
+
+```{r}
+getwd()
+# Read the data file WHO.csv and save it in data frame
+WHO = read.csv("WHO.csv")
+# To look at our data, there are two useful commands
+str(WHO) # Show the structure of the data
+# For each variable, str() gives the name of the variable, a description of 
+# the type of the variable, followed by a first few values of the variable
+# The other useful function is the summary() function
+summary(WHO)
+# For the factor variables it count the number of observations in each of the
+# levels or categories
+# For each of the numerical values, they're calculated the min, max, mean,
+# first quartile, third quartile, median
+# It's possible to subset the data with the subset() function
+WHO_Europe = subset(WHO, Region == "Europe")
+# The function take two arguments, the first is the data frame, 
+# the second is the criteria for which observation we want subset
+# To save this new data frame to a csv file, there is the write.csv() function
+write.csv(WHO_Europe, "WHO_Europe.csv")
+# After the saving, it's possible to remove the data frame from the current session
+ls()
+rm(WHO_Europe)
+ls()
+```
