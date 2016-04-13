@@ -91,3 +91,33 @@ ls()
 rm(WHO_Europe)
 ls()
 ```
+
+## Summary Statistics and Scatterplot
+
+```{r}
+# To access a variable in a data frame, it has to be linked to the data frame
+# it belongs to with the dollar sign
+WHO$Under15 # The output is a vector of the data frame WHO
+# It's possible to compute some statistics about the variable like the mean
+mean(WHO$Under15)
+# or the standard deviation
+sd(WHO$Under15)
+# it's possible to get the statistical summary of just one variable
+summary(WHO$Under15)
+# this output tells us that there's a country with only 13% of the population under 15
+# it's possible to see which country it is using the which.min() function
+which.min(WHO$Under15)
+# the returned number is the row number of the observation and it's possible
+# to see which country is in this row
+WHO$Country[86]
+# to see the country that has the maximum percentage of the population under 15
+WHO$Country[which.max(WHO$Under15)]
+# To create a scatter plot of GNI vs fertility rate with the plot() function
+plot(WHO$GNI, WHO$FertilityRate)
+# there are few countries for which both the GNI and the fertility rate are high
+Outliers = subset(WHO, GNI > 10000 & FertilityRate > 2.5)
+# It's possible to see how many rows are in the subset with the nrow() function
+nrow(Outliers)
+# there's an easy way to extract a few variables from a dataset
+Outliers[c("Country", "GNI", "FertilityRate")]
+```
