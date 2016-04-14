@@ -92,7 +92,7 @@ rm(WHO_Europe)
 ls()
 ```
 
-## Summary Statistics and Scatterplot
+### Summary Statistics and Scatterplot
 
 ```{r}
 # To access a variable in a data frame, it has to be linked to the data frame
@@ -120,4 +120,32 @@ Outliers = subset(WHO, GNI > 10000 & FertilityRate > 2.5)
 nrow(Outliers)
 # there's an easy way to extract a few variables from a dataset
 Outliers[c("Country", "GNI", "FertilityRate")]
+```
+
+### Plots and Summary Tables
+
+```{r}
+# In addition to scatter plots, there are several other types of plots in R
+# To create an histogram with the hist() function
+hist(WHO$CellularSubscribers)
+# A histogram is useful for understanding the distribution of a variable
+# It's easy to create a boxplot of Life expecancy sorted by region
+boxplot(WHO$LifeExpectancy ~ WHO$Region)
+# A box plot is useful for understanding the statistical range of a variable
+# The box for each region shows the range between the first and third quartiles with the middle line marking the median value
+# The dashed lines at the top and bottom of the box show the range from 
+# the minimum: first quartile minus 1.5*IQR (inter-quartile range) and
+# the maximum: third qurtile plus 1.5*IQR (inter-quartile range)
+# excluding the outliers
+# in order to have nice labels it's necessary to add a few arguments
+boxplot(WHO$LifeExpectancy ~ WHO$Region, ylab = "Life Expectancy", main = "Life Expectancy of Countries by Region")
+# To take a look at some summary tables
+table(WHO$Region) # this counts the number of obs in each category
+# Table works well for variables with only a few possible values.
+# In order to see some nice information about numerical variables by using tapply() function
+tapply(WHO$Over60, WHO$Region, mean) # this split the obs by region and then computes the mean of the variable Over60
+# tapply splits the data by the second argument given and then apply the third argument function
+# Another example
+tapply(WHO$LiteracyRate, WHO$Region, min)
+tapply(WHO$LiteracyRate, WHO$Region, min, na.rm=TRUE) # this option removes all missing value before doing the computation
 ```
