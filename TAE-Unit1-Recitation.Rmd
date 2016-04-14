@@ -1,0 +1,31 @@
+---
+title: "TAE - Unit 1 - Recitation"
+author: "GT"
+date: "14 avril 2016"
+output: html_document
+---
+
+## Unit 1 - Recitation
+
+### The importance of Food and Nutrition
+
+Good nutrition is an important part of leading a healthy lifestyle. Malnutrition can result in obesity.
+More than 35% of American adults are obese. The trends Worldwide are no different. Obesity is one of
+today's visible public health problems.  
+So good nutrition is essential for an overall healthy lifestyle. We have access to hundreds of nutrition and
+weight loos applications. These apps are mostly powered by the United States Departement of Agricultural, USDA, 
+food database. These database is about over 7000 food items including the amount of calories and nutrients.
+
+### Working with Data in R
+
+Start by reading the dataset `USDA.csv`, which contains all foods in the USDA database in 100 grams amounts.
+
+```{r}
+# Use the function read.csv() and save the output to a data frame, USDA
+USDA = read.csv("USDA.csv")
+# Learn about the data using the functino str()
+str(USDA)
+# The first variable is a unique identification number for each of the foods starting with 1001...
+# To obtain high-level statistical information about the dataset, it can be used the summary() function
+summary(USDA)
+```
