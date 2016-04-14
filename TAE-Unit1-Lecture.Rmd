@@ -1,11 +1,11 @@
 ---
-title: "TAE - Unit 1"
+title: "TAE - Unit 1 - Lecture"
 author: "GT"
 date: "12 avril 2016"
 output: html_document
 ---
 
-## Unit 1
+## Unit 1 - Lecture
 
 ### Getting started with R
 
