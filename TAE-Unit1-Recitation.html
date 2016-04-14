@@ -198,6 +198,70 @@ summary(USDA)</code></pre>
 ##  Max.   :149.400   Max.   :250.0000  
 ##  NA's   :2720      NA's   :2834</code></pre>
 </div>
+<div id="data-analysis" class="section level3">
+<h3>Data Analysis</h3>
+<pre class="r"><code># The maximum level of Sodium is 38758, which is very high.
+# To see which food this correspends to, first is necessary to select the vector of data associated with the variable Sodium
+head(USDA$Sodium, 20)</code></pre>
+<pre><code>##  [1]  714  827    2 1395  560  629  842  690  621  700  604  364  344  330
+## [15]  330  406  321  965 1116  800</code></pre>
+<pre class="r"><code># find which food is associated with the function which.max()
+which.max(USDA$Sodium)  # 265</code></pre>
+<pre><code>## [1] 265</code></pre>
+<pre class="r"><code># and use the answer (the index) to look at the vector corresponding to the text descriptor of the foods
+# in order to remember the name of the variable, it can be used the names() function
+names(USDA)</code></pre>
+<pre><code>##  [1] &quot;ID&quot;           &quot;Description&quot;  &quot;Calories&quot;     &quot;Protein&quot;     
+##  [5] &quot;TotalFat&quot;     &quot;Carbohydrate&quot; &quot;Sodium&quot;       &quot;SaturatedFat&quot;
+##  [9] &quot;Cholesterol&quot;  &quot;Sugar&quot;        &quot;Calcium&quot;      &quot;Iron&quot;        
+## [13] &quot;Potassium&quot;    &quot;VitaminC&quot;     &quot;VitaminE&quot;     &quot;VitaminD&quot;</code></pre>
+<pre class="r"><code># it's possible now to check for the corresponding food
+USDA$Description[265] # salt, table</code></pre>
+<pre><code>## [1] SALT,TABLE
+## 7054 Levels: ABALONE,MIXED SPECIES,RAW ... ZWIEBACK</code></pre>
+<pre class="r"><code># find out which foods contain more than 10000 mg of sodium creating a subset of the origina data frame
+HighSodium = subset(USDA, Sodium &gt; 10000)
+# check how many foods exist in this new data frame with the function nrow()
+nrow(HighSodium) # 10</code></pre>
+<pre><code>## [1] 10</code></pre>
+<pre class="r"><code># check the name of foodss by looking at their Description vector
+HighSodium$Description</code></pre>
+<pre><code>##  [1] SALT,TABLE                                             
+##  [2] SOUP,BF BROTH OR BOUILLON,PDR,DRY                      
+##  [3] SOUP,BEEF BROTH,CUBED,DRY                              
+##  [4] SOUP,CHICK BROTH OR BOUILLON,DRY                       
+##  [5] SOUP,CHICK BROTH CUBES,DRY                             
+##  [6] GRAVY,AU JUS,DRY                                       
+##  [7] ADOBO FRESCO                                           
+##  [8] LEAVENING AGENTS,BAKING PDR,DOUBLE-ACTING,NA AL SULFATE
+##  [9] LEAVENING AGENTS,BAKING SODA                           
+## [10] DESSERTS,RENNIN,TABLETS,UNSWTND                        
+## 7054 Levels: ABALONE,MIXED SPECIES,RAW ... ZWIEBACK</code></pre>
+<pre class="r"><code># Find how much sodium is contained in 100 gr of caviar
+# get the index of caviar first using the function match() and track down the word 'caviar' in the text description
+match(&quot;CAVIAR&quot;, USDA$Description) # 4154</code></pre>
+<pre><code>## [1] 4154</code></pre>
+<pre class="r"><code># then find the sodium level
+USDA$Sodium[4154] # 1500 mg</code></pre>
+<pre><code>## [1] 1500</code></pre>
+<pre class="r"><code># this sequence of operations can be done with just one expression
+USDA$Sodium[match(&quot;CAVIAR&quot;, USDA$Description)]</code></pre>
+<pre><code>## [1] 1500</code></pre>
+<pre class="r"><code># Evaluate this value by comparing it to the mean and the standard deviation of the sodium levels
+summary(USDA$Sodium)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##     0.0    37.0    79.0   322.1   386.0 38760.0      84</code></pre>
+<pre class="r"><code># and to get the sd
+sd(USDA$Sodium)</code></pre>
+<pre><code>## [1] NA</code></pre>
+<pre class="r"><code># remove the missing values
+sd(USDA$Sodium, na.rm = TRUE) # 1045.417</code></pre>
+<pre><code>## [1] 1045.417</code></pre>
+<pre class="r"><code># if mean and sd are summed
+322.1+1045.417 # 1367.517</code></pre>
+<pre><code>## [1] 1367.517</code></pre>
+<pre class="r"><code># the result is still smaller than the amount of sodium in 100 gr of caviar</code></pre>
+</div>
 </div>
 
 

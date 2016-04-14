@@ -29,3 +29,40 @@ str(USDA)
 # To obtain high-level statistical information about the dataset, it can be used the summary() function
 summary(USDA)
 ```
+
+### Data Analysis
+
+```{r}
+# The maximum level of Sodium is 38758, which is very high.
+# To see which food this correspends to, first is necessary to select the vector of data associated with the variable Sodium
+head(USDA$Sodium, 20)
+# find which food is associated with the function which.max()
+which.max(USDA$Sodium)  # 265
+# and use the answer (the index) to look at the vector corresponding to the text descriptor of the foods
+# in order to remember the name of the variable, it can be used the names() function
+names(USDA)
+# it's possible now to check for the corresponding food
+USDA$Description[265] # salt, table
+# find out which foods contain more than 10000 mg of sodium creating a subset of the origina data frame
+HighSodium = subset(USDA, Sodium > 10000)
+# check how many foods exist in this new data frame with the function nrow()
+nrow(HighSodium) # 10
+# check the name of foodss by looking at their Description vector
+HighSodium$Description
+# Find how much sodium is contained in 100 gr of caviar
+# get the index of caviar first using the function match() and track down the word 'caviar' in the text description
+match("CAVIAR", USDA$Description) # 4154
+# then find the sodium level
+USDA$Sodium[4154] # 1500 mg
+# this sequence of operations can be done with just one expression
+USDA$Sodium[match("CAVIAR", USDA$Description)]
+# Evaluate this value by comparing it to the mean and the standard deviation of the sodium levels
+summary(USDA$Sodium)
+# and to get the sd
+sd(USDA$Sodium)
+# remove the missing values
+sd(USDA$Sodium, na.rm = TRUE) # 1045.417
+# if mean and sd are summed
+322.1+1045.417 # 1367.517
+# the result is still smaller than the amount of sodium in 100 gr of caviar
+```
