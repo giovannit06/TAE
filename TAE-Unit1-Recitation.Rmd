@@ -95,3 +95,33 @@ boxplot(USDA$Sugar, main="Boxplot of Sugar Levels", ylab="Sugar (g)")
 # But there are a lot of outliers with extremely high values of sugar
 # There exist some foods that have almost 100 gr of sugar in 100 gr.
 ```
+
+### Adding Variables
+
+Suppose that it's needed to add a variable in the USDA data frame that takes a 
+value 1 if the food has higher sodium than average and 0 if the food has lower
+sodium than average.
+```{r}
+# Compare if a food has more sodium than the avearge, for example the first food
+# Dont't forget to remove the non-available entries
+USDA$Sodium[1] > mean(USDA$Sodium, na.rm=TRUE) # TRUE
+# What about the 50th food?
+USDA$Sodium[50] > mean(USDA$Sodium, na.rm=TRUE) # FALSE
+# It's possible to write the same command on all the vector Sodium and save the results into a vector called HighSodium
+HighSodium = USDA$Sodium > mean(USDA$Sodium, na.rm=TRUE) 
+# Look at the structure of the HighSodium
+str(HighSodium)
+# the vector has all these values TRUE and FALSE which are called logicals, so the type of the HighSodium vector is logical
+# But it's expected to have 1 and 0 instead of TRUE and FALSE, to do this it exist the function as.numeric()
+HighSodium = as.numeric(USDA$Sodium > mean(USDA$Sodium, na.rm=TRUE))
+str(HighSodium)
+# This vector is not yet associated with the USDA data frame. 
+# To do this it need to use the dollar notation
+USDA$HighSodium = as.numeric(USDA$Sodium > mean(USDA$Sodium, na.rm=TRUE))
+str(USDA)
+# It's possible to do the same and add the variables HighProtein, HighCarbs, HighFat
+USDA$HighProtein = as.numeric(USDA$Protein > mean(USDA$Protein, na.rm=TRUE))
+USDA$HighFat = as.numeric(USDA$TotalFat > mean(USDA$TotalFat, na.rm=TRUE))
+USDA$HighCarbs = as.numeric(USDA$Carbohydrate > mean(USDA$Carbohydrate, na.rm=TRUE))
+str(USDA)
+```
