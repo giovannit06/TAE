@@ -125,3 +125,26 @@ USDA$HighFat = as.numeric(USDA$TotalFat > mean(USDA$TotalFat, na.rm=TRUE))
 USDA$HighCarbs = as.numeric(USDA$Carbohydrate > mean(USDA$Carbohydrate, na.rm=TRUE))
 str(USDA)
 ```
+
+### Summary tables
+
+Now we can try to understand the data and the relationships between variables using table() and tapply() functions.
+
+```{r}
+# To figure out how may foods have higher sodium level than average, look at the HighSodium variable and
+# count the foods that have values 1
+table(USDA$HighSodium) # most of the food have lower sodium than average
+# Look at how many foods have both high sodium and high fat
+table(USDA$HighSodium, USDA$HighFat)
+# The rows belong to the first input (HighSodium) and the columns correspond to the second input (HighFat)
+# Compute the average amount of iron sorted by high and low protein
+# The tapply function takes three arguments:
+# tapply(argument1, argument2, argument3)
+# Group argument1 by argument2 and apply argument3
+tapply(USDA$Iron, USDA$HighProtein, mean, na.rm=TRUE)
+# How about the maximum level of vitamin C in food with high and low carbs
+tapply(USDA$VitaminC, USDA$HighCarbs, max, na.rm=TRUE)
+# In order to further analyze these data use the summary function
+tapply(USDA$VitaminC, USDA$HighCarbs, summary, na.rm=TRUE)
+
+```
