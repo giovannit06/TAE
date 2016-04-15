@@ -66,3 +66,32 @@ sd(USDA$Sodium, na.rm = TRUE) # 1045.417
 322.1+1045.417 # 1367.517
 # the result is still smaller than the amount of sodium in 100 gr of caviar
 ```
+
+### Creating Plots in R
+
+Visualization is a crucial step for initial data exploration.
+```{r}
+# First create a scatterplot with Protein on the x-axis and Fat on the y-axis
+# using the plot() function
+plot(USDA$Protein,USDA$TotalFat)
+# The plot has a very interesting triangular shape, it looks like foods that are higher in protein are typically lower in fat and vice versa.
+# R gives default names for the axis. It's possible to modify them adding more
+# arguments to the plot function.
+# add also a title and change the color
+plot(USDA$Protein,USDA$TotalFat, xlab="Protein", ylab="Fat", main="Protein vs Fat",col="red")
+# Another way to visualize data is by plotting histograms using the hist() function
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels")
+# The histogram groups them all together in one cell. In order to zoom in this section, it's necessary to limit the x-axis to go from zero to 100 mg
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100))
+# But now there is only one big cell. To really break the cell into smaller pieces, it's necessary to add the argument 'breaks='
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100),breaks=100)
+# There are actually only 5 cells and each cell is 20 mg long. This beacause the orginal interval, 0 to 2000 is divided into 100 cells, 2000/100=20
+# To correct this it's needed to think in terms of the original interval and break it into 2000 cells
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100),breaks=2000)
+# In the refined histogram it's possible to see that  more than 5000 foods have less than 1 mg of Vitamim C
+# A third way to visualize data is using box plots using boxplot() function
+boxplot(USDA$Sugar, main="Boxplot of Sugar Levels", ylab="Sugar (g)")
+# The average across the data set seems to be pretty low: around 5 gr.
+# But there are a lot of outliers with extremely high values of sugar
+# There exist some foods that have almost 100 gr of sugar in 100 gr.
+```
