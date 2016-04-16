@@ -1,0 +1,64 @@
+---
+title: "Unit 1 - Assignement"
+author: "GT"
+date: "16 avril 2016"
+output: html_document
+---
+
+## AN ANALYTICAL DETECTIVE
+
+### Problem 1 - Loading the Data
+
+```{r}
+Sys.setlocale("LC_ALL", "C")
+mvt = read.csv("mvtWeek1.csv")
+str(mvt)
+summary(mvt)
+```
+
+How many observations ? **191641**
+
+How many variables ? **11**
+
+What is the maximum value of the variable "ID" ? **9181151**
+
+What is the minimum value of the variable "Beat" ? **111**
+
+How many obs have value TRUE in the "Arrest" variables ? **15536**
+
+How many observations have a LocationDescription value of ALLEY ? **2308**
+
+### Problem 2 - Understanding Dates in R
+
+In what format are the entries in the variable Date ? **mm/dd/yy hh:mm**
+
+```{r}
+mvt$Date[1]
+```
+
+Let's convert these characters into a Date object in R.
+
+```{r}
+DateConvert = as.Date(strptime(mvt$Date, "%m/%d/%y %H:%M"))
+summary(DateConvert)
+```
+
+What's the month of the year of the median date in the dataset ? **May 2006**
+
+Let's extract the month and the day of the week, and add these variables to the data.
+
+```{r}
+mvt$Month = months(DateConvert)
+mvt$Weekday = weekdays(DateConvert)
+mvt$Date = DateConvert
+table(mvt$Month)
+table(mvt$Weekday)
+table(mvt$Month, mvt$Arrest)
+```
+
+In which month did the fewest motor vehicle thefts occur ? **February**
+
+On which weekday did the most motor vehicle thefts occur ? **Friday**
+
+Which month has the largest number of motor vehicle thefts for which
+an arrest was made ? **January**
