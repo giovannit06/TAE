@@ -155,7 +155,7 @@ CocaCola = read.csv("CocaColaStock.csv")
 Boeing = read.csv("BoeingStock.csv")
 ```
 
-### Problem 1
+### Problem 1 - Summary Statistics
 
 Look at the structure of the datasets. The date variable is stored as a factor. We can convert this to a "Date"
 object in R
@@ -191,3 +191,35 @@ What is the maximum stock price of Coca-Cola over this time period? **146.58**
 What is the median stock price of Boeing over this time period? **44.88**
 
 What it the standard deviation of the stock price of Procter&Gamble over this time period? **18.194**
+
+### Problem 2 - Visualizing Stock Dynamics
+
+Plot the stock prices to see if we can visualize trends in stock prices during this time period. 
+Add the argument type = "l" to plot a line intead of points
+
+```{r}
+plot(CocaCola$Date, CocaCola$StockPrice, type="l")
+```
+
+Around what year did Coca-cola has its highest stock price in this time period ? **1973**
+
+Around what year did Coca/Cola has its lowest stock price in this time period ? **1980**
+
+Let's add the line for Procter & Gamble too. Add the line to a plot in R by using the lines function.
+Add a color for the lines to distinguish them. Draw a vertical line at a certain date with the function
+abline()
+
+```{r}
+plot(CocaCola$Date, CocaCola$StockPrice, type="l", col="red")
+lines(ProcterGamble$Date, ProcterGamble$StockPrice, col="blue")
+abline(v=as.Date(c("2000-03-01")))
+abline(v=as.Date(c("1983-01-01")))
+```
+
+In March of 2000, the technology bubble burst, and a stock market crash occurred. According to this plot,
+which company's stock dropped more? **Procter & Gamble**
+
+Around 1983, the stock for one of these companies (CocaCola or Procter & Gamble) was goinig up, while the
+other was going down. Which one was going up? **Coca-Cola**
+
+In the time period shown in the plot, which stock generally has lower values? **Coca-Cola**
