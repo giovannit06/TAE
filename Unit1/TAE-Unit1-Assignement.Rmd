@@ -223,3 +223,28 @@ Around 1983, the stock for one of these companies (CocaCola or Procter & Gamble)
 other was going down. Which one was going up? **Coca-Cola**
 
 In the time period shown in the plot, which stock generally has lower values? **Coca-Cola**
+
+### Problem 3 - Visualizing Stock Dynamics 1995-2005
+
+Let's take a look at how the stock prices changed from 1995-2005 for all five companies.
+
+```{r}
+plot(CocaCola$Date[301:432], CocaCola$StockPrice[301:432],type="l",col="red",ylim=c(0,210))
+lines(ProcterGamble$Date[301:432], ProcterGamble$StockPrice[301:432],col="blue")
+lines(IBM$Date[301:432], IBM$StockPrice[301:432], col="green")
+lines(GE$Date[301:432], GE$StockPrice[301:432], col="brown")
+lines(Boeing$Date[301:432], Boeing$StockPrice[301:432], col="black")
+abline(v=as.Date(c("2000-03-01")))
+abline(v=as.Date(c("1997-10-01")))
+```
+
+Which stock fell the most right after thge technology bubble burst in March 2000? **GE**
+
+Which stock reaches the highest value in the time period 1995-2005? **IBM**
+
+In October 1997 there was a global stock market crash that was caused by an economic crisis in Asia.
+comparing September 1997 to November 1997, which companies saw a decreasing trend in their stock price? 
+**Procter & Gamble and Boeing**
+
+In the last two years of this time period (2004 and 2005) which stock seems to be performing the best, in 
+terms of increasing stock price? **Boeing**
