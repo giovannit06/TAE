@@ -62,3 +62,45 @@ On which weekday did the most motor vehicle thefts occur ? **Friday**
 
 Which month has the largest number of motor vehicle thefts for which
 an arrest was made ? **January**
+
+### Problem 3 - Visualizing Crime Trends
+
+Make a histogram of the variable Date. Add an extra argument, to specify the number of bars we want into histogram
+
+```{r}
+hist(mvt$Date, breaks=100)
+```
+
+Does it look like crime increase or decrease from 2002-2012 ? **Decrease**
+
+Does it look like crime increase or decrease frome 2005-2008 ? **Decrease**
+
+Does it look like crime increase or decrease from 2009-2011 ? **Increase**
+
+Create a boxplot of the variable "Date", sorted by the variable "Arrest"
+
+```{r}
+boxplot(mvt$Date ~ mvt$Arrest)
+```
+
+Does it look like there were more crimes for which arrests were made in the first half of the time period or 
+the second half ? **First half**
+
+```{r}
+table(mvt$Year, mvt$Arrest)
+Arrest2001 = subset(mvt, mvt$Year == 2001 & mvt$Arrest == TRUE)
+Total2001 = subset(mvt, mvt$Year == 2001)
+nrow(Arrest2001)/nrow(Total2001)
+Arrest2007 = subset(mvt, mvt$Year == 2007 & mvt$Arrest == TRUE)
+Total2007 = subset(mvt, mvt$Year == 2007)
+nrow(Arrest2007)/nrow(Total2007)
+Arrest2012 = subset(mvt, mvt$Year == 2012 & mvt$Arrest == TRUE)
+Total2012 = subset(mvt, mvt$Year == 2012)
+nrow(Arrest2012)/nrow(Total2012)
+```
+
+For what proportion of motor vehicle thefts in 2001 was an arrest made? **0.104**
+
+For what proportion of motor vehicle thefts in 2007 was an arrest made? **0.085**
+
+For what proportion of motor vehicle thefts in 2012 was an arrest made? **0.039**
