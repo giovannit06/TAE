@@ -56,3 +56,46 @@ What proportion of interviewees are citiziens of the United States? **`r (116639
 For which races are there at least 250 interviewees in the CPS dataset of Hispanic ethnicity? 
 **American Indian, Black, Multiracial, White**
 
+### Problem 2 - Evaluating Missing Values
+
+Which variables have at least on interviewee with a missing (NA) value ? **MetroAreaCode, Married, Education, EmploymentStatus, Industry**
+
+We will try to determine if there is a pattern in the missing values of the Married variable. The function
+is.na() returns a vector of TRUE/FALSE values for whether the Married variable is missing. We can see if 
+Married is missing based on the Region variable
+
+```{r}
+table(CPS$Region, is.na(CPS$Married))
+table(CPS$Sex, is.na(CPS$Married))
+table(CPS$Age, is.na(CPS$Married))
+table(CPS$Citizenship, is.na(CPS$Married))
+```
+
+**The Married variable being missing is related to the Age value for the interviewee**
+
+MetroAreaCode is missing if an interviewee does not live in a metropolitan area.
+
+```{r}
+table(CPS$State, is.na(CPS$MetroAreaCode))
+table(CPS$Region, is.na(CPS$MetroAreaCode))
+```
+
+How many states had all interviewees living in a non-metropolitan area? **2**
+
+How many states had all interviewees living in a metropolitan area? **3**
+
+Which region of the United States has the largest proportion of interviewees living in a non-metropolitan area?
+**Midwest**
+
+There is a less tedious way to compute the proportion of values that are TRUE. The mean() function, which
+takes the average of the values passed to it, wille treat TRUE as 1 and FALSE as 0, meaning it returns the
+proportion of values that are true. `r mean(c(TRUE, FALSE, TRUE, TRUE)) # 0.75`
+
+```{r}
+sort(tapply(is.na(CPS$MetroAreaCode),CPS$State, mean))
+```
+
+Which state has a proportion of interviewees living in a non-metropolitan area closest to 30%? **Wisconsin**
+
+Which state has the largest proportion of non-metropolitan interviewees, ignoring states where all 
+interviewees were non-metropolitan? **Montana**
