@@ -1,0 +1,58 @@
+---
+title: "Unit 1  - Assignement3"
+author: "GT"
+date: "17 avril 2016"
+output: html_document
+---
+
+## DEMOGRAPHICS AND EMPLOYMENT IN THE UNITED STATES
+
+In the USA the governement measures unemployment using the Current Population Survey (CPS), which collecs
+demographic and employment information from a wide range of Americans each month.
+
+The obs in the dataset represent people surveyed in the September 2013 CPS who actually completed a survey.
+The compact version of this database has the following variables:
+
+  - **PeopleInHousehold**: The number of people in the interviewee's houshold
+  - **Region**
+  - **State**
+  - **MetroAreaCode**: A code that identifies the metropolitan area in which the interviewee lives. The mapping is provided in the file MetroAreaCode.csv
+  - **Age**
+  - **Married**
+  - **Sex**
+  - **Education**
+  - **Race**
+  - **Hispanic**
+  - **CountryOfBirthCode**: A code identifying the country of birth of the interviewee. The mapping from codes to names of countries is provided in the file CountryCodes.csv
+  - **Citizenship**
+  - **EmploymentStatus**
+  - **Industry**
+
+### Problem 1
+
+Load the dataset from CPSData.csv into a data frame called CPS and view the dataset with the summary() and str()
+
+```{r}
+CPS = read.csv("CPSData.csv")
+str(CPS)
+summary(CPS)
+sort(table(CPS$Industry))
+sort(table(CPS$State))
+table(CPS$Citizenship)
+table(CPS$Hispanic, CPS$Race)
+```
+
+How many interviewees are in the dataset? **131302**
+
+Among the interviewees with a value reported for the Industry variable, what is the most common industry of 
+employment: **Educational and health services**
+
+Which state has the fewest interviewees ? **New Mexico**
+
+Which state has the largest number of interviewees ? **California**
+
+What proportion of interviewees are citiziens of the United States? **`r (116639+7073)/131302 # 0.942`** 
+
+For which races are there at least 250 interviewees in the CPS dataset of Hispanic ethnicity? 
+**American Indian, Black, Multiracial, White**
+
