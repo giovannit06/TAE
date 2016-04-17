@@ -99,3 +99,113 @@ Which state has a proportion of interviewees living in a non-metropolitan area c
 
 Which state has the largest proportion of non-metropolitan interviewees, ignoring states where all 
 interviewees were non-metropolitan? **Montana**
+
+### Problem 3 - Integrating Metropolitan Area Data
+
+Read the dictionaries MetroAreaCodes.csv and CountryCodes.csv, which repectively map MetroAreaCode and
+CountryOfBirthCode into their true values.
+
+```{r}
+MetroAreaMap = read.csv("MetroAreaCodes.csv")
+str(MetroAreaMap)
+CountryMap = read.csv("CountryCodes.csv")
+str(CountryMap)
+```
+
+How many obs are there in MetroAreaMap ? **271**
+
+How many obs are there in CountryMap ? **149**
+
+The following command merges the two data frames on these columns, overwriting the CPS data frame with the result
+
+The first two arguments determine the data frames to be merged (x and y). by.x="MetroAreaCode" means
+we're matching on the MetroAreaCode variable from the "x" data frame (CPS), while by.y="Code" means
+we're matching on the Code variable from the "y" data frame (MetroAreaMap). all.x=TRUE means we want to keep
+all rows from the "x" data frame (CPS).
+
+```{r}
+CPS = merge(CPS, MetroAreaMap, by.x="MetroAreaCode", by.y="Code", all.x=TRUE)
+summary(CPS)
+str(CPS)
+sort(table(CPS$MetroArea), decreasing = TRUE)
+```
+
+What was the name of the variable that was added to the data frame by the merge() operation ? **MetroArea**
+
+How many interviewees have a missing value for the new metropolitan area variable? **34238**
+
+Which of the following metropolitan area has the largest number of interviewees ? **Boston**
+
+```{r}
+sort(tapply(CPS$Hispanic, CPS$MetroArea, mean),decreasing = TRUE)
+```
+
+Which metropolitan area has the highest proportion of interviewees of Hispanic ethnicity? **Laredo, TX**
+
+```{r}
+sort(tapply(CPS$Race == "Asian", CPS$MetroArea, mean),decreasing = TRUE)
+```
+
+Number of metropolitan areas in the USA from which at least 20% of interviewees are Asian: **4**
+
+```{r}
+sort(tapply(CPS$Education == "No high school diploma", CPS$MetroArea, mean, na.rm = TRUE))
+```
+
+Which metropolitan area has the smallest proportion of interviewees who have received no high school diploma ?
+**Iowa City, IA**
+
+### Problem 4 - Integrating Country of Birth Data
+
+Merge in the country of birth information from the CountryMap data frame, replacing the CPS data frame with the
+result.
+
+```{r}
+CPS = merge(CPS, CountryMap, by.x="CountryOfBirthCode", by.y="Code", all.x=TRUE)
+summary(CPS)
+```
+
+What is the name of the variable added to the CPS data frame by this merge operation? **Country**
+
+How many interviewees have a missing value for the new country of birth variables? **176**
+
+```{r}
+sort(table(CPS$Country), decreasing = TRUE)
+```
+
+Among all interviewees born outside of the North America, which country was the most common place of birth?
+**Philippines**
+
+```{r}
+tapply(CPS$Country != "United States", CPS$MetroArea, mean, na.rm = TRUE)
+```
+
+What proportion of the interviewees from the "New York-Northern New Jersey-Long Island, NY-NJ-PA" metropolitan
+area have a country of birth that is not the US? **0.309**
+
+```{r}
+# India
+table(CPS$Country == "India", CPS$MetroArea == "Boston-Cambridge-Quincy, MA-NH")
+table(CPS$Country == "India", CPS$MetroArea == "Minneapolis-St Paul-Bloomington, MN-WI")
+table(CPS$Country == "India", CPS$MetroArea == "New York-Northern New Jersey-Long Island, NY-NJ-PA")
+table(CPS$Country == "India", CPS$MetroArea == "Washington-Arlington-Alexandria, DC-VA-MD-WV")
+# Brazil
+table(CPS$Country == "Brazil", CPS$MetroArea == "Boston-Cambridge-Quincy, MA-NH")
+table(CPS$Country == "Brazil", CPS$MetroArea == "Minneapolis-St Paul-Bloomington, MN-WI")
+table(CPS$Country == "Brazil", CPS$MetroArea == "New York-Northern New Jersey-Long Island, NY-NJ-PA")
+table(CPS$Country == "Brazil", CPS$MetroArea == "Washington-Arlington-Alexandria, DC-VA-MD-WV")
+# Somalia
+table(CPS$Country == "Somalia", CPS$MetroArea == "Boston-Cambridge-Quincy, MA-NH")
+table(CPS$Country == "Somalia", CPS$MetroArea == "Minneapolis-St Paul-Bloomington, MN-WI")
+table(CPS$Country == "Somalia", CPS$MetroArea == "New York-Northern New Jersey-Long Island, NY-NJ-PA")
+table(CPS$Country == "Somalia", CPS$MetroArea == "Washington-Arlington-Alexandria, DC-VA-MD-WV")
+
+```
+
+Which metropolitan area has the largest number of interviewees with a country birth in India ? **New York**
+
+In Brazil ? **Boston**
+
+In Somalia ? **Minneapolis**
+
+

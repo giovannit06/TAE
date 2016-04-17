@@ -490,6 +490,3055 @@ str(CPS)</code></pre>
 <p>Which state has a proportion of interviewees living in a non-metropolitan area closest to 30%? <strong>Wisconsin</strong></p>
 <p>Which state has the largest proportion of non-metropolitan interviewees, ignoring states where all interviewees were non-metropolitan? <strong>Montana</strong></p>
 </div>
+<div id="problem-3---integrating-metropolitan-area-data" class="section level3">
+<h3>Problem 3 - Integrating Metropolitan Area Data</h3>
+<p>Read the dictionaries MetroAreaCodes.csv and CountryCodes.csv, which repectively map MetroAreaCode and CountryOfBirthCode into their true values.</p>
+<pre class="r"><code>MetroAreaMap = read.csv(&quot;MetroAreaCodes.csv&quot;)
+str(MetroAreaMap)</code></pre>
+<pre><code>## 'data.frame':    271 obs. of  2 variables:
+##  $ Code     : int  460 3000 3160 3610 3720 6450 10420 10500 10580 10740 ...
+##  $ MetroArea: Factor w/ 271 levels &quot;Akron, OH&quot;,&quot;Albany, GA&quot;,..: 12 92 98 117 122 194 1 2 3 4 ...</code></pre>
+<pre class="r"><code>CountryMap = read.csv(&quot;CountryCodes.csv&quot;)
+str(CountryMap)</code></pre>
+<pre><code>## 'data.frame':    149 obs. of  2 variables:
+##  $ Code   : int  57 66 73 78 96 100 102 103 104 105 ...
+##  $ Country: Factor w/ 149 levels &quot;Afghanistan&quot;,..: 138 57 105 141 97 3 11 18 24 36 ...</code></pre>
+<p>How many obs are there in MetroAreaMap ? <strong>271</strong></p>
+<p>How many obs are there in CountryMap ? <strong>149</strong></p>
+<p>The following command merges the two data frames on these columns, overwriting the CPS data frame with the result</p>
+<p>The first two arguments determine the data frames to be merged (x and y). by.x=“MetroAreaCode” means we’re matching on the MetroAreaCode variable from the “x” data frame (CPS), while by.y=“Code” means we’re matching on the Code variable from the “y” data frame (MetroAreaMap). all.x=TRUE means we want to keep all rows from the “x” data frame (CPS).</p>
+<pre class="r"><code>CPS = merge(CPS, MetroAreaMap, by.x=&quot;MetroAreaCode&quot;, by.y=&quot;Code&quot;, all.x=TRUE)
+summary(CPS)</code></pre>
+<pre><code>##  MetroAreaCode   PeopleInHousehold       Region               State      
+##  Min.   :10420   Min.   : 1.000    Midwest  :30684   California  :11570  
+##  1st Qu.:21780   1st Qu.: 2.000    Northeast:25939   Texas       : 7077  
+##  Median :34740   Median : 3.000    South    :41502   New York    : 5595  
+##  Mean   :35075   Mean   : 3.284    West     :33177   Florida     : 5149  
+##  3rd Qu.:41860   3rd Qu.: 4.000                      Pennsylvania: 3930  
+##  Max.   :79600   Max.   :15.000                      Illinois    : 3912  
+##  NA's   :34238                                       (Other)     :94069  
+##       Age                 Married          Sex       
+##  Min.   : 0.00   Divorced     :11151   Female:67481  
+##  1st Qu.:19.00   Married      :55509   Male  :63821  
+##  Median :39.00   Never Married:30772                 
+##  Mean   :38.83   Separated    : 2027                 
+##  3rd Qu.:57.00   Widowed      : 6505                 
+##  Max.   :85.00   NA's         :25338                 
+##                                                      
+##                    Education                   Race       
+##  High school            :30906   American Indian :  1433  
+##  Bachelor's degree      :19443   Asian           :  6520  
+##  Some college, no degree:18863   Black           : 13913  
+##  No high school diploma :16095   Multiracial     :  2897  
+##  Associate degree       : 9913   Pacific Islander:   618  
+##  (Other)                :10744   White           :105921  
+##  NA's                   :25338                            
+##     Hispanic      CountryOfBirthCode               Citizenship    
+##  Min.   :0.0000   Min.   : 57.00     Citizen, Native     :116639  
+##  1st Qu.:0.0000   1st Qu.: 57.00     Citizen, Naturalized:  7073  
+##  Median :0.0000   Median : 57.00     Non-Citizen         :  7590  
+##  Mean   :0.1393   Mean   : 82.68                                  
+##  3rd Qu.:0.0000   3rd Qu.: 57.00                                  
+##  Max.   :1.0000   Max.   :555.00                                  
+##                                                                   
+##            EmploymentStatus                               Industry    
+##  Disabled          : 5712   Educational and health services   :15017  
+##  Employed          :61733   Trade                             : 8933  
+##  Not in Labor Force:15246   Professional and business services: 7519  
+##  Retired           :18619   Manufacturing                     : 6791  
+##  Unemployed        : 4203   Leisure and hospitality           : 6364  
+##  NA's              :25789   (Other)                           :21618  
+##                             NA's                              :65060  
+##                                               MetroArea    
+##  New York-Northern New Jersey-Long Island, NY-NJ-PA: 5409  
+##  Washington-Arlington-Alexandria, DC-VA-MD-WV      : 4177  
+##  Los Angeles-Long Beach-Santa Ana, CA              : 4102  
+##  Philadelphia-Camden-Wilmington, PA-NJ-DE          : 2855  
+##  Chicago-Naperville-Joliet, IN-IN-WI               : 2772  
+##  (Other)                                           :77749  
+##  NA's                                              :34238</code></pre>
+<pre class="r"><code>str(CPS)</code></pre>
+<pre><code>## 'data.frame':    131302 obs. of  15 variables:
+##  $ MetroAreaCode     : int  10420 10420 10420 10420 10420 10420 10420 10420 10420 10420 ...
+##  $ PeopleInHousehold : int  4 4 2 4 1 3 4 4 2 3 ...
+##  $ Region            : Factor w/ 4 levels &quot;Midwest&quot;,&quot;Northeast&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ State             : Factor w/ 51 levels &quot;Alabama&quot;,&quot;Alaska&quot;,..: 36 36 36 36 36 36 36 36 36 36 ...
+##  $ Age               : int  2 9 73 40 63 19 30 6 60 32 ...
+##  $ Married           : Factor w/ 5 levels &quot;Divorced&quot;,&quot;Married&quot;,..: NA NA 2 2 3 3 2 NA 2 2 ...
+##  $ Sex               : Factor w/ 2 levels &quot;Female&quot;,&quot;Male&quot;: 2 2 1 1 2 1 1 1 1 2 ...
+##  $ Education         : Factor w/ 8 levels &quot;Associate degree&quot;,..: NA NA 8 4 6 4 2 NA 4 4 ...
+##  $ Race              : Factor w/ 6 levels &quot;American Indian&quot;,..: 6 6 6 6 6 6 2 6 6 6 ...
+##  $ Hispanic          : int  0 0 0 0 0 0 0 1 0 0 ...
+##  $ CountryOfBirthCode: int  57 57 57 362 57 57 203 57 57 57 ...
+##  $ Citizenship       : Factor w/ 3 levels &quot;Citizen, Native&quot;,..: 1 1 1 2 1 1 3 1 1 1 ...
+##  $ EmploymentStatus  : Factor w/ 5 levels &quot;Disabled&quot;,&quot;Employed&quot;,..: NA NA 4 3 1 2 3 NA 2 2 ...
+##  $ Industry          : Factor w/ 14 levels &quot;Agriculture, forestry, fishing, and hunting&quot;,..: NA NA NA NA NA 7 NA NA 4 13 ...
+##  $ MetroArea         : Factor w/ 271 levels &quot;Akron, OH&quot;,&quot;Albany, GA&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
+<pre class="r"><code>sort(table(CPS$MetroArea), decreasing = TRUE)</code></pre>
+<pre><code>## 
+## New York-Northern New Jersey-Long Island, NY-NJ-PA 
+##                                               5409 
+##       Washington-Arlington-Alexandria, DC-VA-MD-WV 
+##                                               4177 
+##               Los Angeles-Long Beach-Santa Ana, CA 
+##                                               4102 
+##           Philadelphia-Camden-Wilmington, PA-NJ-DE 
+##                                               2855 
+##                Chicago-Naperville-Joliet, IN-IN-WI 
+##                                               2772 
+##               Providence-Fall River-Warwick, MA-RI 
+##                                               2284 
+##                     Boston-Cambridge-Quincy, MA-NH 
+##                                               2229 
+##             Minneapolis-St Paul-Bloomington, MN-WI 
+##                                               1942 
+##                    Dallas-Fort Worth-Arlington, TX 
+##                                               1863 
+##                     Houston-Baytown-Sugar Land, TX 
+##                                               1649 
+##                                       Honolulu, HI 
+##                                               1576 
+##              Miami-Fort Lauderdale-Miami Beach, FL 
+##                                               1554 
+##                 Atlanta-Sandy Springs-Marietta, GA 
+##                                               1552 
+##                                  Denver-Aurora, CO 
+##                                               1504 
+##                               Baltimore-Towson, MD 
+##                                               1483 
+##                  San Francisco-Oakland-Fremont, CA 
+##                                               1386 
+##                         Detroit-Warren-Livonia, MI 
+##                                               1354 
+##                             Las Vegas-Paradise, NV 
+##                                               1299 
+##                       Riverside-San Bernardino, CA 
+##                                               1290 
+##                        Seattle-Tacoma-Bellevue, WA 
+##                                               1255 
+##                Portland-Vancouver-Beaverton, OR-WA 
+##                                               1089 
+##                        Phoenix-Mesa-Scottsdale, AZ 
+##                                                971 
+##                                 Kansas City, MO-KS 
+##                                                962 
+##                        Omaha-Council Bluffs, NE-IA 
+##                                                957 
+##                                   St. Louis, MO-IL 
+##                                                956 
+##                  San Diego-Carlsbad-San Marcos, CA 
+##                                                907 
+##           Hartford-West Hartford-East Hartford, CT 
+##                                                885 
+##                Tampa-St. Petersburg-Clearwater, FL 
+##                                                842 
+##                                     Pittsburgh, PA 
+##                                                732 
+##                    Bridgeport-Stamford-Norwalk, CT 
+##                                                730 
+##                                 Salt Lake City, UT 
+##                                                723 
+##                    Cincinnati-Middletown, OH-KY-IN 
+##                                                719 
+##                  Milwaukee-Waukesha-West Allis, WI 
+##                                                714 
+##                        Portland-South Portland, ME 
+##                                                701 
+##                        Cleveland-Elyria-Mentor, OH 
+##                                                681 
+##                 San Jose-Sunnyvale-Santa Clara, CA 
+##                                                670 
+##              Sacramento-Arden-Arcade-Roseville, CA 
+##                                                667 
+##                    Burlington-South Burlington, VT 
+##                                                657 
+##                               Boise City-Nampa, ID 
+##                                                644 
+##                                        Orlando, FL 
+##                                                610 
+##                                    Albuquerque, NM 
+##                                                609 
+##                                    San Antonio, TX 
+##                                                607 
+##                                  Oklahoma City, OK 
+##                                                604 
+##         Virginia Beach-Norfolk-Newport News, VA-NC 
+##                                                597 
+##                                    Sioux Falls, SD 
+##                                                595 
+##                                   Indianapolis, IN 
+##                                                570 
+##                                       Columbus, OH 
+##                                                551 
+##                                  Louisville, KY-IN 
+##                                                519 
+##                  Charlotte-Gastonia-Concord, NC-SC 
+##                                                517 
+##                              Austin-Round Rock, TX 
+##                                                516 
+##                                      New Haven, CT 
+##                                                506 
+##                Nashville-Davidson-Murfreesboro, TN 
+##                                                505 
+##                                     Des Moines, IA 
+##                                                501 
+##                                       Richmond, VA 
+##                                                490 
+##                                          Dover, DE 
+##                                                456 
+##                                       Fargo, ND-MN 
+##                                                432 
+##                                        Wichita, KS 
+##                                                427 
+##                               Ogden-Clearfield, UT 
+##                                                423 
+##                  Little Rock-North Little Rock, AR 
+##                                                404 
+##                                   Jacksonville, FL 
+##                                                393 
+##                              Birmingham-Hoover, AL 
+##                                                392 
+##                               Colorado Springs, CO 
+##                                                372 
+##                    New Orleans-Metairie-Kenner, LA 
+##                                                367 
+##                                  Memphis, TN-MS-AR 
+##                                                348 
+##                          Buffalo-Niagara Falls, NY 
+##                                                344 
+##                                   Raleigh-Cary, NC 
+##                                                336 
+##                  Allentown-Bethlehem-Easton, PA-NJ 
+##                                                334 
+##                                          Tulsa, OK 
+##                                                323 
+##                                    Reno-Sparks, NV 
+##                                                310 
+##                                     Provo-Orem, UT 
+##                                                309 
+##                                      Rochester, NY 
+##                                                307 
+##                           Grand Rapids-Wyoming, MI 
+##                                                304 
+##                                         Fresno, CA 
+##                                                303 
+##                                         Tucson, AZ 
+##                                                302 
+##                                       Columbia, SC 
+##                                                291 
+##                                        Madison, WI 
+##                                                284 
+##                        Albany-Schenectady-Troy, NY 
+##                                                268 
+##                                         Dayton, OH 
+##                                                268 
+##                   Oxnard-Thousand Oaks-Ventura, CA 
+##                                                267 
+##                                    Baton Rouge, LA 
+##                                                262 
+##                                     Charleston, WV 
+##                                                262 
+##                             Rochester-Dover, NH-ME 
+##                                                262 
+##                          Greensboro-High Point, NC 
+##                                                251 
+##                                    Bakersfield, CA 
+##                                                245 
+##                                        El Paso, TX 
+##                                                244 
+##                Davenport-Moline-Rock Island, IA-IL 
+##                                                240 
+##                                         Toledo, OH 
+##                                                235 
+##                    Charleston-North Charleston, SC 
+##                                                232 
+##                                          Akron, OH 
+##                                                231 
+##                                       Syracuse, NY 
+##                                                223 
+##                                        Jackson, MS 
+##                                                222 
+##              Fayetteville-Springdale-Rogers, AR-MO 
+##                                                215 
+##                                         Bangor, ME 
+##                                                208 
+##                          Fort Collins-Loveland, CO 
+##                                                206 
+##                          Norwich-New London, CT-RI 
+##                                                203 
+##                                       Savannah, GA 
+##                                                202 
+##               Poughkeepsie-Newburgh-Middletown, NY 
+##                                                201 
+##                                       Billings, MT 
+##                                                199 
+##                              Lexington-Fayette, KY 
+##                                                198 
+##                                   Cedar Rapids, IA 
+##                                                196 
+##                             Eugene-Springfield, OR 
+##                                                196 
+##                         McAllen-Edinburg-Pharr, TX 
+##                                                195 
+##                                       Stockton, CA 
+##                                                193 
+##                      Sarasota-Bradenton-Venice, FL 
+##                                                192 
+##                                         Durham, NC 
+##                                                189 
+##                                     Greenville, SC 
+##                                                185 
+##                                         Topeka, KS 
+##                                                182 
+##                                      Lafayette, LA 
+##                                                181 
+##                                         Monroe, LA 
+##                                                179 
+##                          Scranton-Wilkes Barre, PA 
+##                                                176 
+##                            Harrisburg-Carlisle, PA 
+##                                                174 
+##                                        Boulder, CO 
+##                                                171 
+##                                          Salem, OR 
+##                                                170 
+##                                      Knoxville, TN 
+##                                                168 
+##                  Palm Bay-Melbourne-Titusville, FL 
+##                                                168 
+##                                 Chattanooga, TN-GA 
+##                                                167 
+##                                        Greeley, CO 
+##                                                162 
+##                     Augusta-Richmond County, GA-SC 
+##                                                161 
+##                                    Springfield, MO 
+##                                                161 
+##                                        Modesto, CA 
+##                                                158 
+##                                      Waterbury, CT 
+##                                                157 
+##                                      Lancaster, PA 
+##                                                156 
+##                                        Spokane, WA 
+##                                                156 
+##                           Waterloo-Cedar Falls, IA 
+##                                                156 
+##                                 Springfield, MA-CT 
+##                                                155 
+##                     Youngstown-Warren-Boardman, OH 
+##                                                153 
+##                          Lakeland-Winter Haven, FL 
+##                                                149 
+##                          Cape Coral-Fort Myers, FL 
+##                                                146 
+##                        Shreveport-Bossier City, LA 
+##                                                146 
+##                                   Worcester, MA-CT 
+##                                                144 
+##                                        Reading, PA 
+##                                                142 
+##                                           Bend, OR 
+##                                                140 
+##             Deltona-Daytona Beach-Ormond Beach, FL 
+##                                                140 
+##                                     Fort Wayne, IN 
+##                                                136 
+##                                      Green Bay, WI 
+##                                                136 
+##                              Vallejo-Fairfield, CA 
+##                                                133 
+##                                 Corpus Christi, TX 
+##                                                132 
+##               Santa Barbara-Santa Maria-Goleta, CA 
+##                                                132 
+##                                      Iowa City, IA 
+##                                                131 
+##                                         Pueblo, CO 
+##                                                130 
+##                            Santa Rosa-Petaluma, CA 
+##                                                129 
+##                              Kalamazoo-Portage, MI 
+##                                                127 
+##                                  Winston-Salem, NC 
+##                                                127 
+##                                      Duluth, MN-WI 
+##                                                126 
+##                                        Appleton,WI 
+##                                                125 
+##                           Beaumont-Port Author, TX 
+##                                                123 
+##                               Champaign-Urbana, IL 
+##                                                122 
+##                            Visalia-Porterville, CA 
+##                                                121 
+##                           Lansing-East Lansing, MI 
+##                                                119 
+##                                         Racine, WI 
+##                                                119 
+##                               Canton-Massillon, OH 
+##                                                118 
+##                                  Coeur d'Alene, ID 
+##                                                117 
+##                                     Huntsville, AL 
+##                                                117 
+##                                   York-Hanover, PA 
+##                                                117 
+##                                      Asheville, NC 
+##                                                116 
+##                                       Victoria, TX 
+##                                                116 
+##                                      La Crosse, WI 
+##                                                114 
+##                                       Rockford, IL 
+##                                                114 
+##                                        Danbury, CT 
+##                                                112 
+##                                         Peoria, IL 
+##                                                112 
+##                                         Yakima, WA 
+##                                                112 
+##                                  Atlantic City, NJ 
+##                                                111 
+##                                     Eau Claire, WI 
+##                                                110 
+##                                         Mobile, AL 
+##                                                110 
+##                     Port St. Lucie-Fort Pierce, FL 
+##                                                109 
+##                                     Las Cruses, NM 
+##                                                107 
+##                     Pensacola-Ferry Pass-Brent, FL 
+##                                                107 
+##                                         Merced, CA 
+##                                                106 
+##                                  Fort Smith, AR-OK 
+##                                                105 
+##                                    Bloomington, IN 
+##                                                104 
+##                                        Salinas, CA 
+##                                                104 
+##                                     Montgomery, AL 
+##                                                103 
+##                                          Flint, MI 
+##                                                102 
+##         Myrtle Beach-Conway-North Myrtle Beach, SC 
+##                                                102 
+##                       Killeen-Temple-Fort Hood, TX 
+##                                                101 
+##                                      El Centro, CA 
+##                                                 99 
+##                                  Evansville, IN-KY 
+##                                                 99 
+##                                     Janesville, WI 
+##                                                 99 
+##                                        Olympia, WA 
+##                                                 99 
+##                                    Spartanburg, SC 
+##                                                 99 
+##                                       Lawrence, KS 
+##                                                 98 
+##                                         Lawton, OK 
+##                                                 97 
+##                                        Decatur, Al 
+##                                                 96 
+##                                         Wausau, WI 
+##                                                 96 
+##                                  Trenton-Ewing, NJ 
+##                                                 91 
+##                                   Harrisonburg, VA 
+##                                                 90 
+##                         Muskegon-Norton Shores, MI 
+##                                                 90 
+##                                         Laredo, TX 
+##                                                 89 
+##                                       Amarillo, TX 
+##                                                 88 
+##                           Bremerton-Silverdale, WA 
+##                                                 87 
+##                                           Erie, PA 
+##                                                 87 
+##                               Kankakee-Bradley, IL 
+##                                                 87 
+##                                       Kingston, NY 
+##                                                 87 
+##                      Hagerstown-Martinsburg, MD-WV 
+##                                                 86 
+##                                      Ann Arbor, MI 
+##                                                 85 
+##                                 Oshkosh-Neenah, WI 
+##                                                 85 
+##                                        Altoona, PA 
+##                                                 82 
+##                       Huntington-Ashland, WV-KY-OH 
+##                                                 82 
+##                                        Medford, OR 
+##                                                 82 
+##                            Naples-Marco Island, FL 
+##                                                 82 
+##                                      St. Cloud, MN 
+##                                                 82 
+##                                        Decatur, IL 
+##                                                 81 
+##                                   Lake Charles, LA 
+##                                                 81 
+##                        South Bend-Mishawaka, IN-MI 
+##                                                 81 
+##             Fort Walton Beach-Crestview-Destin, FL 
+##                                                 80 
+##                                     Utica-Rome, NY 
+##                                                 80 
+##                          Brownsville-Harlingen, TX 
+##                                                 79 
+##                                     Vero Beach, FL 
+##                                                 79 
+##                                           Waco, TX 
+##                                                 79 
+##                            Holland-Grand Haven, MI 
+##                                                 78 
+##                                     Tuscaloosa, AL 
+##                                                 78 
+##                                   Fayetteville, NC 
+##                                                 77 
+##                         Michigan City-La Porte, IN 
+##                                                 77 
+##                    San Luis Obispo-Paso Robles, CA 
+##                                                 77 
+##                                          Ocala, FL 
+##                                                 76 
+##                                    Springfield, IL 
+##                                                 76 
+##                                Barnstable Town, MA 
+##                                                 75 
+##                 Saginaw-Saginaw Township North, MI 
+##                                                 74 
+##                                      Salisbury, MD 
+##                                                 74 
+##                                     Binghamton, NY 
+##                                                 73 
+##                                      Lynchburg, VA 
+##                                                 73 
+##                                     Bellingham, WA 
+##                                                 70 
+##                                    Gainesville, FL 
+##                                                 70 
+##                                        Jackson, MI 
+##                                                 70 
+##                                         Albany, GA 
+##                                                 68 
+##                           Kingsport-Bristol, TN-VA 
+##                                                 67 
+##                   Leominster-Fitchburg-Gardner, MA 
+##                                                 66 
+##                                        Roanoke, VA 
+##                                                 66 
+##                         Santa-Cruz-Watsonville, CA 
+##                                                 66 
+##                            Athens-Clark County, GA 
+##                                                 65 
+##                                Gulfport-Biloxi, MS 
+##                                                 65 
+##                                       Longview, TX 
+##                                                 65 
+##                                          Macon, GA 
+##                                                 65 
+##                                       Anderson, SC 
+##                                                 64 
+##                                     Farmington, NM 
+##                                                 64 
+##                                       Florence, AL 
+##                                                 63 
+##                                   Jacksonville, NC 
+##                                                 63 
+##                                      Johnstown, PA 
+##                                                 63 
+##                                        Lubbock, TX 
+##                                                 63 
+##                                         Monroe, MI 
+##                                                 63 
+##                                       Anderson, IN 
+##                                                 62 
+##                                Anniston-Oxford, AL 
+##                                                 61 
+##                                           Napa, CA 
+##                                                 61 
+##                                          Chico, CA 
+##                                                 60 
+##                                    Columbus, GA-AL 
+##                                                 59 
+##                                         Joplin, MO 
+##                                                 59 
+##                         Panama City-Lynn Haven, FL 
+##                                                 59 
+##                      Hickory-Morgantown-Lenoir, NC 
+##                                                 57 
+##                                         Madera, CA 
+##                                                 57 
+##                                       Prescott, AZ 
+##                                                 54 
+##                   Vineland-Millville-Bridgeton, NJ 
+##                                                 54 
+##                                   Johnson City, TN 
+##                                                 52 
+##                                       Santa Fe, NM 
+##                                                 52 
+##                                        Midland, TX 
+##                                                 51 
+##                            Niles-Benton Harbor, MI 
+##                                                 51 
+##                                    Punta Gorda, FL 
+##                                                 48 
+##                                       Columbia, MO 
+##                                                 47 
+##                                    Tallahassee, FL 
+##                                                 43 
+##                                       Valdosta, GA 
+##                                                 42 
+##                                  Warner Robins, GA 
+##                                                 42 
+##                              Bloomington-Normal IL 
+##                                                 40 
+##                                    Springfield, OH 
+##                                                 34 
+##                                     Ocean City, NJ 
+##                                                 30 
+##                                  Bowling Green, KY 
+##                                                 29 
+##                        Appleton-Oshkosh-Neenah, WI 
+##                                                  0 
+##                  Grand Rapids-Muskegon-Holland, MI 
+##                                                  0 
+##                Greenville-Spartanburg-Anderson, SC 
+##                                                  0 
+##                        Hinesville-Fort Stewart, GA 
+##                                                  0 
+##                                      Jamestown, NY 
+##                                                  0 
+##                         Kalamazoo-Battle Creek, MI 
+##                                                  0 
+##                        Portsmouth-Rochester, NH-ME 
+##                                                  0</code></pre>
+<p>What was the name of the variable that was added to the data frame by the merge() operation ? <strong>MetroArea</strong></p>
+<p>How many interviewees have a missing value for the new metropolitan area variable? <strong>34238</strong></p>
+<p>Which of the following metropolitan area has the largest number of interviewees ? <strong>Boston</strong></p>
+<pre class="r"><code>sort(tapply(CPS$Hispanic, CPS$MetroArea, mean),decreasing = TRUE)</code></pre>
+<pre><code>##                                         Laredo, TX 
+##                                        0.966292135 
+##                         McAllen-Edinburg-Pharr, TX 
+##                                        0.948717949 
+##                          Brownsville-Harlingen, TX 
+##                                        0.797468354 
+##                                        El Paso, TX 
+##                                        0.790983607 
+##                                      El Centro, CA 
+##                                        0.686868687 
+##                                    San Antonio, TX 
+##                                        0.644151565 
+##                                         Madera, CA 
+##                                        0.614035088 
+##                                 Corpus Christi, TX 
+##                                        0.606060606 
+##                                         Merced, CA 
+##                                        0.566037736 
+##                                        Salinas, CA 
+##                                        0.557692308 
+##                                     Las Cruses, NM 
+##                                        0.542056075 
+##                                         Tucson, AZ 
+##                                        0.506622517 
+##                       Riverside-San Bernardino, CA 
+##                                        0.502325581 
+##                                    Bakersfield, CA 
+##                                        0.489795918 
+##              Miami-Fort Lauderdale-Miami Beach, FL 
+##                                        0.467824968 
+##                                       Victoria, TX 
+##                                        0.465517241 
+##                                       Santa Fe, NM 
+##                                        0.461538462 
+##               Los Angeles-Long Beach-Santa Ana, CA 
+##                                        0.460263286 
+##                                    Albuquerque, NM 
+##                                        0.441707718 
+##                          Cape Coral-Fort Myers, FL 
+##                                        0.438356164 
+##                            Visalia-Porterville, CA 
+##                                        0.438016529 
+##                                         Fresno, CA 
+##                                        0.409240924 
+##                   Vineland-Millville-Bridgeton, NJ 
+##                                        0.407407407 
+##               Santa Barbara-Santa Maria-Goleta, CA 
+##                                        0.401515152 
+##                       Killeen-Temple-Fort Hood, TX 
+##                                        0.386138614 
+##                   Oxnard-Thousand Oaks-Ventura, CA 
+##                                        0.359550562 
+##                     Houston-Baytown-Sugar Land, TX 
+##                                        0.359005458 
+##                                         Yakima, WA 
+##                                        0.357142857 
+##                                        Midland, TX 
+##                                        0.352941176 
+##                                        Modesto, CA 
+##                                        0.341772152 
+##                                        Danbury, CT 
+##                                        0.339285714 
+##                                           Waco, TX 
+##                                        0.329113924 
+##                                       Stockton, CA 
+##                                        0.321243523 
+##                 San Jose-Sunnyvale-Santa Clara, CA 
+##                                        0.316417910 
+##                              Austin-Round Rock, TX 
+##                                        0.310077519 
+##                                         Pueblo, CO 
+##                                        0.307692308 
+##                                       Longview, TX 
+##                                        0.292307692 
+##                                        Lubbock, TX 
+##                                        0.285714286 
+##                    Dallas-Fort Worth-Arlington, TX 
+##                                        0.283950617 
+##               Poughkeepsie-Newburgh-Middletown, NY 
+##                                        0.273631841 
+##                  San Diego-Carlsbad-San Marcos, CA 
+##                                        0.269018743 
+##              Sacramento-Arden-Arcade-Roseville, CA 
+##                                        0.263868066 
+##                                       Amarillo, TX 
+##                                        0.261363636 
+##                        Phoenix-Mesa-Scottsdale, AZ 
+##                                        0.254376931 
+##                             Las Vegas-Paradise, NV 
+##                                        0.251732102 
+##                                      Waterbury, CT 
+##                                        0.248407643 
+##                    San Luis Obispo-Paso Robles, CA 
+##                                        0.246753247 
+##                                     Farmington, NM 
+##                                        0.234375000 
+##                            Santa Rosa-Petaluma, CA 
+##                                        0.232558140 
+##                                  Denver-Aurora, CO 
+##                                        0.232047872 
+##                                           Napa, CA 
+##                                        0.229508197 
+## New York-Northern New Jersey-Long Island, NY-NJ-PA 
+##                                        0.228508042 
+##                           Beaumont-Port Author, TX 
+##                                        0.227642276 
+##                                 Springfield, MA-CT 
+##                                        0.219354839 
+##                                        Orlando, FL 
+##                                        0.213114754 
+##                                          Salem, OR 
+##                                        0.211764706 
+##                                        Reading, PA 
+##                                        0.211267606 
+##                              Vallejo-Fairfield, CA 
+##                                        0.210526316 
+##                                    Columbus, GA-AL 
+##                                        0.203389831 
+##                  San Francisco-Oakland-Fremont, CA 
+##                                        0.199855700 
+##                                    Reno-Sparks, NV 
+##                                        0.196774194 
+##                            Naples-Marco Island, FL 
+##                                        0.182926829 
+##                Chicago-Naperville-Joliet, IN-IN-WI 
+##                                        0.167388167 
+##                                        Greeley, CO 
+##                                        0.160493827 
+##                Tampa-St. Petersburg-Clearwater, FL 
+##                                        0.159144893 
+##                                          Ocala, FL 
+##                                        0.157894737 
+##                                   Fayetteville, NC 
+##                                        0.155844156 
+##                                 Salt Lake City, UT 
+##                                        0.154910097 
+##                         Santa-Cruz-Watsonville, CA 
+##                                        0.151515152 
+##              Fayetteville-Springdale-Rogers, AR-MO 
+##                                        0.148837209 
+##                                        Boulder, CO 
+##                                        0.146198830 
+##                               Ogden-Clearfield, UT 
+##                                        0.144208038 
+##                           Grand Rapids-Wyoming, MI 
+##                                        0.138157895 
+##                          Scranton-Wilkes Barre, PA 
+##                                        0.136363636 
+##                          Lakeland-Winter Haven, FL 
+##                                        0.134228188 
+##                                        Wichita, KS 
+##                                        0.133489461 
+##                                  Trenton-Ewing, NJ 
+##                                        0.131868132 
+##                                       Prescott, AZ 
+##                                        0.129629630 
+##                                   Jacksonville, NC 
+##                                        0.126984127 
+##                                      Green Bay, WI 
+##                                        0.125000000 
+##                                         Lawton, OK 
+##                                        0.123711340 
+##                            Athens-Clark County, GA 
+##                                        0.123076923 
+##                                 Kansas City, MO-KS 
+##                                        0.121621622 
+##       Washington-Arlington-Alexandria, DC-VA-MD-WV 
+##                                        0.121378980 
+##                          Fort Collins-Loveland, CO 
+##                                        0.121359223 
+##                                        Olympia, WA 
+##                                        0.121212121 
+##                               Colorado Springs, CO 
+##                                        0.120967742 
+##                                   Raleigh-Cary, NC 
+##                                        0.119047619 
+##                  Charlotte-Gastonia-Concord, NC-SC 
+##                                        0.117988395 
+##                                          Chico, CA 
+##                                        0.116666667 
+##                               Kankakee-Bradley, IL 
+##                                        0.114942529 
+##                                          Tulsa, OK 
+##                                        0.114551084 
+##               Providence-Fall River-Warwick, MA-RI 
+##                                        0.114273205 
+##             Fort Walton Beach-Crestview-Destin, FL 
+##                                        0.112500000 
+##                    Bridgeport-Stamford-Norwalk, CT 
+##                                        0.112328767 
+##                    New Orleans-Metairie-Kenner, LA 
+##                                        0.111716621 
+##                                         Durham, NC 
+##                                        0.111111111 
+##                           Waterloo-Cedar Falls, IA 
+##                                        0.108974359 
+##                                  Oklahoma City, OK 
+##                                        0.107615894 
+##           Hartford-West Hartford-East Hartford, CT 
+##                                        0.105084746 
+##                          Norwich-New London, CT-RI 
+##                                        0.103448276 
+##                                      Lancaster, PA 
+##                                        0.102564103 
+##                                     Tuscaloosa, AL 
+##                                        0.102564103 
+##                     Port St. Lucie-Fort Pierce, FL 
+##                                        0.100917431 
+##             Deltona-Daytona Beach-Ormond Beach, FL 
+##                                        0.100000000 
+##                Portland-Vancouver-Beaverton, OR-WA 
+##                                        0.094582185 
+##                                         Topeka, KS 
+##                                        0.093406593 
+##                     Augusta-Richmond County, GA-SC 
+##                                        0.093167702 
+##                               Boise City-Nampa, ID 
+##                                        0.093167702 
+##                Davenport-Moline-Rock Island, IA-IL 
+##                                        0.091666667 
+##                                   Jacksonville, FL 
+##                                        0.091603053 
+##                   Leominster-Fitchburg-Gardner, MA 
+##                                        0.090909091 
+##                                  Atlantic City, NJ 
+##                                        0.090090090 
+##                        Seattle-Tacoma-Bellevue, WA 
+##                                        0.088446215 
+##                      Hickory-Morgantown-Lenoir, NC 
+##                                        0.087719298 
+##                  Allentown-Bethlehem-Easton, PA-NJ 
+##                                        0.086826347 
+##                                  Fort Smith, AR-OK 
+##                                        0.085714286 
+##                 Atlanta-Sandy Springs-Marietta, GA 
+##                                        0.085695876 
+##                  Milwaukee-Waukesha-West Allis, WI 
+##                                        0.085434174 
+##                                        Medford, OR 
+##                                        0.085365854 
+##                           Lansing-East Lansing, MI 
+##                                        0.084033613 
+##                                   Worcester, MA-CT 
+##                                        0.083333333 
+##                               Baltimore-Towson, MD 
+##                                        0.082265678 
+##                        Shreveport-Bossier City, LA 
+##                                        0.082191781 
+##                                       Syracuse, NY 
+##                                        0.080717489 
+##                                       Columbia, SC 
+##                                        0.079037801 
+##           Philadelphia-Camden-Wilmington, PA-NJ-DE 
+##                                        0.078458844 
+##                                 Chattanooga, TN-GA 
+##                                        0.077844311 
+##                             Eugene-Springfield, OR 
+##                                        0.076530612 
+##                               Canton-Massillon, OH 
+##                                        0.076271186 
+##                                     Vero Beach, FL 
+##                                        0.075949367 
+##                          Greensboro-High Point, NC 
+##                                        0.075697211 
+##                                     Utica-Rome, NY 
+##                                        0.075000000 
+##                                     Des Moines, IA 
+##                                        0.073852295 
+##                                      New Haven, CT 
+##                                        0.073122530 
+##                                   Indianapolis, IN 
+##                                        0.071929825 
+##                        Omaha-Council Bluffs, NE-IA 
+##                                        0.070010449 
+##                                    Tallahassee, FL 
+##                                        0.069767442 
+##                     Boston-Cambridge-Quincy, MA-NH 
+##                                        0.069537909 
+##                Nashville-Davidson-Murfreesboro, TN 
+##                                        0.069306931 
+##                                       Kingston, NY 
+##                                        0.068965517 
+##                         Panama City-Lynn Haven, FL 
+##                                        0.067796610 
+##                                     Ocean City, NJ 
+##                                        0.066666667 
+##                                     Provo-Orem, UT 
+##                                        0.064724919 
+##                                       Anderson, IN 
+##                                        0.064516129 
+##                                         Monroe, MI 
+##                                        0.063492063 
+##                                         Peoria, IL 
+##                                        0.062500000 
+##                                      Lafayette, LA 
+##                                        0.060773481 
+##                                      Asheville, NC 
+##                                        0.060344828 
+##                        Cleveland-Elyria-Mentor, OH 
+##                                        0.060205580 
+##                                       Honolulu, HI 
+##                                        0.059644670 
+##         Myrtle Beach-Conway-North Myrtle Beach, SC 
+##                                        0.058823529 
+##                                         Racine, WI 
+##                                        0.058823529 
+##                                      Rochester, NY 
+##                                        0.058631922 
+##                           Bremerton-Silverdale, WA 
+##                                        0.057471264 
+##                                          Dover, DE 
+##                                        0.057017544 
+##                                  Winston-Salem, NC 
+##                                        0.055118110 
+##                              Birmingham-Hoover, AL 
+##                                        0.053571429 
+##                  Palm Bay-Melbourne-Titusville, FL 
+##                                        0.053571429 
+##                                        Decatur, Al 
+##                                        0.052083333 
+##             Minneapolis-St Paul-Bloomington, MN-WI 
+##                                        0.052008239 
+##         Virginia Beach-Norfolk-Newport News, VA-NC 
+##                                        0.050251256 
+##                        South Bend-Mishawaka, IN-MI 
+##                                        0.049382716 
+##                                Anniston-Oxford, AL 
+##                                        0.049180328 
+##                                       Valdosta, GA 
+##                                        0.047619048 
+##                      Sarasota-Bradenton-Venice, FL 
+##                                        0.046875000 
+##                                         Albany, GA 
+##                                        0.044117647 
+##                                       Rockford, IL 
+##                                        0.043859649 
+##                                       Columbus, OH 
+##                                        0.043557169 
+##                                    Springfield, MO 
+##                                        0.043478261 
+##                                    Gainesville, FL 
+##                                        0.042857143 
+##                                       Richmond, VA 
+##                                        0.042857143 
+##                                   York-Hanover, PA 
+##                                        0.042735043 
+##                                       Columbia, MO 
+##                                        0.042553191 
+##                                    Sioux Falls, SD 
+##                                        0.042016807 
+##                                    Punta Gorda, FL 
+##                                        0.041666667 
+##                                     Binghamton, NY 
+##                                        0.041095890 
+##                        Albany-Schenectady-Troy, NY 
+##                                        0.041044776 
+##                                       Lawrence, KS 
+##                                        0.040816327 
+##                              Lexington-Fayette, KY 
+##                                        0.040404040 
+##                    Cincinnati-Middletown, OH-KY-IN 
+##                                        0.040333797 
+##                                          Flint, MI 
+##                                        0.039215686 
+##                         Michigan City-La Porte, IN 
+##                                        0.038961039 
+##                                  Louisville, KY-IN 
+##                                        0.038535645 
+##                                   Johnson City, TN 
+##                                        0.038461538 
+##                                    Baton Rouge, LA 
+##                                        0.038167939 
+##                                     Greenville, SC 
+##                                        0.037837838 
+##                         Detroit-Warren-Livonia, MI 
+##                                        0.037666174 
+##                  Little Rock-North Little Rock, AR 
+##                                        0.037128713 
+##                                     Fort Wayne, IN 
+##                                        0.036764706 
+##                                         Toledo, OH 
+##                                        0.034042553 
+##                               Champaign-Urbana, IL 
+##                                        0.032786885 
+##                     Youngstown-Warren-Boardman, OH 
+##                                        0.032679739 
+##                              Kalamazoo-Portage, MI 
+##                                        0.031496063 
+##                                      Iowa City, IA 
+##                                        0.030534351 
+##                             Rochester-Dover, NH-ME 
+##                                        0.030534351 
+##                                   St. Louis, MO-IL 
+##                                        0.030334728 
+##                                     Janesville, WI 
+##                                        0.030303030 
+##                                        Roanoke, VA 
+##                                        0.030303030 
+##                                       Billings, MT 
+##                                        0.030150754 
+##                                    Springfield, OH 
+##                                        0.029411765 
+##                                  Memphis, TN-MS-AR 
+##                                        0.028735632 
+##                     Pensacola-Ferry Pass-Brent, FL 
+##                                        0.028037383 
+##                                      Lynchburg, VA 
+##                                        0.027397260 
+##                 Saginaw-Saginaw Township North, MI 
+##                                        0.027027027 
+##                                  Coeur d'Alene, ID 
+##                                        0.025641026 
+##                                        Spokane, WA 
+##                                        0.025641026 
+##                                       Fargo, ND-MN 
+##                                        0.025462963 
+##                                   Lake Charles, LA 
+##                                        0.024691358 
+##                                        Madison, WI 
+##                                        0.024647887 
+##                                           Erie, PA 
+##                                        0.022988506 
+##                            Harrisburg-Carlisle, PA 
+##                                        0.022988506 
+##                         Muskegon-Norton Shores, MI 
+##                                        0.022222222 
+##                                           Bend, OR 
+##                                        0.021428571 
+##                                  Evansville, IN-KY 
+##                                        0.020202020 
+##                                    Spartanburg, SC 
+##                                        0.020202020 
+##                            Niles-Benton Harbor, MI 
+##                                        0.019607843 
+##                                      La Crosse, WI 
+##                                        0.017543860 
+##                          Buffalo-Niagara Falls, NY 
+##                                        0.017441860 
+##                    Charleston-North Charleston, SC 
+##                                        0.017241379 
+##                                         Joplin, MO 
+##                                        0.016949153 
+##                                     Pittsburgh, PA 
+##                                        0.016393443 
+##                                      Duluth, MN-WI 
+##                                        0.015873016 
+##                                Gulfport-Biloxi, MS 
+##                                        0.015384615 
+##                                   Cedar Rapids, IA 
+##                                        0.015306122 
+##                           Kingsport-Bristol, TN-VA 
+##                                        0.014925373 
+##                                         Bangor, ME 
+##                                        0.014423077 
+##                                     Bellingham, WA 
+##                                        0.014285714 
+##                                    Springfield, IL 
+##                                        0.013157895 
+##                                          Akron, OH 
+##                                        0.012987013 
+##                            Holland-Grand Haven, MI 
+##                                        0.012820513 
+##                                        Altoona, PA 
+##                                        0.012195122 
+##                                      St. Cloud, MN 
+##                                        0.012195122 
+##                                 Oshkosh-Neenah, WI 
+##                                        0.011764706 
+##                        Portland-South Portland, ME 
+##                                        0.011412268 
+##                                         Wausau, WI 
+##                                        0.010416667 
+##                                     Montgomery, AL 
+##                                        0.009708738 
+##                    Burlington-South Burlington, VT 
+##                                        0.009132420 
+##                                        Jackson, MS 
+##                                        0.009009009 
+##                                        Appleton,WI 
+##                                        0.008000000 
+##                                     Charleston, WV 
+##                                        0.007633588 
+##                                      Knoxville, TN 
+##                                        0.005952381 
+##                                         Monroe, LA 
+##                                        0.005586592 
+##                                         Dayton, OH 
+##                                        0.003731343 
+##                                       Anderson, SC 
+##                                        0.000000000 
+##                                      Ann Arbor, MI 
+##                                        0.000000000 
+##                                Barnstable Town, MA 
+##                                        0.000000000 
+##                                    Bloomington, IN 
+##                                        0.000000000 
+##                              Bloomington-Normal IL 
+##                                        0.000000000 
+##                                  Bowling Green, KY 
+##                                        0.000000000 
+##                                        Decatur, IL 
+##                                        0.000000000 
+##                                     Eau Claire, WI 
+##                                        0.000000000 
+##                                       Florence, AL 
+##                                        0.000000000 
+##                      Hagerstown-Martinsburg, MD-WV 
+##                                        0.000000000 
+##                                   Harrisonburg, VA 
+##                                        0.000000000 
+##                       Huntington-Ashland, WV-KY-OH 
+##                                        0.000000000 
+##                                     Huntsville, AL 
+##                                        0.000000000 
+##                                        Jackson, MI 
+##                                        0.000000000 
+##                                      Johnstown, PA 
+##                                        0.000000000 
+##                                          Macon, GA 
+##                                        0.000000000 
+##                                         Mobile, AL 
+##                                        0.000000000 
+##                                      Salisbury, MD 
+##                                        0.000000000 
+##                                       Savannah, GA 
+##                                        0.000000000 
+##                                  Warner Robins, GA 
+##                                        0.000000000</code></pre>
+<p>Which metropolitan area has the highest proportion of interviewees of Hispanic ethnicity? <strong>Laredo, TX</strong></p>
+<pre class="r"><code>sort(tapply(CPS$Race == &quot;Asian&quot;, CPS$MetroArea, mean),decreasing = TRUE)</code></pre>
+<pre><code>##                                       Honolulu, HI 
+##                                        0.501903553 
+##                  San Francisco-Oakland-Fremont, CA 
+##                                        0.246753247 
+##                 San Jose-Sunnyvale-Santa Clara, CA 
+##                                        0.241791045 
+##                              Vallejo-Fairfield, CA 
+##                                        0.203007519 
+##                                         Fresno, CA 
+##                                        0.184818482 
+##                                  Warner Robins, GA 
+##                                        0.166666667 
+##                                       Stockton, CA 
+##                                        0.155440415 
+##                                  Atlantic City, NJ 
+##                                        0.144144144 
+##              Sacramento-Arden-Arcade-Roseville, CA 
+##                                        0.142428786 
+##                  San Diego-Carlsbad-San Marcos, CA 
+##                                        0.142227122 
+##               Los Angeles-Long Beach-Santa Ana, CA 
+##                                        0.135056070 
+##                                        Olympia, WA 
+##                                        0.131313131 
+##                                        Salinas, CA 
+##                                        0.125000000 
+## New York-Northern New Jersey-Long Island, NY-NJ-PA 
+##                                        0.104270660 
+##                        Seattle-Tacoma-Bellevue, WA 
+##                                        0.099601594 
+##                            Visalia-Porterville, CA 
+##                                        0.090909091 
+##                                      Green Bay, WI 
+##                                        0.088235294 
+##                                      La Crosse, WI 
+##                                        0.087719298 
+##                                      Ann Arbor, MI 
+##                                        0.082352941 
+##                                    Bakersfield, CA 
+##                                        0.081632653 
+##                          Greensboro-High Point, NC 
+##                                        0.079681275 
+##                             Las Vegas-Paradise, NV 
+##                                        0.078521940 
+##             Minneapolis-St Paul-Bloomington, MN-WI 
+##                                        0.076725026 
+##                          Brownsville-Harlingen, TX 
+##                                        0.075949367 
+##                              Bloomington-Normal IL 
+##                                        0.075000000 
+##                   Oxnard-Thousand Oaks-Ventura, CA 
+##                                        0.074906367 
+##                                   Lake Charles, LA 
+##                                        0.074074074 
+##                          Norwich-New London, CT-RI 
+##                                        0.073891626 
+##                 Atlanta-Sandy Springs-Marietta, GA 
+##                                        0.072809278 
+##       Washington-Arlington-Alexandria, DC-VA-MD-WV 
+##                                        0.070624850 
+##                Portland-Vancouver-Beaverton, OR-WA 
+##                                        0.069788797 
+##           Hartford-West Hartford-East Hartford, CT 
+##                                        0.066666667 
+##                                   Cedar Rapids, IA 
+##                                        0.066326531 
+##                                      Rochester, NY 
+##                                        0.065146580 
+##                                       Columbia, MO 
+##                                        0.063829787 
+##                    Dallas-Fort Worth-Arlington, TX 
+##                                        0.062801932 
+##                                        Danbury, CT 
+##                                        0.062500000 
+##                       Riverside-San Bernardino, CA 
+##                                        0.062015504 
+##                     Houston-Baytown-Sugar Land, TX 
+##                                        0.061249242 
+##                                        Boulder, CO 
+##                                        0.058479532 
+##                Chicago-Naperville-Joliet, IN-IN-WI 
+##                                        0.058441558 
+##                                    Reno-Sparks, NV 
+##                                        0.058064516 
+##                               Baltimore-Towson, MD 
+##                                        0.057990560 
+##                                      Lancaster, PA 
+##                                        0.057692308 
+##                Nashville-Davidson-Murfreesboro, TN 
+##                                        0.057425743 
+##                                  Fort Smith, AR-OK 
+##                                        0.057142857 
+##                                         Merced, CA 
+##                                        0.056603774 
+##                                        Madison, WI 
+##                                        0.056338028 
+##                                         Peoria, IL 
+##                                        0.053571429 
+##                                      Iowa City, IA 
+##                                        0.053435115 
+##                                    Springfield, IL 
+##                                        0.052631579 
+##                              Austin-Round Rock, TX 
+##                                        0.052325581 
+##                          Buffalo-Niagara Falls, NY 
+##                                        0.052325581 
+##                     Boston-Cambridge-Quincy, MA-NH 
+##                                        0.052041274 
+##                    San Luis Obispo-Paso Robles, CA 
+##                                        0.051948052 
+##              Fayetteville-Springdale-Rogers, AR-MO 
+##                                        0.051162791 
+##                                        Orlando, FL 
+##                                        0.050819672 
+##                                   Raleigh-Cary, NC 
+##                                        0.050595238 
+##                                          Tulsa, OK 
+##                                        0.049535604 
+##                                Anniston-Oxford, AL 
+##                                        0.049180328 
+##                    Burlington-South Burlington, VT 
+##                                        0.048706240 
+##                                   Jacksonville, FL 
+##                                        0.048346056 
+##                                   Jacksonville, NC 
+##                                        0.047619048 
+##                  Milwaukee-Waukesha-West Allis, WI 
+##                                        0.047619048 
+##                                      New Haven, CT 
+##                                        0.047430830 
+##                                  Trenton-Ewing, NJ 
+##                                        0.043956044 
+##                         Detroit-Warren-Livonia, MI 
+##                                        0.043574594 
+##                                    Gainesville, FL 
+##                                        0.042857143 
+##                        Portland-South Portland, ME 
+##                                        0.042796006 
+##                                        Decatur, Al 
+##                                        0.041666667 
+##                                    Albuquerque, NM 
+##                                        0.041050903 
+##                                       Syracuse, NY 
+##                                        0.040358744 
+##                                      Duluth, MN-WI 
+##                                        0.039682540 
+##                Tampa-St. Petersburg-Clearwater, FL 
+##                                        0.039192399 
+##               Providence-Fall River-Warwick, MA-RI 
+##                                        0.038966725 
+##                    Bridgeport-Stamford-Norwalk, CT 
+##                                        0.038356164 
+##                                     Pittsburgh, PA 
+##                                        0.038251366 
+##                        Phoenix-Mesa-Scottsdale, AZ 
+##                                        0.038105046 
+##                                     Des Moines, IA 
+##                                        0.037924152 
+##             Fort Walton Beach-Crestview-Destin, FL 
+##                                        0.037500000 
+##                                     Fort Wayne, IN 
+##                                        0.036764706 
+##                                       Richmond, VA 
+##                                        0.036734694 
+##                       Huntington-Ashland, WV-KY-OH 
+##                                        0.036585366 
+##                                         Mobile, AL 
+##                                        0.036363636 
+##                                 Salt Lake City, UT 
+##                                        0.035961272 
+##                  Palm Bay-Melbourne-Titusville, FL 
+##                                        0.035714286 
+##              Miami-Fort Lauderdale-Miami Beach, FL 
+##                                        0.035392535 
+##                              Lexington-Fayette, KY 
+##                                        0.035353535 
+##                      Hickory-Morgantown-Lenoir, NC 
+##                                        0.035087719 
+##                                  Oklahoma City, OK 
+##                                        0.034768212 
+##                                   Worcester, MA-CT 
+##                                        0.034722222 
+##                                 Kansas City, MO-KS 
+##                                        0.034303534 
+##                          Cape Coral-Fort Myers, FL 
+##                                        0.034246575 
+##                                   Harrisonburg, VA 
+##                                        0.033333333 
+##           Philadelphia-Camden-Wilmington, PA-NJ-DE 
+##                                        0.032924694 
+##                                     Greenville, SC 
+##                                        0.032432432 
+##                                  Denver-Aurora, CO 
+##                                        0.031914894 
+##                                       Anderson, SC 
+##                                        0.031250000 
+##                            Athens-Clark County, GA 
+##                                        0.030769231 
+##                                Gulfport-Biloxi, MS 
+##                                        0.030769231 
+##                                        Wichita, KS 
+##                                        0.030444965 
+##                                          Akron, OH 
+##                                        0.030303030 
+##                        Omaha-Council Bluffs, NE-IA 
+##                                        0.029258098 
+##                                     Montgomery, AL 
+##                                        0.029126214 
+##                                     Bellingham, WA 
+##                                        0.028571429 
+##                                       Fargo, ND-MN 
+##                                        0.027777778 
+##                                       Columbia, SC 
+##                                        0.027491409 
+##                          Lakeland-Winter Haven, FL 
+##                                        0.026845638 
+##         Virginia Beach-Norfolk-Newport News, VA-NC 
+##                                        0.026800670 
+##                             Rochester-Dover, NH-ME 
+##                                        0.026717557 
+##                               Ogden-Clearfield, UT 
+##                                        0.026004728 
+##                                   Fayetteville, NC 
+##                                        0.025974026 
+##                            Holland-Grand Haven, MI 
+##                                        0.025641026 
+##                     Augusta-Richmond County, GA-SC 
+##                                        0.024844720 
+##                                   Indianapolis, IN 
+##                                        0.024561404 
+##                            Naples-Marco Island, FL 
+##                                        0.024390244 
+##                                         Bangor, ME 
+##                                        0.024038462 
+##                           Bremerton-Silverdale, WA 
+##                                        0.022988506 
+##                                    Baton Rouge, LA 
+##                                        0.022900763 
+##                        Albany-Schenectady-Troy, NY 
+##                                        0.022388060 
+##                  Little Rock-North Little Rock, AR 
+##                                        0.022277228 
+##                    Cincinnati-Middletown, OH-KY-IN 
+##                                        0.022253129 
+##                                         Topeka, KS 
+##                                        0.021978022 
+##             Deltona-Daytona Beach-Ormond Beach, FL 
+##                                        0.021428571 
+##                Davenport-Moline-Rock Island, IA-IL 
+##                                        0.020833333 
+##                             Eugene-Springfield, OR 
+##                                        0.020408163 
+##                                      El Centro, CA 
+##                                        0.020202020 
+##                                         Tucson, AZ 
+##                                        0.019867550 
+##                                       Savannah, GA 
+##                                        0.019801980 
+##                                          Flint, MI 
+##                                        0.019607843 
+##                          Fort Collins-Loveland, CO 
+##                                        0.019417476 
+##                                        Spokane, WA 
+##                                        0.019230769 
+##                                     Las Cruses, NM 
+##                                        0.018691589 
+##                     Pensacola-Ferry Pass-Brent, FL 
+##                                        0.018691589 
+##                                       Prescott, AZ 
+##                                        0.018518519 
+##                                       Columbus, OH 
+##                                        0.018148820 
+##                                  Memphis, TN-MS-AR 
+##                                        0.017241379 
+##                         Panama City-Lynn Haven, FL 
+##                                        0.016949153 
+##                               Champaign-Urbana, IL 
+##                                        0.016393443 
+##                                           Napa, CA 
+##                                        0.016393443 
+##                               Colorado Springs, CO 
+##                                        0.016129032 
+##                                      Johnstown, PA 
+##                                        0.015873016 
+##                              Kalamazoo-Portage, MI 
+##                                        0.015748031 
+##                                  Winston-Salem, NC 
+##                                        0.015748031 
+##                      Sarasota-Bradenton-Venice, FL 
+##                                        0.015625000 
+##                  Charlotte-Gastonia-Concord, NC-SC 
+##                                        0.015473888 
+##                                          Dover, DE 
+##                                        0.015350877 
+##                                 Corpus Christi, TX 
+##                                        0.015151515 
+##                  Allentown-Bethlehem-Easton, PA-NJ 
+##                                        0.014970060 
+##                                          Ocala, FL 
+##                                        0.013157895 
+##                     Youngstown-Warren-Boardman, OH 
+##                                        0.013071895 
+##                                     Provo-Orem, UT 
+##                                        0.012944984 
+##                           Waterloo-Cedar Falls, IA 
+##                                        0.012820513 
+##                              Birmingham-Hoover, AL 
+##                                        0.012755102 
+##                                    Springfield, MO 
+##                                        0.012422360 
+##                                        Greeley, CO 
+##                                        0.012345679 
+##                                        Medford, OR 
+##                                        0.012195122 
+##                                  Louisville, KY-IN 
+##                                        0.011560694 
+##                            Harrisburg-Carlisle, PA 
+##                                        0.011494253 
+##                                       Kingston, NY 
+##                                        0.011494253 
+##                               Boise City-Nampa, ID 
+##                                        0.010869565 
+##                                         Lawton, OK 
+##                                        0.010309278 
+##                        Cleveland-Elyria-Mentor, OH 
+##                                        0.010279001 
+##                                       Lawrence, KS 
+##                                        0.010204082 
+##                                  Evansville, IN-KY 
+##                                        0.010101010 
+##                                    Sioux Falls, SD 
+##                                        0.010084034 
+##                           Grand Rapids-Wyoming, MI 
+##                                        0.009868421 
+##                                         Yakima, WA 
+##                                        0.008928571 
+##                                  Coeur d'Alene, ID 
+##                                        0.008547009 
+##                                   York-Hanover, PA 
+##                                        0.008547009 
+##                                         Toledo, OH 
+##                                        0.008510638 
+##                            Santa Rosa-Petaluma, CA 
+##                                        0.007751938 
+##               Santa Barbara-Santa Maria-Goleta, CA 
+##                                        0.007575758 
+##                                         Dayton, OH 
+##                                        0.007462687 
+##                                           Bend, OR 
+##                                        0.007142857 
+##                                        Modesto, CA 
+##                                        0.006329114 
+##                                 Chattanooga, TN-GA 
+##                                        0.005988024 
+##                                         Monroe, LA 
+##                                        0.005586592 
+##                    Charleston-North Charleston, SC 
+##                                        0.004310345 
+##                                    San Antonio, TX 
+##                                        0.003294893 
+##                    New Orleans-Metairie-Kenner, LA 
+##                                        0.002724796 
+##                                   St. Louis, MO-IL 
+##                                        0.002092050 
+##                                         Albany, GA 
+##                                        0.000000000 
+##                                        Altoona, PA 
+##                                        0.000000000 
+##                                       Amarillo, TX 
+##                                        0.000000000 
+##                                       Anderson, IN 
+##                                        0.000000000 
+##                                        Appleton,WI 
+##                                        0.000000000 
+##                                      Asheville, NC 
+##                                        0.000000000 
+##                                Barnstable Town, MA 
+##                                        0.000000000 
+##                           Beaumont-Port Author, TX 
+##                                        0.000000000 
+##                                       Billings, MT 
+##                                        0.000000000 
+##                                     Binghamton, NY 
+##                                        0.000000000 
+##                                    Bloomington, IN 
+##                                        0.000000000 
+##                                  Bowling Green, KY 
+##                                        0.000000000 
+##                               Canton-Massillon, OH 
+##                                        0.000000000 
+##                                     Charleston, WV 
+##                                        0.000000000 
+##                                          Chico, CA 
+##                                        0.000000000 
+##                                    Columbus, GA-AL 
+##                                        0.000000000 
+##                                        Decatur, IL 
+##                                        0.000000000 
+##                                         Durham, NC 
+##                                        0.000000000 
+##                                     Eau Claire, WI 
+##                                        0.000000000 
+##                                        El Paso, TX 
+##                                        0.000000000 
+##                                           Erie, PA 
+##                                        0.000000000 
+##                                     Farmington, NM 
+##                                        0.000000000 
+##                                       Florence, AL 
+##                                        0.000000000 
+##                      Hagerstown-Martinsburg, MD-WV 
+##                                        0.000000000 
+##                                     Huntsville, AL 
+##                                        0.000000000 
+##                                        Jackson, MI 
+##                                        0.000000000 
+##                                        Jackson, MS 
+##                                        0.000000000 
+##                                     Janesville, WI 
+##                                        0.000000000 
+##                                   Johnson City, TN 
+##                                        0.000000000 
+##                                         Joplin, MO 
+##                                        0.000000000 
+##                               Kankakee-Bradley, IL 
+##                                        0.000000000 
+##                       Killeen-Temple-Fort Hood, TX 
+##                                        0.000000000 
+##                           Kingsport-Bristol, TN-VA 
+##                                        0.000000000 
+##                                      Knoxville, TN 
+##                                        0.000000000 
+##                                      Lafayette, LA 
+##                                        0.000000000 
+##                           Lansing-East Lansing, MI 
+##                                        0.000000000 
+##                                         Laredo, TX 
+##                                        0.000000000 
+##                   Leominster-Fitchburg-Gardner, MA 
+##                                        0.000000000 
+##                                       Longview, TX 
+##                                        0.000000000 
+##                                        Lubbock, TX 
+##                                        0.000000000 
+##                                      Lynchburg, VA 
+##                                        0.000000000 
+##                                          Macon, GA 
+##                                        0.000000000 
+##                                         Madera, CA 
+##                                        0.000000000 
+##                         McAllen-Edinburg-Pharr, TX 
+##                                        0.000000000 
+##                         Michigan City-La Porte, IN 
+##                                        0.000000000 
+##                                        Midland, TX 
+##                                        0.000000000 
+##                                         Monroe, MI 
+##                                        0.000000000 
+##                         Muskegon-Norton Shores, MI 
+##                                        0.000000000 
+##         Myrtle Beach-Conway-North Myrtle Beach, SC 
+##                                        0.000000000 
+##                            Niles-Benton Harbor, MI 
+##                                        0.000000000 
+##                                     Ocean City, NJ 
+##                                        0.000000000 
+##                                 Oshkosh-Neenah, WI 
+##                                        0.000000000 
+##                     Port St. Lucie-Fort Pierce, FL 
+##                                        0.000000000 
+##               Poughkeepsie-Newburgh-Middletown, NY 
+##                                        0.000000000 
+##                                         Pueblo, CO 
+##                                        0.000000000 
+##                                    Punta Gorda, FL 
+##                                        0.000000000 
+##                                         Racine, WI 
+##                                        0.000000000 
+##                                        Reading, PA 
+##                                        0.000000000 
+##                                        Roanoke, VA 
+##                                        0.000000000 
+##                                       Rockford, IL 
+##                                        0.000000000 
+##                 Saginaw-Saginaw Township North, MI 
+##                                        0.000000000 
+##                                          Salem, OR 
+##                                        0.000000000 
+##                                      Salisbury, MD 
+##                                        0.000000000 
+##                         Santa-Cruz-Watsonville, CA 
+##                                        0.000000000 
+##                                       Santa Fe, NM 
+##                                        0.000000000 
+##                          Scranton-Wilkes Barre, PA 
+##                                        0.000000000 
+##                        Shreveport-Bossier City, LA 
+##                                        0.000000000 
+##                        South Bend-Mishawaka, IN-MI 
+##                                        0.000000000 
+##                                    Spartanburg, SC 
+##                                        0.000000000 
+##                                 Springfield, MA-CT 
+##                                        0.000000000 
+##                                    Springfield, OH 
+##                                        0.000000000 
+##                                      St. Cloud, MN 
+##                                        0.000000000 
+##                                    Tallahassee, FL 
+##                                        0.000000000 
+##                                     Tuscaloosa, AL 
+##                                        0.000000000 
+##                                     Utica-Rome, NY 
+##                                        0.000000000 
+##                                       Valdosta, GA 
+##                                        0.000000000 
+##                                     Vero Beach, FL 
+##                                        0.000000000 
+##                                       Victoria, TX 
+##                                        0.000000000 
+##                   Vineland-Millville-Bridgeton, NJ 
+##                                        0.000000000 
+##                                           Waco, TX 
+##                                        0.000000000 
+##                                      Waterbury, CT 
+##                                        0.000000000 
+##                                         Wausau, WI 
+##                                        0.000000000</code></pre>
+<p>Number of metropolitan areas in the USA from which at least 20% of interviewees are Asian: <strong>4</strong></p>
+<pre class="r"><code>sort(tapply(CPS$Education == &quot;No high school diploma&quot;, CPS$MetroArea, mean, na.rm = TRUE))</code></pre>
+<pre><code>##                                      Iowa City, IA 
+##                                         0.02912621 
+##                                  Bowling Green, KY 
+##                                         0.03703704 
+##                              Kalamazoo-Portage, MI 
+##                                         0.05050505 
+##                               Champaign-Urbana, IL 
+##                                         0.05154639 
+##                           Bremerton-Silverdale, WA 
+##                                         0.05405405 
+##                                       Lawrence, KS 
+##                                         0.05952381 
+##                              Bloomington-Normal IL 
+##                                         0.06060606 
+##                                   Jacksonville, NC 
+##                                         0.06122449 
+##                                     Eau Claire, WI 
+##                                         0.06250000 
+##                  Palm Bay-Melbourne-Titusville, FL 
+##                                         0.06666667 
+##                                      Salisbury, MD 
+##                                         0.06779661 
+##                                    Gainesville, FL 
+##                                         0.06896552 
+##                          Fort Collins-Loveland, CO 
+##                                         0.06936416 
+##                                        Altoona, PA 
+##                                         0.07142857 
+##                                        Madison, WI 
+##                                         0.07423581 
+##                                    Tallahassee, FL 
+##                                         0.07500000 
+##                                       Fargo, ND-MN 
+##                                         0.07902736 
+##                        Albany-Schenectady-Troy, NY 
+##                                         0.07929515 
+##                                     Ocean City, NJ 
+##                                         0.08000000 
+##                          Lakeland-Winter Haven, FL 
+##                                         0.08130081 
+##                                       Billings, MT 
+##                                         0.08280255 
+##                                  Coeur d'Alene, ID 
+##                                         0.08333333 
+##                    Burlington-South Burlington, VT 
+##                                         0.08394161 
+##                                          Akron, OH 
+##                                         0.08421053 
+##                                      Ann Arbor, MI 
+##                                         0.08695652 
+##                                      Asheville, NC 
+##                                         0.08695652 
+##                     Pensacola-Ferry Pass-Brent, FL 
+##                                         0.08695652 
+##                                 Oshkosh-Neenah, WI 
+##                                         0.08823529 
+##                             Rochester-Dover, NH-ME 
+##                                         0.08928571 
+##                                      Knoxville, TN 
+##                                         0.08965517 
+##                                     Pittsburgh, PA 
+##                                         0.09060403 
+##                                Barnstable Town, MA 
+##                                         0.09090909 
+##                    Bridgeport-Stamford-Norwalk, CT 
+##                                         0.09563758 
+##                                      Johnstown, PA 
+##                                         0.09615385 
+##                              Austin-Round Rock, TX 
+##                                         0.09629630 
+##                                      La Crosse, WI 
+##                                         0.09677419 
+##                                        Boulder, CO 
+##                                         0.09701493 
+##                    Charleston-North Charleston, SC 
+##                                         0.09890110 
+##                                     Fort Wayne, IN 
+##                                         0.09900990 
+##                                        Roanoke, VA 
+##                                         0.10169492 
+##                                       Prescott, AZ 
+##                                         0.10204082 
+##                            Santa Rosa-Petaluma, CA 
+##                                         0.10280374 
+##                                  Evansville, IN-KY 
+##                                         0.10389610 
+##                                        Spokane, WA 
+##                                         0.10434783 
+##               Poughkeepsie-Newburgh-Middletown, NY 
+##                                         0.10559006 
+##                Tampa-St. Petersburg-Clearwater, FL 
+##                                         0.10579710 
+##                           Grand Rapids-Wyoming, MI 
+##                                         0.10612245 
+##                        Portland-South Portland, ME 
+##                                         0.10638298 
+##                                       Honolulu, HI 
+##                                         0.10739300 
+##                         Michigan City-La Porte, IN 
+##                                         0.10769231 
+##                             Eugene-Springfield, OR 
+##                                         0.11038961 
+##                     Boston-Cambridge-Quincy, MA-NH 
+##                                         0.11080485 
+##                                           Bend, OR 
+##                                         0.11111111 
+##                                     Vero Beach, FL 
+##                                         0.11428571 
+##                      Sarasota-Bradenton-Venice, FL 
+##                                         0.11464968 
+##             Fort Walton Beach-Crestview-Destin, FL 
+##                                         0.11475410 
+##                                          Flint, MI 
+##                                         0.11538462 
+##                                   Cedar Rapids, IA 
+##                                         0.11564626 
+##             Minneapolis-St Paul-Bloomington, MN-WI 
+##                                         0.11638204 
+##                Portland-Vancouver-Beaverton, OR-WA 
+##                                         0.11657143 
+##       Washington-Arlington-Alexandria, DC-VA-MD-WV 
+##                                         0.11683748 
+##                                         Mobile, AL 
+##                                         0.11702128 
+##                          Scranton-Wilkes Barre, PA 
+##                                         0.11724138 
+##                                         Topeka, KS 
+##                                         0.11724138 
+##                               Colorado Springs, CO 
+##                                         0.11764706 
+##                                        Olympia, WA 
+##                                         0.11764706 
+##                                    Reno-Sparks, NV 
+##                                         0.11764706 
+##                                        Appleton,WI 
+##                                         0.11827957 
+##                                       Santa Fe, NM 
+##                                         0.11904762 
+##         Virginia Beach-Norfolk-Newport News, VA-NC 
+##                                         0.11909651 
+##                  Allentown-Bethlehem-Easton, PA-NJ 
+##                                         0.11929825 
+##                                      Rochester, NY 
+##                                         0.12132353 
+##                        Seattle-Tacoma-Bellevue, WA 
+##                                         0.12168793 
+##                                 Kansas City, MO-KS 
+##                                         0.12172775 
+##                                           Napa, CA 
+##                                         0.12244898 
+##                                      Duluth, MN-WI 
+##                                         0.12264151 
+##                                      New Haven, CT 
+##                                         0.12354312 
+##                               Canton-Massillon, OH 
+##                                         0.12371134 
+##                                   Fayetteville, NC 
+##                                         0.12500000 
+##                    San Luis Obispo-Paso Robles, CA 
+##                                         0.12500000 
+##                                   Worcester, MA-CT 
+##                                         0.12605042 
+##           Philadelphia-Camden-Wilmington, PA-NJ-DE 
+##                                         0.12717253 
+##                Davenport-Moline-Rock Island, IA-IL 
+##                                         0.12727273 
+##                           Waterloo-Cedar Falls, IA 
+##                                         0.12800000 
+##                                         Pueblo, CO 
+##                                         0.12844037 
+##                                    Baton Rouge, LA 
+##                                         0.12871287 
+##                                         Racine, WI 
+##                                         0.12903226 
+##                                     Des Moines, IA 
+##                                         0.12944162 
+##                         Detroit-Warren-Livonia, MI 
+##                                         0.12964642 
+##                        Omaha-Council Bluffs, NE-IA 
+##                                         0.12972973 
+##                                       Richmond, VA 
+##                                         0.12990196 
+##                                       Savannah, GA 
+##                                         0.13013699 
+##                                        Danbury, CT 
+##                                         0.13043478 
+##                                    Bloomington, IN 
+##                                         0.13095238 
+##                                       Valdosta, GA 
+##                                         0.13157895 
+##                                         Wausau, WI 
+##                                         0.13157895 
+##             Deltona-Daytona Beach-Ormond Beach, FL 
+##                                         0.13178295 
+##                                          Tulsa, OK 
+##                                         0.13178295 
+##                            Harrisburg-Carlisle, PA 
+##                                         0.13286713 
+##                             Las Vegas-Paradise, NV 
+##                                         0.13307985 
+##         Myrtle Beach-Conway-North Myrtle Beach, SC 
+##                                         0.13333333 
+##                                     Provo-Orem, UT 
+##                                         0.13366337 
+##                                       Anderson, IN 
+##                                         0.13461538 
+##                                          Chico, CA 
+##                                         0.13461538 
+##                                   St. Louis, MO-IL 
+##                                         0.13461538 
+##                            Niles-Benton Harbor, MI 
+##                                         0.13513514 
+##                               Ogden-Clearfield, UT 
+##                                         0.13571429 
+##                               Baltimore-Towson, MD 
+##                                         0.13583333 
+##                          Buffalo-Niagara Falls, NY 
+##                                         0.13684211 
+##                  Milwaukee-Waukesha-West Allis, WI 
+##                                         0.13693694 
+##                Chicago-Naperville-Joliet, IN-IN-WI 
+##                                         0.13737734 
+##                                  Louisville, KY-IN 
+##                                         0.13785047 
+##                                      Lynchburg, VA 
+##                                         0.13793103 
+##                                         Peoria, IL 
+##                                         0.13829787 
+##                                    Sioux Falls, SD 
+##                                         0.13832200 
+##                                          Ocala, FL 
+##                                         0.13888889 
+##                   Leominster-Fitchburg-Gardner, MA 
+##                                         0.14035088 
+##                                  Oklahoma City, OK 
+##                                         0.14137214 
+##                  San Diego-Carlsbad-San Marcos, CA 
+##                                         0.14188267 
+##                                   Jacksonville, FL 
+##                                         0.14244186 
+##                                  Atlantic City, NJ 
+##                                         0.14285714 
+##                            Holland-Grand Haven, MI 
+##                                         0.14285714 
+##                                        Medford, OR 
+##                                         0.14285714 
+##                            Naples-Marco Island, FL 
+##                                         0.14285714 
+##                                    Punta Gorda, FL 
+##                                         0.14285714 
+##                                       Victoria, TX 
+##                                         0.14285714 
+##                                  Winston-Salem, NC 
+##                                         0.14285714 
+##                                 Salt Lake City, UT 
+##                                         0.14338235 
+##                 Atlanta-Sandy Springs-Marietta, GA 
+##                                         0.14421553 
+##                                        Decatur, IL 
+##                                         0.14516129 
+##                                    Springfield, IL 
+##                                         0.14516129 
+##                                         Monroe, MI 
+##                                         0.14545455 
+##                                  Denver-Aurora, CO 
+##                                         0.14574558 
+##           Hartford-West Hartford-East Hartford, CT 
+##                                         0.14574899 
+##                                        Greeley, CO 
+##                                         0.14615385 
+##                  San Francisco-Oakland-Fremont, CA 
+##                                         0.14651368 
+##                               Boise City-Nampa, ID 
+##                                         0.14653465 
+##                                     Greenville, SC 
+##                                         0.14666667 
+##                              Birmingham-Hoover, AL 
+##                                         0.14678899 
+##                 Saginaw-Saginaw Township North, MI 
+##                                         0.14754098 
+##                         Santa-Cruz-Watsonville, CA 
+##                                         0.14814815 
+##                                  Trenton-Ewing, NJ 
+##                                         0.14814815 
+##                              Lexington-Fayette, KY 
+##                                         0.14838710 
+##                 San Jose-Sunnyvale-Santa Clara, CA 
+##                                         0.14922481 
+##                                     Bellingham, WA 
+##                                         0.15000000 
+##                          Norwich-New London, CT-RI 
+##                                         0.15060241 
+##                                        Lubbock, TX 
+##                                         0.15094340 
+##                       Huntington-Ashland, WV-KY-OH 
+##                                         0.15151515 
+##                                      St. Cloud, MN 
+##                                         0.15151515 
+##                                        Jackson, MS 
+##                                         0.15168539 
+##                                         Dayton, OH 
+##                                         0.15207373 
+##                                 Chattanooga, TN-GA 
+##                                         0.15217391 
+##                                       Syracuse, NY 
+##                                         0.15428571 
+## New York-Northern New Jersey-Long Island, NY-NJ-PA 
+##                                         0.15573586 
+##                                       Columbia, SC 
+##                                         0.15600000 
+##                                       Columbus, OH 
+##                                         0.15617716 
+##                                  Memphis, TN-MS-AR 
+##                                         0.15714286 
+##                                        Orlando, FL 
+##                                         0.16108787 
+##                                  Warner Robins, GA 
+##                                         0.16216216 
+##                        Cleveland-Elyria-Mentor, OH 
+##                                         0.16250000 
+##                                       Columbia, MO 
+##                                         0.16279070 
+##                                         Durham, NC 
+##                                         0.16326531 
+##              Miami-Fort Lauderdale-Miami Beach, FL 
+##                                         0.16356589 
+##                                   Indianapolis, IN 
+##                                         0.16371681 
+##                                    Albuquerque, NM 
+##                                         0.16424116 
+##                          Cape Coral-Fort Myers, FL 
+##                                         0.16528926 
+##                                       Amarillo, TX 
+##                                         0.16666667 
+##                                Anniston-Oxford, AL 
+##                                         0.16666667 
+##                            Athens-Clark County, GA 
+##                                         0.16666667 
+##                                     Binghamton, NY 
+##                                         0.16666667 
+##                        Phoenix-Mesa-Scottsdale, AZ 
+##                                         0.16687737 
+##                                      Green Bay, WI 
+##                                         0.16831683 
+##                                         Bangor, ME 
+##                                         0.16860465 
+##               Providence-Fall River-Warwick, MA-RI 
+##                                         0.16915688 
+##                         Muskegon-Norton Shores, MI 
+##                                         0.16923077 
+##                                     Tuscaloosa, AL 
+##                                         0.16949153 
+##                                       Rockford, IL 
+##                                         0.17021277 
+##                                     Las Cruses, NM 
+##                                         0.17283951 
+##                                Gulfport-Biloxi, MS 
+##                                         0.17307692 
+##                                     Huntsville, AL 
+##                                         0.17391304 
+##                                     Utica-Rome, NY 
+##                                         0.17391304 
+##                                  Fort Smith, AR-OK 
+##                                         0.17441860 
+##                  Charlotte-Gastonia-Concord, NC-SC 
+##                                         0.17444717 
+##                                      El Centro, CA 
+##                                         0.17567568 
+##                                           Erie, PA 
+##                                         0.17567568 
+##                                        Jackson, MI 
+##                                         0.17741935 
+##                    Cincinnati-Middletown, OH-KY-IN 
+##                                         0.17773788 
+##                                 Springfield, MA-CT 
+##                                         0.17829457 
+##                                        Reading, PA 
+##                                         0.17857143 
+##                              Vallejo-Fairfield, CA 
+##                                         0.17924528 
+##                                          Salem, OR 
+##                                         0.17985612 
+##                Nashville-Davidson-Murfreesboro, TN 
+##                                         0.18112245 
+##                                   Johnson City, TN 
+##                                         0.18181818 
+##                                        Wichita, KS 
+##                                         0.18181818 
+##                                   York-Hanover, PA 
+##                                         0.18181818 
+##                                     Janesville, WI 
+##                                         0.18292683 
+##                           Lansing-East Lansing, MI 
+##                                         0.18348624 
+##                          Greensboro-High Point, NC 
+##                                         0.18357488 
+##                                        Decatur, Al 
+##                                         0.18421053 
+##                                         Albany, GA 
+##                                         0.18604651 
+##                     Augusta-Richmond County, GA-SC 
+##                                         0.18796992 
+##                                     Charleston, WV 
+##                                         0.18834081 
+##                        Shreveport-Bossier City, LA 
+##                                         0.18918919 
+##                                   Raleigh-Cary, NC 
+##                                         0.18959108 
+##                                         Toledo, OH 
+##                                         0.18965517 
+##                                    Spartanburg, SC 
+##                                         0.18987342 
+##                    Dallas-Fort Worth-Arlington, TX 
+##                                         0.19077135 
+##              Sacramento-Arden-Arcade-Roseville, CA 
+##                                         0.19136961 
+##               Santa Barbara-Santa Maria-Goleta, CA 
+##                                         0.19191919 
+##                                         Monroe, LA 
+##                                         0.19205298 
+##                                          Dover, DE 
+##                                         0.19220056 
+##                        South Bend-Mishawaka, IN-MI 
+##                                         0.19354839 
+##              Fayetteville-Springdale-Rogers, AR-MO 
+##                                         0.19393939 
+##                                    Columbus, GA-AL 
+##                                         0.19607843 
+##                                       Kingston, NY 
+##                                         0.19696970 
+##                     Port St. Lucie-Fort Pierce, FL 
+##                                         0.19767442 
+##                                      Waterbury, CT 
+##                                         0.19852941 
+##                  Little Rock-North Little Rock, AR 
+##                                         0.19939577 
+##                                    Springfield, MO 
+##                                         0.20000000 
+##                                        Modesto, CA 
+##                                         0.20325203 
+##                     Houston-Baytown-Sugar Land, TX 
+##                                         0.20439739 
+##                   Oxnard-Thousand Oaks-Ventura, CA 
+##                                         0.20657277 
+##                                       Anderson, SC 
+##                                         0.20689655 
+##                                        Midland, TX 
+##                                         0.21052632 
+##                    New Orleans-Metairie-Kenner, LA 
+##                                         0.21088435 
+##                                         Fresno, CA 
+##                                         0.21120690 
+##                                   Lake Charles, LA 
+##                                         0.21739130 
+##                            Visalia-Porterville, CA 
+##                                         0.21782178 
+##                                    San Antonio, TX 
+##                                         0.22004357 
+##                      Hagerstown-Martinsburg, MD-WV 
+##                                         0.22222222 
+##                                         Yakima, WA 
+##                                         0.22222222 
+##                      Hickory-Morgantown-Lenoir, NC 
+##                                         0.22448980 
+##               Los Angeles-Long Beach-Santa Ana, CA 
+##                                         0.22882883 
+##                         Panama City-Lynn Haven, FL 
+##                                         0.22916667 
+##                                   Harrisonburg, VA 
+##                                         0.23287671 
+##                               Kankakee-Bradley, IL 
+##                                         0.23437500 
+##                           Beaumont-Port Author, TX 
+##                                         0.23469388 
+##                     Youngstown-Warren-Boardman, OH 
+##                                         0.23622047 
+##                       Riverside-San Bernardino, CA 
+##                                         0.23780488 
+##                                     Farmington, NM 
+##                                         0.23913043 
+##                       Killeen-Temple-Fort Hood, TX 
+##                                         0.24050633 
+##                                           Waco, TX 
+##                                         0.24074074 
+##                                     Montgomery, AL 
+##                                         0.24137931 
+##                                         Tucson, AZ 
+##                                         0.24603175 
+##                                      Lafayette, LA 
+##                                         0.24822695 
+##                                         Joplin, MO 
+##                                         0.25000000 
+##                                       Stockton, CA 
+##                                         0.25333333 
+##                          Brownsville-Harlingen, TX 
+##                                         0.25396825 
+##                                      Lancaster, PA 
+##                                         0.26771654 
+##                                    Bakersfield, CA 
+##                                         0.27218935 
+##                   Vineland-Millville-Bridgeton, NJ 
+##                                         0.27500000 
+##                                         Lawton, OK 
+##                                         0.28000000 
+##                                         Merced, CA 
+##                                         0.28358209 
+##                                 Corpus Christi, TX 
+##                                         0.29702970 
+##                                        El Paso, TX 
+##                                         0.30219780 
+##                                    Springfield, OH 
+##                                         0.31034483 
+##                                       Florence, AL 
+##                                         0.32075472 
+##                                         Madera, CA 
+##                                         0.33333333 
+##                                        Salinas, CA 
+##                                         0.34090909 
+##                                         Laredo, TX 
+##                                         0.34426230 
+##                           Kingsport-Bristol, TN-VA 
+##                                         0.36363636 
+##                                       Longview, TX 
+##                                         0.38297872 
+##                         McAllen-Edinburg-Pharr, TX 
+##                                         0.38297872 
+##                                          Macon, GA 
+##                                         0.40816327</code></pre>
+<p>Which metropolitan area has the smallest proportion of interviewees who have received no high school diploma ? <strong>Iowa City, IA</strong></p>
+</div>
+<div id="problem-4---integrating-country-of-birth-data" class="section level3">
+<h3>Problem 4 - Integrating Country of Birth Data</h3>
+<p>Merge in the country of birth information from the CountryMap data frame, replacing the CPS data frame with the result.</p>
+<pre class="r"><code>CPS = merge(CPS, CountryMap, by.x=&quot;CountryOfBirthCode&quot;, by.y=&quot;Code&quot;, all.x=TRUE)
+summary(CPS)</code></pre>
+<pre><code>##  CountryOfBirthCode MetroAreaCode   PeopleInHousehold       Region     
+##  Min.   : 57.00     Min.   :10420   Min.   : 1.000    Midwest  :30684  
+##  1st Qu.: 57.00     1st Qu.:21780   1st Qu.: 2.000    Northeast:25939  
+##  Median : 57.00     Median :34740   Median : 3.000    South    :41502  
+##  Mean   : 82.68     Mean   :35075   Mean   : 3.284    West     :33177  
+##  3rd Qu.: 57.00     3rd Qu.:41860   3rd Qu.: 4.000                     
+##  Max.   :555.00     Max.   :79600   Max.   :15.000                     
+##                     NA's   :34238                                      
+##           State            Age                 Married          Sex       
+##  California  :11570   Min.   : 0.00   Divorced     :11151   Female:67481  
+##  Texas       : 7077   1st Qu.:19.00   Married      :55509   Male  :63821  
+##  New York    : 5595   Median :39.00   Never Married:30772                 
+##  Florida     : 5149   Mean   :38.83   Separated    : 2027                 
+##  Pennsylvania: 3930   3rd Qu.:57.00   Widowed      : 6505                 
+##  Illinois    : 3912   Max.   :85.00   NA's         :25338                 
+##  (Other)     :94069                                                       
+##                    Education                   Race       
+##  High school            :30906   American Indian :  1433  
+##  Bachelor's degree      :19443   Asian           :  6520  
+##  Some college, no degree:18863   Black           : 13913  
+##  No high school diploma :16095   Multiracial     :  2897  
+##  Associate degree       : 9913   Pacific Islander:   618  
+##  (Other)                :10744   White           :105921  
+##  NA's                   :25338                            
+##     Hispanic                    Citizenship               EmploymentStatus
+##  Min.   :0.0000   Citizen, Native     :116639   Disabled          : 5712  
+##  1st Qu.:0.0000   Citizen, Naturalized:  7073   Employed          :61733  
+##  Median :0.0000   Non-Citizen         :  7590   Not in Labor Force:15246  
+##  Mean   :0.1393                                 Retired           :18619  
+##  3rd Qu.:0.0000                                 Unemployed        : 4203  
+##  Max.   :1.0000                                 NA's              :25789  
+##                                                                           
+##                                Industry    
+##  Educational and health services   :15017  
+##  Trade                             : 8933  
+##  Professional and business services: 7519  
+##  Manufacturing                     : 6791  
+##  Leisure and hospitality           : 6364  
+##  (Other)                           :21618  
+##  NA's                              :65060  
+##                                               MetroArea    
+##  New York-Northern New Jersey-Long Island, NY-NJ-PA: 5409  
+##  Washington-Arlington-Alexandria, DC-VA-MD-WV      : 4177  
+##  Los Angeles-Long Beach-Santa Ana, CA              : 4102  
+##  Philadelphia-Camden-Wilmington, PA-NJ-DE          : 2855  
+##  Chicago-Naperville-Joliet, IN-IN-WI               : 2772  
+##  (Other)                                           :77749  
+##  NA's                                              :34238  
+##           Country      
+##  United States:115063  
+##  Mexico       :  3921  
+##  Philippines  :   839  
+##  India        :   770  
+##  China        :   581  
+##  (Other)      :  9952  
+##  NA's         :   176</code></pre>
+<p>What is the name of the variable added to the CPS data frame by this merge operation? <strong>Country</strong></p>
+<p>How many interviewees have a missing value for the new country of birth variables? <strong>176</strong></p>
+<pre class="r"><code>sort(table(CPS$Country), decreasing = TRUE)</code></pre>
+<pre><code>## 
+##                  United States                         Mexico 
+##                         115063                           3921 
+##                    Philippines                          India 
+##                            839                            770 
+##                          China                    Puerto Rico 
+##                            581                            518 
+##                    El Salvador                        Vietnam 
+##                            477                            458 
+##                        Germany                           Cuba 
+##                            438                            426 
+##                         Canada                          Korea 
+##                            410                            334 
+##             Dominican Republic                      Guatemala 
+##                            330                            309 
+##                        Jamaica                       Columbia 
+##                            217                            206 
+##                       Honduras                          Japan 
+##                            189                            187 
+##                        England                         Russia 
+##                            179                            173 
+##                          Haiti                         Poland 
+##                            167                            162 
+##                         Brazil                          Italy 
+##                            159                            149 
+##                           Iran                        Ecuador 
+##                            144                            136 
+##                           Peru          Africa, not specified 
+##                            136                            129 
+##                       Thailand                 United Kingdom 
+##                            128                            111 
+##                         Guyana                       Pakistan 
+##                            109                            109 
+##                        Ukraine                         Taiwan 
+##                            104                            102 
+##                           Laos                           Iraq 
+##                             98                             97 
+##                        Nigeria                      Elsewhere 
+##                             85                             81 
+##                       Ethiopia                          Ghana 
+##                             80                             76 
+##                      Nicaragua                         France 
+##                             76                             73 
+##                    South Korea                        Somalia 
+##                             73                             72 
+##                          Egypt                      Argentina 
+##                             65                             64 
+##                      Hong Kong                       Portugal 
+##                             64                             64 
+##           Bosnia &amp; Herzegovina                      Venezuela 
+##                             61                             61 
+##            Trinidad and Tobago                         Israel 
+##                             60                             57 
+##                         Greece                          Kenya 
+##                             56                             55 
+##                        Romania                        Liberia 
+##                             55                             52 
+##                       Cambodia                   South Africa 
+##                             49                             48 
+##                         Turkey                        Lebanon 
+##                             48                             45 
+##                Myanmar (Burma)                          Nepal 
+##                             45                             44 
+##                         Panama                      Australia 
+##                             44                             43 
+##                     Bangladesh                          Spain 
+##                             42                             41 
+##            Asia, not specified                        Ireland 
+##                             39                             39 
+##                          Chile                         Jordan 
+##                             37                             36 
+##                        Armenia                       Cameroon 
+##                             35                             32 
+##                          Syria                           Guam 
+##                             32                             31 
+##                       Bulgaria                     Costa Rica 
+##                             29                             29 
+##                   Saudi Arabia                    Netherlands 
+##                             29                             28 
+##                         Sweden                    Afghanistan 
+##                             28                             26 
+##                      Indonesia                        Hungary 
+##                             26                             25 
+##                        Belarus                       Scotland 
+##                             24                             24 
+##                     Yugoslavia                    New Zealand 
+##                             24                             23 
+##                    Switzerland                          Yemen 
+##                             23                             23 
+##                         Azores                           USSR 
+##                             22                             22 
+##                       Malaysia                         Serbia 
+##                             20                             20 
+##          Europe, not specified                     Uzbekistan 
+##                             19                             19 
+##     West Indies, not specified                        Albania 
+##                             19                             18 
+##                         Norway                        Austria 
+##                             18                             17 
+##                        Morocco                      Sri Lanka 
+##                             17                             17 
+##                        Uruguay           U. S. Virgin Islands 
+##                             17                             17 
+##                     Cape Verde                        Eritrea 
+##                             15                             15 
+##                   Sierra Leone                         Uganda 
+##                             15                             15 
+##            Antigua and Barbuda                        Belgium 
+##                             13                             13 
+##                        Bermuda                        Bolivia 
+##                             13                             13 
+##                        Grenada                          Sudan 
+##                             13                             13 
+##                        Croatia                      Macedonia 
+##                             12                             12 
+##                        Moldova                 Czech Republic 
+##                             12                             11 
+##                       Dominica                       Paraguay 
+##                             11                             11 
+##                        Bahamas                        Finland 
+##                             10                             10 
+##                         Kuwait                      Lithuania 
+##                             10                             10 
+##                        Algeria        Americas, not specified 
+##                              9                              9 
+##                         Belize                           Fiji 
+##                              9                              9 
+## St. Vincent and the Grenadines   South America, not specified 
+##                              9                              7 
+##                      St. Lucia                       Barbados 
+##                              7                              6 
+##                        Denmark                         Latvia 
+##                              6                              6 
+##                          Samoa                        Senegal 
+##                              6                              6 
+##                      Singapore                       Slovakia 
+##                              6                              6 
+##                          Tonga                       Zimbabwe 
+##                              6                              6 
+##                        Georgia                     Azerbaijan 
+##                              5                              3 
+##                 Czechoslovakia               St. Kitts--Nevis 
+##                              3                              3 
+##               Northern Ireland                       Tanzania 
+##                              2                              2 
+##                         Cyprus                         Kosovo 
+##                              0                              0 
+##         Oceania, not specified       Other U. S. Island Areas 
+##                              0                              0 
+##                          Wales 
+##                              0</code></pre>
+<p>Among all interviewees born outside of the North America, which country was the most common place of birth? <strong>Philippines</strong></p>
+<pre class="r"><code>tapply(CPS$Country != &quot;United States&quot;, CPS$MetroArea, mean, na.rm = TRUE)</code></pre>
+<pre><code>##                                          Akron, OH 
+##                                        0.034934498 
+##                                         Albany, GA 
+##                                        0.014705882 
+##                        Albany-Schenectady-Troy, NY 
+##                                        0.082089552 
+##                                    Albuquerque, NM 
+##                                        0.100164204 
+##                  Allentown-Bethlehem-Easton, PA-NJ 
+##                                        0.122754491 
+##                                        Altoona, PA 
+##                                        0.012195122 
+##                                       Amarillo, TX 
+##                                        0.056818182 
+##                                       Anderson, IN 
+##                                        0.048387097 
+##                                       Anderson, SC 
+##                                        0.015625000 
+##                                      Ann Arbor, MI 
+##                                        0.117647059 
+##                                Anniston-Oxford, AL 
+##                                        0.098360656 
+##                        Appleton-Oshkosh-Neenah, WI 
+##                                                 NA 
+##                                        Appleton,WI 
+##                                        0.016000000 
+##                                      Asheville, NC 
+##                                        0.068965517 
+##                            Athens-Clark County, GA 
+##                                        0.107692308 
+##                 Atlanta-Sandy Springs-Marietta, GA 
+##                                        0.146278317 
+##                                  Atlantic City, NJ 
+##                                        0.171171171 
+##                     Augusta-Richmond County, GA-SC 
+##                                        0.062111801 
+##                              Austin-Round Rock, TX 
+##                                        0.155038760 
+##                                    Bakersfield, CA 
+##                                        0.248979592 
+##                               Baltimore-Towson, MD 
+##                                        0.120189061 
+##                                         Bangor, ME 
+##                                        0.038461538 
+##                                Barnstable Town, MA 
+##                                        0.093333333 
+##                                    Baton Rouge, LA 
+##                                        0.049618321 
+##                           Beaumont-Port Author, TX 
+##                                        0.090163934 
+##                                     Bellingham, WA 
+##                                        0.028571429 
+##                                           Bend, OR 
+##                                        0.021428571 
+##                                       Billings, MT 
+##                                        0.010050251 
+##                                     Binghamton, NY 
+##                                        0.041095890 
+##                              Birmingham-Hoover, AL 
+##                                        0.035714286 
+##                                    Bloomington, IN 
+##                                        0.019230769 
+##                              Bloomington-Normal IL 
+##                                        0.075000000 
+##                               Boise City-Nampa, ID 
+##                                        0.063664596 
+##                     Boston-Cambridge-Quincy, MA-NH 
+##                                        0.128757290 
+##                                        Boulder, CO 
+##                                        0.140350877 
+##                                  Bowling Green, KY 
+##                                        0.068965517 
+##                           Bremerton-Silverdale, WA 
+##                                        0.080459770 
+##                    Bridgeport-Stamford-Norwalk, CT 
+##                                        0.220082531 
+##                          Brownsville-Harlingen, TX 
+##                                        0.392405063 
+##                          Buffalo-Niagara Falls, NY 
+##                                        0.071641791 
+##                    Burlington-South Burlington, VT 
+##                                        0.064914992 
+##                               Canton-Massillon, OH 
+##                                        0.033898305 
+##                          Cape Coral-Fort Myers, FL 
+##                                        0.349315068 
+##                                   Cedar Rapids, IA 
+##                                        0.025510204 
+##                               Champaign-Urbana, IL 
+##                                        0.057377049 
+##                    Charleston-North Charleston, SC 
+##                                        0.034482759 
+##                                     Charleston, WV 
+##                                        0.003816794 
+##                  Charlotte-Gastonia-Concord, NC-SC 
+##                                        0.104448743 
+##                                 Chattanooga, TN-GA 
+##                                        0.071856287 
+##                Chicago-Naperville-Joliet, IN-IN-WI 
+##                                        0.166787004 
+##                                          Chico, CA 
+##                                        0.100000000 
+##                    Cincinnati-Middletown, OH-KY-IN 
+##                                        0.068150209 
+##                        Cleveland-Elyria-Mentor, OH 
+##                                        0.064610866 
+##                                  Coeur d'Alene, ID 
+##                                        0.059829060 
+##                               Colorado Springs, CO 
+##                                        0.053763441 
+##                                       Columbia, MO 
+##                                        0.021276596 
+##                                       Columbia, SC 
+##                                        0.092783505 
+##                                    Columbus, GA-AL 
+##                                        0.220338983 
+##                                       Columbus, OH 
+##                                        0.086080586 
+##                                 Corpus Christi, TX 
+##                                        0.068181818 
+##                    Dallas-Fort Worth-Arlington, TX 
+##                                        0.180010747 
+##                                        Danbury, CT 
+##                                        0.279279279 
+##                Davenport-Moline-Rock Island, IA-IL 
+##                                        0.029166667 
+##                                         Dayton, OH 
+##                                        0.026119403 
+##                                        Decatur, Al 
+##                                        0.062500000 
+##                                        Decatur, IL 
+##                                        0.000000000 
+##             Deltona-Daytona Beach-Ormond Beach, FL 
+##                                        0.114285714 
+##                                  Denver-Aurora, CO 
+##                                        0.136303191 
+##                                     Des Moines, IA 
+##                                        0.089820359 
+##                         Detroit-Warren-Livonia, MI 
+##                                        0.130723781 
+##                                          Dover, DE 
+##                                        0.054824561 
+##                                      Duluth, MN-WI 
+##                                        0.015873016 
+##                                         Durham, NC 
+##                                        0.111111111 
+##                                     Eau Claire, WI 
+##                                        0.009090909 
+##                                      El Centro, CA 
+##                                        0.333333333 
+##                                        El Paso, TX 
+##                                        0.315573770 
+##                                           Erie, PA 
+##                                        0.057471264 
+##                             Eugene-Springfield, OR 
+##                                        0.045918367 
+##                                  Evansville, IN-KY 
+##                                        0.010101010 
+##                                       Fargo, ND-MN 
+##                                        0.058411215 
+##                                     Farmington, NM 
+##                                        0.046875000 
+##                                   Fayetteville, NC 
+##                                        0.077922078 
+##              Fayetteville-Springdale-Rogers, AR-MO 
+##                                        0.138095238 
+##                                          Flint, MI 
+##                                        0.029411765 
+##                                       Florence, AL 
+##                                        0.000000000 
+##                          Fort Collins-Loveland, CO 
+##                                        0.033980583 
+##                                  Fort Smith, AR-OK 
+##                                        0.066666667 
+##             Fort Walton Beach-Crestview-Destin, FL 
+##                                        0.125000000 
+##                                     Fort Wayne, IN 
+##                                        0.066176471 
+##                                         Fresno, CA 
+##                                        0.198019802 
+##                                    Gainesville, FL 
+##                                        0.114285714 
+##                  Grand Rapids-Muskegon-Holland, MI 
+##                                                 NA 
+##                           Grand Rapids-Wyoming, MI 
+##                                        0.065789474 
+##                                        Greeley, CO 
+##                                        0.055555556 
+##                                      Green Bay, WI 
+##                                        0.125000000 
+##                          Greensboro-High Point, NC 
+##                                        0.099601594 
+##                                     Greenville, SC 
+##                                        0.098360656 
+##                Greenville-Spartanburg-Anderson, SC 
+##                                                 NA 
+##                                Gulfport-Biloxi, MS 
+##                                        0.061538462 
+##                      Hagerstown-Martinsburg, MD-WV 
+##                                        0.046511628 
+##                            Harrisburg-Carlisle, PA 
+##                                        0.040229885 
+##                                   Harrisonburg, VA 
+##                                        0.022222222 
+##           Hartford-West Hartford-East Hartford, CT 
+##                                        0.161581921 
+##                      Hickory-Morgantown-Lenoir, NC 
+##                                        0.070175439 
+##                        Hinesville-Fort Stewart, GA 
+##                                                 NA 
+##                            Holland-Grand Haven, MI 
+##                                        0.038461538 
+##                                       Honolulu, HI 
+##                                        0.200000000 
+##                     Houston-Baytown-Sugar Land, TX 
+##                                        0.207443563 
+##                       Huntington-Ashland, WV-KY-OH 
+##                                        0.036585366 
+##                                     Huntsville, AL 
+##                                        0.042735043 
+##                                   Indianapolis, IN 
+##                                        0.061403509 
+##                                      Iowa City, IA 
+##                                        0.076335878 
+##                                        Jackson, MI 
+##                                        0.028571429 
+##                                        Jackson, MS 
+##                                        0.009009009 
+##                                   Jacksonville, FL 
+##                                        0.114503817 
+##                                   Jacksonville, NC 
+##                                        0.063492063 
+##                                      Jamestown, NY 
+##                                                 NA 
+##                                     Janesville, WI 
+##                                        0.010101010 
+##                                   Johnson City, TN 
+##                                        0.038461538 
+##                                      Johnstown, PA 
+##                                        0.015873016 
+##                                         Joplin, MO 
+##                                        0.033898305 
+##                         Kalamazoo-Battle Creek, MI 
+##                                                 NA 
+##                              Kalamazoo-Portage, MI 
+##                                        0.015748031 
+##                               Kankakee-Bradley, IL 
+##                                        0.045977011 
+##                                 Kansas City, MO-KS 
+##                                        0.090436590 
+##                       Killeen-Temple-Fort Hood, TX 
+##                                        0.188118812 
+##                           Kingsport-Bristol, TN-VA 
+##                                        0.000000000 
+##                                       Kingston, NY 
+##                                        0.057471264 
+##                                      Knoxville, TN 
+##                                        0.011904762 
+##                                      La Crosse, WI 
+##                                        0.043859649 
+##                                      Lafayette, LA 
+##                                        0.016574586 
+##                                   Lake Charles, LA 
+##                                        0.037037037 
+##                          Lakeland-Winter Haven, FL 
+##                                        0.100671141 
+##                                      Lancaster, PA 
+##                                        0.128205128 
+##                           Lansing-East Lansing, MI 
+##                                        0.075630252 
+##                                         Laredo, TX 
+##                                        0.314606742 
+##                                     Las Cruses, NM 
+##                                        0.093457944 
+##                             Las Vegas-Paradise, NV 
+##                                        0.200617284 
+##                                       Lawrence, KS 
+##                                        0.040816327 
+##                                         Lawton, OK 
+##                                        0.051546392 
+##                   Leominster-Fitchburg-Gardner, MA 
+##                                        0.060606061 
+##                              Lexington-Fayette, KY 
+##                                        0.045918367 
+##                  Little Rock-North Little Rock, AR 
+##                                        0.044554455 
+##                                       Longview, TX 
+##                                        0.215384615 
+##               Los Angeles-Long Beach-Santa Ana, CA 
+##                                        0.334878049 
+##                                  Louisville, KY-IN 
+##                                        0.067829457 
+##                                        Lubbock, TX 
+##                                        0.000000000 
+##                                      Lynchburg, VA 
+##                                        0.041095890 
+##                                          Macon, GA 
+##                                        0.000000000 
+##                                         Madera, CA 
+##                                        0.140350877 
+##                                        Madison, WI 
+##                                        0.091549296 
+##                         McAllen-Edinburg-Pharr, TX 
+##                                        0.266666667 
+##                                        Medford, OR 
+##                                        0.073170732 
+##                                  Memphis, TN-MS-AR 
+##                                        0.077586207 
+##                                         Merced, CA 
+##                                        0.226415094 
+##              Miami-Fort Lauderdale-Miami Beach, FL 
+##                                        0.409909910 
+##                         Michigan City-La Porte, IN 
+##                                        0.012987013 
+##                                        Midland, TX 
+##                                        0.117647059 
+##                  Milwaukee-Waukesha-West Allis, WI 
+##                                        0.070028011 
+##             Minneapolis-St Paul-Bloomington, MN-WI 
+##                                        0.111971104 
+##                                         Mobile, AL 
+##                                        0.027272727 
+##                                        Modesto, CA 
+##                                        0.183544304 
+##                                         Monroe, LA 
+##                                        0.016759777 
+##                                         Monroe, MI 
+##                                        0.000000000 
+##                                     Montgomery, AL 
+##                                        0.038834951 
+##                         Muskegon-Norton Shores, MI 
+##                                        0.077777778 
+##         Myrtle Beach-Conway-North Myrtle Beach, SC 
+##                                        0.029411765 
+##                                           Napa, CA 
+##                                        0.147540984 
+##                            Naples-Marco Island, FL 
+##                                        0.243902439 
+##                Nashville-Davidson-Murfreesboro, TN 
+##                                        0.094758065 
+##                                      New Haven, CT 
+##                                        0.100790514 
+##                    New Orleans-Metairie-Kenner, LA 
+##                                        0.087193460 
+## New York-Northern New Jersey-Long Island, NY-NJ-PA 
+##                                        0.308660252 
+##                            Niles-Benton Harbor, MI 
+##                                        0.019607843 
+##                          Norwich-New London, CT-RI 
+##                                        0.118226601 
+##                                          Ocala, FL 
+##                                        0.131578947 
+##                                     Ocean City, NJ 
+##                                        0.000000000 
+##                               Ogden-Clearfield, UT 
+##                                        0.074162679 
+##                                  Oklahoma City, OK 
+##                                        0.094370861 
+##                                        Olympia, WA 
+##                                        0.181818182 
+##                        Omaha-Council Bluffs, NE-IA 
+##                                        0.058761805 
+##                                        Orlando, FL 
+##                                        0.177049180 
+##                                 Oshkosh-Neenah, WI 
+##                                        0.035294118 
+##                   Oxnard-Thousand Oaks-Ventura, CA 
+##                                        0.183520599 
+##                  Palm Bay-Melbourne-Titusville, FL 
+##                                        0.083832335 
+##                         Panama City-Lynn Haven, FL 
+##                                        0.033898305 
+##                     Pensacola-Ferry Pass-Brent, FL 
+##                                        0.056074766 
+##                                         Peoria, IL 
+##                                        0.053571429 
+##           Philadelphia-Camden-Wilmington, PA-NJ-DE 
+##                                        0.105853488 
+##                        Phoenix-Mesa-Scottsdale, AZ 
+##                                        0.152420185 
+##                                     Pittsburgh, PA 
+##                                        0.035714286 
+##                        Portland-South Portland, ME 
+##                                        0.074391989 
+##                Portland-Vancouver-Beaverton, OR-WA 
+##                                        0.136029412 
+##                        Portsmouth-Rochester, NH-ME 
+##                                                 NA 
+##                     Port St. Lucie-Fort Pierce, FL 
+##                                        0.073394495 
+##               Poughkeepsie-Newburgh-Middletown, NY 
+##                                        0.119402985 
+##                                       Prescott, AZ 
+##                                        0.055555556 
+##               Providence-Fall River-Warwick, MA-RI 
+##                                        0.148880105 
+##                                     Provo-Orem, UT 
+##                                        0.055016181 
+##                                         Pueblo, CO 
+##                                        0.023076923 
+##                                    Punta Gorda, FL 
+##                                        0.145833333 
+##                                         Racine, WI 
+##                                        0.008403361 
+##                                   Raleigh-Cary, NC 
+##                                        0.125000000 
+##                                        Reading, PA 
+##                                        0.176056338 
+##                                    Reno-Sparks, NV 
+##                                        0.187096774 
+##                                       Richmond, VA 
+##                                        0.061224490 
+##                       Riverside-San Bernardino, CA 
+##                                        0.217829457 
+##                                        Roanoke, VA 
+##                                        0.030303030 
+##                             Rochester-Dover, NH-ME 
+##                                        0.053435115 
+##                                      Rochester, NY 
+##                                        0.130293160 
+##                                       Rockford, IL 
+##                                        0.043859649 
+##              Sacramento-Arden-Arcade-Roseville, CA 
+##                                        0.203898051 
+##                 Saginaw-Saginaw Township North, MI 
+##                                        0.000000000 
+##                                          Salem, OR 
+##                                        0.100000000 
+##                                        Salinas, CA 
+##                                        0.269230769 
+##                                      Salisbury, MD 
+##                                        0.027027027 
+##                                 Salt Lake City, UT 
+##                                        0.128808864 
+##                                    San Antonio, TX 
+##                                        0.144975288 
+##                  San Diego-Carlsbad-San Marcos, CA 
+##                                        0.256890849 
+##                  San Francisco-Oakland-Fremont, CA 
+##                                        0.293352601 
+##                 San Jose-Sunnyvale-Santa Clara, CA 
+##                                        0.329850746 
+##                    San Luis Obispo-Paso Robles, CA 
+##                                        0.116883117 
+##               Santa Barbara-Santa Maria-Goleta, CA 
+##                                        0.174242424 
+##                         Santa-Cruz-Watsonville, CA 
+##                                        0.060606061 
+##                                       Santa Fe, NM 
+##                                        0.038461538 
+##                            Santa Rosa-Petaluma, CA 
+##                                        0.108527132 
+##                      Sarasota-Bradenton-Venice, FL 
+##                                        0.057291667 
+##                                       Savannah, GA 
+##                                        0.014851485 
+##                          Scranton-Wilkes Barre, PA 
+##                                        0.051136364 
+##                        Seattle-Tacoma-Bellevue, WA 
+##                                        0.173982442 
+##                        Shreveport-Bossier City, LA 
+##                                        0.075342466 
+##                                    Sioux Falls, SD 
+##                                        0.040609137 
+##                        South Bend-Mishawaka, IN-MI 
+##                                        0.024691358 
+##                                    Spartanburg, SC 
+##                                        0.080808081 
+##                                        Spokane, WA 
+##                                        0.102564103 
+##                                    Springfield, IL 
+##                                        0.078947368 
+##                                 Springfield, MA-CT 
+##                                        0.116129032 
+##                                    Springfield, MO 
+##                                        0.043478261 
+##                                    Springfield, OH 
+##                                        0.029411765 
+##                                      St. Cloud, MN 
+##                                        0.146341463 
+##                                   St. Louis, MO-IL 
+##                                        0.040794979 
+##                                       Stockton, CA 
+##                                        0.310880829 
+##                                       Syracuse, NY 
+##                                        0.067264574 
+##                                    Tallahassee, FL 
+##                                        0.046511628 
+##                Tampa-St. Petersburg-Clearwater, FL 
+##                                        0.166468490 
+##                                         Toledo, OH 
+##                                        0.029787234 
+##                                         Topeka, KS 
+##                                        0.043956044 
+##                                  Trenton-Ewing, NJ 
+##                                        0.318681319 
+##                                         Tucson, AZ 
+##                                        0.129139073 
+##                                          Tulsa, OK 
+##                                        0.080495356 
+##                                     Tuscaloosa, AL 
+##                                        0.115384615 
+##                                     Utica-Rome, NY 
+##                                        0.112500000 
+##                                       Valdosta, GA 
+##                                        0.023809524 
+##                              Vallejo-Fairfield, CA 
+##                                        0.180451128 
+##                                     Vero Beach, FL 
+##                                        0.088607595 
+##                                       Victoria, TX 
+##                                        0.017241379 
+##                   Vineland-Millville-Bridgeton, NJ 
+##                                        0.148148148 
+##         Virginia Beach-Norfolk-Newport News, VA-NC 
+##                                        0.041876047 
+##                            Visalia-Porterville, CA 
+##                                        0.214876033 
+##                                           Waco, TX 
+##                                        0.126582278 
+##                                  Warner Robins, GA 
+##                                        0.142857143 
+##       Washington-Arlington-Alexandria, DC-VA-MD-WV 
+##                                        0.210980580 
+##                                      Waterbury, CT 
+##                                        0.203821656 
+##                           Waterloo-Cedar Falls, IA 
+##                                        0.044871795 
+##                                         Wausau, WI 
+##                                        0.010416667 
+##                                        Wichita, KS 
+##                                        0.096018735 
+##                                  Winston-Salem, NC 
+##                                        0.078740157 
+##                                   Worcester, MA-CT 
+##                                        0.152777778 
+##                                         Yakima, WA 
+##                                        0.091743119 
+##                                   York-Hanover, PA 
+##                                        0.025641026 
+##                     Youngstown-Warren-Boardman, OH 
+##                                        0.084967320</code></pre>
+<p>What proportion of the interviewees from the “New York-Northern New Jersey-Long Island, NY-NJ-PA” metropolitan area have a country of birth that is not the US? <strong>0.309</strong></p>
+<pre class="r"><code># India
+table(CPS$Country == &quot;India&quot;, CPS$MetroArea == &quot;Boston-Cambridge-Quincy, MA-NH&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 93977  2218
+##   TRUE    699    11</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;India&quot;, CPS$MetroArea == &quot;Minneapolis-St Paul-Bloomington, MN-WI&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 94280  1915
+##   TRUE    687    23</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;India&quot;, CPS$MetroArea == &quot;New York-Northern New Jersey-Long Island, NY-NJ-PA&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 90887  5308
+##   TRUE    614    96</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;India&quot;, CPS$MetroArea == &quot;Washington-Arlington-Alexandria, DC-VA-MD-WV&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 92074  4121
+##   TRUE    660    50</code></pre>
+<pre class="r"><code># Brazil
+table(CPS$Country == &quot;Brazil&quot;, CPS$MetroArea == &quot;Boston-Cambridge-Quincy, MA-NH&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 94555  2211
+##   TRUE    121    18</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;Brazil&quot;, CPS$MetroArea == &quot;Minneapolis-St Paul-Bloomington, MN-WI&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 94829  1937
+##   TRUE    138     1</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;Brazil&quot;, CPS$MetroArea == &quot;New York-Northern New Jersey-Long Island, NY-NJ-PA&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 91369  5397
+##   TRUE    132     7</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;Brazil&quot;, CPS$MetroArea == &quot;Washington-Arlington-Alexandria, DC-VA-MD-WV&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 92603  4163
+##   TRUE    131     8</code></pre>
+<pre class="r"><code># Somalia
+table(CPS$Country == &quot;Somalia&quot;, CPS$MetroArea == &quot;Boston-Cambridge-Quincy, MA-NH&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 94613  2229
+##   TRUE     63     0</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;Somalia&quot;, CPS$MetroArea == &quot;Minneapolis-St Paul-Bloomington, MN-WI&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 94921  1921
+##   TRUE     46    17</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;Somalia&quot;, CPS$MetroArea == &quot;New York-Northern New Jersey-Long Island, NY-NJ-PA&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 91438  5404
+##   TRUE     63     0</code></pre>
+<pre class="r"><code>table(CPS$Country == &quot;Somalia&quot;, CPS$MetroArea == &quot;Washington-Arlington-Alexandria, DC-VA-MD-WV&quot;)</code></pre>
+<pre><code>##        
+##         FALSE  TRUE
+##   FALSE 92671  4171
+##   TRUE     63     0</code></pre>
+<p>Which metropolitan area has the largest number of interviewees with a country birth in India ? <strong>New York</strong></p>
+<p>In Brazil ? <strong>Boston</strong></p>
+<p>In Somalia ? <strong>Minneapolis</strong></p>
+</div>
 </div>
 
 
