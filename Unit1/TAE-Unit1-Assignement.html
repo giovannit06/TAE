@@ -467,6 +467,78 @@ table(Top5$LocationDescription, Top5$Arrest)</code></pre>
 <p>On which day of the week do the fewest motor vehicle thefts in residential driveway happen? <strong>Saturday</strong></p>
 </div>
 </div>
+<div id="stock-dynamics" class="section level2">
+<h2>STOCK DYNAMICS</h2>
+<p>Download and read the files in R, using the read.csv() function. Each data frame has two variables, described as follows:</p>
+<ul>
+<li><strong>Date</strong>: thedate of the stock price (first of the month)</li>
+<li><strong>StockPrice</strong>: the average stock price of the company in the given month</li>
+</ul>
+<pre class="r"><code>IBM = read.csv(&quot;IBMStock.csv&quot;)
+GE = read.csv(&quot;GEStock.csv&quot;)
+ProcterGamble = read.csv(&quot;ProcterGambleStock.csv&quot;)
+CocaCola = read.csv(&quot;CocaColaStock.csv&quot;)
+Boeing = read.csv(&quot;BoeingStock.csv&quot;)</code></pre>
+<div id="problem-1" class="section level3">
+<h3>Problem 1</h3>
+<p>Look at the structure of the datasets. The date variable is stored as a factor. We can convert this to a “Date” object in R</p>
+<pre class="r"><code>str(IBM)</code></pre>
+<pre><code>## 'data.frame':    480 obs. of  2 variables:
+##  $ Date      : Factor w/ 480 levels &quot;1/1/00&quot;,&quot;1/1/01&quot;,..: 11 171 211 251 291 331 371 411 451 51 ...
+##  $ StockPrice: num  360 347 327 320 270 ...</code></pre>
+<pre class="r"><code>IBM$Date = as.Date(IBM$Date, &quot;%m/%d/%y&quot;)
+GE$Date = as.Date(GE$Date, &quot;%m/%d/%y&quot;)
+CocaCola$Date = as.Date(CocaCola$Date, &quot;%m/%d/%y&quot;)
+ProcterGamble$Date = as.Date(ProcterGamble$Date, &quot;%m/%d/%y&quot;)
+Boeing$Date = as.Date(Boeing$Date, &quot;%m/%d/%y&quot;)
+str(IBM)</code></pre>
+<pre><code>## 'data.frame':    480 obs. of  2 variables:
+##  $ Date      : Date, format: &quot;1970-01-01&quot; &quot;1970-02-01&quot; ...
+##  $ StockPrice: num  360 347 327 320 270 ...</code></pre>
+<pre class="r"><code>summary(IBM)</code></pre>
+<pre><code>##       Date              StockPrice    
+##  Min.   :1970-01-01   Min.   : 43.40  
+##  1st Qu.:1979-12-24   1st Qu.: 88.34  
+##  Median :1989-12-16   Median :112.11  
+##  Mean   :1989-12-15   Mean   :144.38  
+##  3rd Qu.:1999-12-08   3rd Qu.:165.41  
+##  Max.   :2009-12-01   Max.   :438.90</code></pre>
+<pre class="r"><code>summary(GE)</code></pre>
+<pre><code>##       Date              StockPrice     
+##  Min.   :1970-01-01   Min.   :  9.294  
+##  1st Qu.:1979-12-24   1st Qu.: 44.214  
+##  Median :1989-12-16   Median : 55.812  
+##  Mean   :1989-12-15   Mean   : 59.303  
+##  3rd Qu.:1999-12-08   3rd Qu.: 72.226  
+##  Max.   :2009-12-01   Max.   :156.844</code></pre>
+<pre class="r"><code>summary(CocaCola)</code></pre>
+<pre><code>##       Date              StockPrice    
+##  Min.   :1970-01-01   Min.   : 30.06  
+##  1st Qu.:1979-12-24   1st Qu.: 42.76  
+##  Median :1989-12-16   Median : 51.44  
+##  Mean   :1989-12-15   Mean   : 60.03  
+##  3rd Qu.:1999-12-08   3rd Qu.: 69.62  
+##  Max.   :2009-12-01   Max.   :146.58</code></pre>
+<pre class="r"><code>summary(Boeing)</code></pre>
+<pre><code>##       Date              StockPrice    
+##  Min.   :1970-01-01   Min.   : 12.74  
+##  1st Qu.:1979-12-24   1st Qu.: 34.64  
+##  Median :1989-12-16   Median : 44.88  
+##  Mean   :1989-12-15   Mean   : 46.59  
+##  3rd Qu.:1999-12-08   3rd Qu.: 57.21  
+##  Max.   :2009-12-01   Max.   :107.28</code></pre>
+<pre class="r"><code>sd(ProcterGamble$StockPrice)</code></pre>
+<pre><code>## [1] 18.19414</code></pre>
+<p>The five datasets have the same number of observations. How many observations are there in each data set ? <strong>480</strong></p>
+<p>What is the earliest year in the datasets? <strong>1970</strong></p>
+<p>What is the latest year in the datasets? <strong>2009</strong></p>
+<p>What is the mean stock price of IBM over this time period? <strong>144.38</strong></p>
+<p>What is the minimum stock price of GE over this time period? <strong>9.294</strong></p>
+<p>What is the maximum stock price of Coca-Cola over this time period? <strong>146.58</strong></p>
+<p>What is the median stock price of Boeing over this time period? <strong>44.88</strong></p>
+<p>What it the standard deviation of the stock price of Procter&amp;Gamble over this time period? <strong>18.194</strong></p>
+</div>
+</div>
 
 
 

@@ -138,3 +138,56 @@ One of the locations has a much higher arrest rate than the other locations. Whi
 On which day of the week do the most motor vehicle thefts at gas stations happen ? **Saturday**
 
 On which day of the week do the fewest motor vehicle thefts in residential driveway happen? **Saturday**
+
+## STOCK DYNAMICS
+
+Download and read the files in R, using the read.csv() function. Each data frame has two variables, described
+as follows:
+
+  - **Date**: thedate of the stock price (first of the month)
+  - **StockPrice**: the average stock price of the company in the given month
+
+```{r}
+IBM = read.csv("IBMStock.csv")
+GE = read.csv("GEStock.csv")
+ProcterGamble = read.csv("ProcterGambleStock.csv")
+CocaCola = read.csv("CocaColaStock.csv")
+Boeing = read.csv("BoeingStock.csv")
+```
+
+### Problem 1
+
+Look at the structure of the datasets. The date variable is stored as a factor. We can convert this to a "Date"
+object in R
+
+```{r}
+str(IBM)
+IBM$Date = as.Date(IBM$Date, "%m/%d/%y")
+GE$Date = as.Date(GE$Date, "%m/%d/%y")
+CocaCola$Date = as.Date(CocaCola$Date, "%m/%d/%y")
+ProcterGamble$Date = as.Date(ProcterGamble$Date, "%m/%d/%y")
+Boeing$Date = as.Date(Boeing$Date, "%m/%d/%y")
+str(IBM)
+summary(IBM)
+summary(GE)
+summary(CocaCola)
+summary(Boeing)
+sd(ProcterGamble$StockPrice)
+```
+
+The five datasets have the same number of observations. How many observations are there in each data set ?
+**480**
+
+What is the earliest year in the datasets? **1970**
+
+What is the latest year in the datasets? **2009**
+
+What is the mean stock price of IBM over this time period? **144.38**
+
+What is the minimum stock price of GE over this time period? **9.294**
+
+What is the maximum stock price of Coca-Cola over this time period? **146.58**
+
+What is the median stock price of Boeing over this time period? **44.88**
+
+What it the standard deviation of the stock price of Procter&Gamble over this time period? **18.194**
