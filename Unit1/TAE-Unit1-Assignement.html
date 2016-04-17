@@ -571,6 +571,40 @@ abline(v=as.Date(c(&quot;1997-10-01&quot;)))</code></pre>
 <p>In October 1997 there was a global stock market crash that was caused by an economic crisis in Asia. comparing September 1997 to November 1997, which companies saw a decreasing trend in their stock price? <strong>Procter &amp; Gamble and Boeing</strong></p>
 <p>In the last two years of this time period (2004 and 2005) which stock seems to be performing the best, in terms of increasing stock price? <strong>Boeing</strong></p>
 </div>
+<div id="problem-4---monthly-trends" class="section level3">
+<h3>Problem 4 - Monthly Trends</h3>
+<p>Let’s see if stocks tend to be higher or lower during certain months. Use the tapply command to calculate the mean stock price of IBM, sorted by months.</p>
+<pre class="r"><code>mean(IBM$StockPrice)</code></pre>
+<pre><code>## [1] 144.375</code></pre>
+<pre class="r"><code>tapply(IBM$StockPrice, months(IBM$Date), mean)</code></pre>
+<pre><code>##     April    August  December  February   January      July      June 
+##  152.1168  140.1455  140.7593  152.6940  150.2384  139.0670  139.0907 
+##     March       May  November   October September 
+##  152.4327  151.5022  138.0187  137.3466  139.0885</code></pre>
+<p>In which months has IBM historically had a higher stock price? <strong>Jan, Feb, Mar, Apr, May</strong></p>
+<pre class="r"><code>tapply(CocaCola$StockPrice, months(CocaCola$Date), mean)</code></pre>
+<pre><code>##     April    August  December  February   January      July      June 
+##  62.68888  58.88014  59.73223  60.73475  60.36849  58.98346  60.81208 
+##     March       May  November   October September 
+##  62.07135  61.44358  59.10268  57.93887  57.60024</code></pre>
+<pre class="r"><code>tapply(GE$StockPrice, months(GE$Date), mean)</code></pre>
+<pre><code>##     April    August  December  February   January      July      June 
+##  64.48009  56.50315  59.10217  62.52080  62.04511  56.73349  56.46844 
+##     March       May  November   October September 
+##  63.15055  60.87135  57.28879  56.23897  56.23913</code></pre>
+<pre class="r"><code>tapply(ProcterGamble$StockPrice, months(ProcterGamble$Date), mean)</code></pre>
+<pre><code>##     April    August  December  February   January      July      June 
+##  77.68671  76.82266  78.29661  79.02575  79.61798  76.64556  77.39275 
+##     March       May  November   October September 
+##  77.34761  77.85958  78.45610  76.67903  76.62385</code></pre>
+<pre class="r"><code>tapply(Boeing$StockPrice, months(Boeing$Date), mean)</code></pre>
+<pre><code>##     April    August  December  February   January      July      June 
+##  47.04686  46.86311  46.17315  46.89223  46.51097  46.55360  47.38525 
+##     March       May  November   October September 
+##  46.88208  48.13716  45.14990  45.21603  46.30485</code></pre>
+<p>GE and Coca-Cola both have their highest average stock price in the same month. Which month is this? <strong>April</strong></p>
+<p>For the months of December and January, every company’s averages stock is higher in one month and lower in the other. In which month are the stock prices lower? <strong>December</strong></p>
+</div>
 </div>
 
 
