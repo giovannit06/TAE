@@ -1,0 +1,144 @@
+---
+title: "Unit 1 - Assignement1"
+author: "GT"
+date: "16 avril 2016"
+output: html_document
+---
+
+```{r}
+Sys.setlocale("LC_ALL", "C")
+```
+
+## AN ANALYTICAL DETECTIVE
+
+### Problem 1 - Loading the Data
+
+```{r}
+Sys.setlocale("LC_ALL", "C")
+mvt = read.csv("mvtWeek1.csv")
+str(mvt)
+summary(mvt)
+```
+
+How many observations ? **191641**
+
+How many variables ? **11**
+
+What is the maximum value of the variable "ID" ? **9181151**
+
+What is the minimum value of the variable "Beat" ? **111**
+
+How many obs have value TRUE in the "Arrest" variables ? **15536**
+
+How many observations have a LocationDescription value of ALLEY ? **2308**
+
+### Problem 2 - Understanding Dates in R
+
+In what format are the entries in the variable Date ? **mm/dd/yy hh:mm**
+
+```{r}
+mvt$Date[1]
+```
+
+Let's convert these characters into a Date object in R.
+
+```{r}
+DateConvert = as.Date(strptime(mvt$Date, "%m/%d/%y %H:%M"))
+summary(DateConvert)
+```
+
+What's the month of the year of the median date in the dataset ? **May 2006**
+
+Let's extract the month and the day of the week, and add these variables to the data.
+
+```{r}
+mvt$Month = months(DateConvert)
+mvt$Weekday = weekdays(DateConvert)
+mvt$Date = DateConvert
+table(mvt$Month)
+table(mvt$Weekday)
+table(mvt$Month, mvt$Arrest)
+```
+
+In which month did the fewest motor vehicle thefts occur ? **February**
+
+On which weekday did the most motor vehicle thefts occur ? **Friday**
+
+Which month has the largest number of motor vehicle thefts for which
+an arrest was made ? **January**
+
+### Problem 3 - Visualizing Crime Trends
+
+Make a histogram of the variable Date. Add an extra argument, to specify the number of bars we want into histogram
+
+```{r}
+hist(mvt$Date, breaks=100)
+```
+
+Does it look like crime increase or decrease from 2002-2012 ? **Decrease**
+
+Does it look like crime increase or decrease frome 2005-2008 ? **Decrease**
+
+Does it look like crime increase or decrease from 2009-2011 ? **Increase**
+
+Create a boxplot of the variable "Date", sorted by the variable "Arrest"
+
+```{r}
+boxplot(mvt$Date ~ mvt$Arrest)
+```
+
+Does it look like there were more crimes for which arrests were made in the first half of the time period or 
+the second half ? **First half**
+
+```{r}
+table(mvt$Year, mvt$Arrest)
+Arrest2001 = subset(mvt, mvt$Year == 2001 & mvt$Arrest == TRUE)
+Total2001 = subset(mvt, mvt$Year == 2001)
+nrow(Arrest2001)/nrow(Total2001)
+Arrest2007 = subset(mvt, mvt$Year == 2007 & mvt$Arrest == TRUE)
+Total2007 = subset(mvt, mvt$Year == 2007)
+nrow(Arrest2007)/nrow(Total2007)
+Arrest2012 = subset(mvt, mvt$Year == 2012 & mvt$Arrest == TRUE)
+Total2012 = subset(mvt, mvt$Year == 2012)
+nrow(Arrest2012)/nrow(Total2012)
+```
+
+For what proportion of motor vehicle thefts in 2001 was an arrest made? **0.104**
+
+For what proportion of motor vehicle thefts in 2007 was an arrest made? **0.085**
+
+For what proportion of motor vehicle thefts in 2012 was an arrest made? **0.039**
+
+### Problem 4 - Popular Locations
+
+Find the top five locations where motor vehicle thefts occur more by using the sort function:
+**Street, Parking Lot/Garage (Non. Resid.), Alley, Gas Station, and Driveway - Residential**
+
+```{r}
+sort(table(mvt$LocationDescription),decreasing = TRUE)
+```
+
+Create a subset of your data, only taking observations for which the theft happened in one of these five
+locations
+
+```{r}
+Top5 = subset(mvt, mvt$LocationDescription %in% c("STREET", "PARKING LOT/GARAGE(NON.RESID.)", "ALLEY", "GAS STATION", "DRIVEWAY - RESIDENTIAL"))
+nrow(mvt)
+nrow(Top5)
+```
+
+How many obs are in Top5 **177510**
+
+R will remember the other categories of the LocationDescription variable from the orginal dataset. 
+To make the tables nicer we can refresh this factor variable
+
+```{r}
+Top5$LocationDescription = factor(Top5$LocationDescription)
+table(Top5$LocationDescription, Top5$Arrest)
+table(Top5$Weekday, Top5$LocationDescription)
+```
+One of the locations has a much higher arrest rate than the other locations. Which is it ? **Gas Station**
+
+On which day of the week do the most motor vehicle thefts at gas stations happen ? **Saturday**
+
+On which day of the week do the fewest motor vehicle thefts in residential driveway happen? **Saturday**
