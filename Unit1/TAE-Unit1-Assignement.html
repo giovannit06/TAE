@@ -265,6 +265,207 @@ nrow(Arrest2012)/nrow(Total2012)</code></pre>
 <p>For what proportion of motor vehicle thefts in 2007 was an arrest made? <strong>0.085</strong></p>
 <p>For what proportion of motor vehicle thefts in 2012 was an arrest made? <strong>0.039</strong></p>
 </div>
+<div id="problem-4---popular-locations" class="section level3">
+<h3>Problem 4 - Popular Locations</h3>
+<p>Find the top five locations where motor vehicle thefts occur more by using the sort function: <strong>Street, Parking Lot/Garage (Non. Resid.), Alley, Gas Station, and Driveway - Residential</strong></p>
+<pre class="r"><code>sort(table(mvt$LocationDescription),decreasing = TRUE)</code></pre>
+<pre><code>## 
+##                                          STREET 
+##                                          156564 
+##                  PARKING LOT/GARAGE(NON.RESID.) 
+##                                           14852 
+##                                           OTHER 
+##                                            4573 
+##                                           ALLEY 
+##                                            2308 
+##                                     GAS STATION 
+##                                            2111 
+##                          DRIVEWAY - RESIDENTIAL 
+##                                            1675 
+##                   RESIDENTIAL YARD (FRONT/BACK) 
+##                                            1536 
+##                                       RESIDENCE 
+##                                            1302 
+##                                RESIDENCE-GARAGE 
+##                                            1176 
+##                                 VACANT LOT/LAND 
+##                                             985 
+##                          VEHICLE NON-COMMERCIAL 
+##                                             817 
+##                                        SIDEWALK 
+##                                             462 
+##                         CHA PARKING LOT/GROUNDS 
+##                                             405 
+##                                AIRPORT/AIRCRAFT 
+##                                             363 
+##                 POLICE FACILITY/VEH PARKING LOT 
+##                                             266 
+##                                   PARK PROPERTY 
+##                                             255 
+##                         SCHOOL, PUBLIC, GROUNDS 
+##                                             206 
+##                                       APARTMENT 
+##                                             184 
+##                            SPORTS ARENA/STADIUM 
+##                                             166 
+##                     CTA GARAGE / OTHER PROPERTY 
+##                                             148 
+##                    COMMERCIAL / BUSINESS OFFICE 
+##                                             126 
+##                                     HOTEL/MOTEL 
+##                                             124 
+##                        SCHOOL, PUBLIC, BUILDING 
+##                                             114 
+##                       HOSPITAL BUILDING/GROUNDS 
+##                                             101 
+##                              GROCERY FOOD STORE 
+##                                              80 
+##               CHURCH/SYNAGOGUE/PLACE OF WORSHIP 
+##                                              56 
+##                                      RESTAURANT 
+##                                              49 
+##                    GOVERNMENT BUILDING/PROPERTY 
+##                                              48 
+##                      COLLEGE/UNIVERSITY GROUNDS 
+##                                              47 
+##                                        CAR WASH 
+##                                              44 
+##                               CONSTRUCTION SITE 
+##                                              35 
+##                              SMALL RETAIL STORE 
+##                                              33 
+##               OTHER RAILROAD PROP / TRAIN DEPOT 
+##                                              28 
+##              AIRPORT EXTERIOR - NON-SECURE AREA 
+##                                              24 
+##                        SCHOOL, PRIVATE, GROUNDS 
+##                                              23 
+##                              VEHICLE-COMMERCIAL 
+##                                              23 
+##                                DEPARTMENT STORE 
+##                                              22 
+##                              HIGHWAY/EXPRESSWAY 
+##                                              22 
+##                    NURSING HOME/RETIREMENT HOME 
+##                                              21 
+##                                         TAXICAB 
+##                                              21 
+##                             MOVIE HOUSE/THEATER 
+##                                              18 
+##                         RESIDENCE PORCH/HALLWAY 
+##                                              18 
+##                                   BAR OR TAVERN 
+##                                              17 
+##                                       WAREHOUSE 
+##                                              17 
+##                  FACTORY/MANUFACTURING BUILDING 
+##                                              16 
+##                       SCHOOL, PRIVATE, BUILDING 
+##                                              14 
+##                             TAVERN/LIQUOR STORE 
+##                                              14 
+##                             AIRPORT PARKING LOT 
+##                                              11 
+##                   AIRPORT VENDING ESTABLISHMENT 
+##                                              10 
+##                                   ATHLETIC CLUB 
+##                                               9 
+##                                      DRUG STORE 
+##                                               8 
+##                 OTHER COMMERCIAL TRANSPORTATION 
+##                                               8 
+##                                            BANK 
+##                                               7 
+##                               CONVENIENCE STORE 
+##                                               7 
+##                                 FOREST PRESERVE 
+##                                               6 
+##  AIRPORT TERMINAL UPPER LEVEL - NON-SECURE AREA 
+##                                               5 
+##                                   CHA APARTMENT 
+##                                               5 
+##                                 DAY CARE CENTER 
+##                                               5 
+##                                    FIRE STATION 
+##                                               5 
+##                              ABANDONED BUILDING 
+##                                               4 
+## AIRPORT BUILDING NON-TERMINAL - NON-SECURE AREA 
+##                                               4 
+##                                      BARBERSHOP 
+##                                               4 
+##                  LAKEFRONT/WATERFRONT/RIVERBANK 
+##                                               4 
+##                                         LIBRARY 
+##                                               4 
+##                                SAVINGS AND LOAN 
+##                                               4 
+##                                   BOWLING ALLEY 
+##                                               3 
+##                                  CLEANING STORE 
+##                                               3 
+##                           MEDICAL/DENTAL OFFICE 
+##                                               3 
+##                                          BRIDGE 
+##                                               2 
+##               COLLEGE/UNIVERSITY RESIDENCE HALL 
+##                                               2 
+##                               CURRENCY EXCHANGE 
+##                                               2 
+##     AIRPORT BUILDING NON-TERMINAL - SECURE AREA 
+##                                               1 
+##                  AIRPORT EXTERIOR - SECURE AREA 
+##                                               1 
+##                                 ANIMAL HOSPITAL 
+##                                               1 
+##                                 APPLIANCE STORE 
+##                                               1 
+##                                       CTA TRAIN 
+##                                               1 
+##                         JAIL / LOCK-UP FACILITY 
+##                                               1 
+##                                       NEWSSTAND 
+##                                               1</code></pre>
+<p>Create a subset of your data, only taking observations for which the theft happened in one of these five locations</p>
+<pre class="r"><code>Top5 = subset(mvt, mvt$LocationDescription %in% c(&quot;STREET&quot;, &quot;PARKING LOT/GARAGE(NON.RESID.)&quot;, &quot;ALLEY&quot;, &quot;GAS STATION&quot;, &quot;DRIVEWAY - RESIDENTIAL&quot;))
+nrow(mvt)</code></pre>
+<pre><code>## [1] 191641</code></pre>
+<pre class="r"><code>nrow(Top5)</code></pre>
+<pre><code>## [1] 177510</code></pre>
+<p>How many obs are in Top5 <strong>177510</strong></p>
+<p>R will remember the other categories of the LocationDescription variable from the orginal dataset. To make the tables nicer we can refresh this factor variable</p>
+<pre class="r"><code>Top5$LocationDescription = factor(Top5$LocationDescription)
+table(Top5$LocationDescription, Top5$Arrest)</code></pre>
+<pre><code>##                                 
+##                                   FALSE   TRUE
+##   ALLEY                            2059    249
+##   DRIVEWAY - RESIDENTIAL           1543    132
+##   GAS STATION                      1672    439
+##   PARKING LOT/GARAGE(NON.RESID.)  13249   1603
+##   STREET                         144969  11595</code></pre>
+<pre class="r"><code>table(Top5$Weekday, Top5$LocationDescription)</code></pre>
+<pre><code>##            
+##             ALLEY DRIVEWAY - RESIDENTIAL GAS STATION
+##   Friday      385                    257         332
+##   Monday      320                    255         280
+##   Saturday    341                    202         338
+##   Sunday      307                    221         336
+##   Thursday    315                    263         282
+##   Tuesday     323                    243         270
+##   Wednesday   317                    234         273
+##            
+##             PARKING LOT/GARAGE(NON.RESID.) STREET
+##   Friday                              2331  23773
+##   Monday                              2128  22305
+##   Saturday                            2199  22175
+##   Sunday                              1936  21756
+##   Thursday                            2082  22296
+##   Tuesday                             2073  21888
+##   Wednesday                           2103  22371</code></pre>
+<p>One of the locations has a much higher arrest rate than the other locations. Which is it ? <strong>Gas Station</strong></p>
+<p>On which day of the week do the most motor vehicle thefts at gas stations happen ? <strong>Saturday</strong></p>
+<p>On which day of the week do the fewest motor vehicle thefts in residential driveway happen? <strong>Saturday</strong></p>
+</div>
 </div>
 
 

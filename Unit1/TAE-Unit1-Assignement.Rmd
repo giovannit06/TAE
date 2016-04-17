@@ -104,3 +104,37 @@ For what proportion of motor vehicle thefts in 2001 was an arrest made? **0.104*
 For what proportion of motor vehicle thefts in 2007 was an arrest made? **0.085**
 
 For what proportion of motor vehicle thefts in 2012 was an arrest made? **0.039**
+
+### Problem 4 - Popular Locations
+
+Find the top five locations where motor vehicle thefts occur more by using the sort function:
+**Street, Parking Lot/Garage (Non. Resid.), Alley, Gas Station, and Driveway - Residential**
+
+```{r}
+sort(table(mvt$LocationDescription),decreasing = TRUE)
+```
+
+Create a subset of your data, only taking observations for which the theft happened in one of these five
+locations
+
+```{r}
+Top5 = subset(mvt, mvt$LocationDescription %in% c("STREET", "PARKING LOT/GARAGE(NON.RESID.)", "ALLEY", "GAS STATION", "DRIVEWAY - RESIDENTIAL"))
+nrow(mvt)
+nrow(Top5)
+```
+
+How many obs are in Top5 **177510**
+
+R will remember the other categories of the LocationDescription variable from the orginal dataset. 
+To make the tables nicer we can refresh this factor variable
+
+```{r}
+Top5$LocationDescription = factor(Top5$LocationDescription)
+table(Top5$LocationDescription, Top5$Arrest)
+table(Top5$Weekday, Top5$LocationDescription)
+```
+One of the locations has a much higher arrest rate than the other locations. Which is it ? **Gas Station**
+
+On which day of the week do the most motor vehicle thefts at gas stations happen ? **Saturday**
+
+On which day of the week do the fewest motor vehicle thefts in residential driveway happen? **Saturday**
