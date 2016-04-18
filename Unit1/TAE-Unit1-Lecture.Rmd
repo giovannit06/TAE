@@ -9,84 +9,151 @@ output: html_document
 
 ### Getting started with R
 
+R can be used as a basic calculator.
+
 ```{r}
-# R can be used as a basic calculator
 8*6
 2^16
-# R works in terms of functions and variables
-# A function can take in several arguments, or input and returns
-# an output value
+```
+
+R works in terms of functions and variables.
+
+A function can take in several arguments, or input and returns an output value.
+
+```{r}
 sqrt(2)
 abs(-65)
-# To save the output of a function, it's possible to saving it to a variable
+```
+
+To save the output of a function, it's possible to saving it to a variable
+
+```{r}
 SquareRoot2 = sqrt(2)
 SquareRoot2
-# Don't use spaces in variable names, don't start variable names with a number
-# It's possible to do assignement with '=' or '<-'
+```
+
+Don't use spaces in variable names, don't start variable names with a number
+
+It's possible to do assignement with '=' or '<-'
+
+```{r}
 HoursYear <- 365*24
 HoursYear
+```
 
-# List all variable created in the session
+List all variable created in the session
+
+```{r}
 ls()
 ```
 
+
 ### Vectors and Data Frames
 
+A vector is a series of numbers or characters stored as the same object.
+
+You can create a vector in R using the 'c' function (combine).
+
+Create a vector of country names, then enter the life expectancies in the same 
+order
+
 ```{r}
-# A vector is a series of numbers or characters stored as the same object
-# You can creat a vector in R using the 'c' function (combine)
 c(2, 3, 5, 8, 13)
-# Create a vector of country names
 Country = c("Brazil", "China", "India", "Switzerland", "USA")
-# Then enter the life expectancies in the same order
 LifeExpectancy = c(74, 76, 65, 83, 79)
 Country
 LifeExpectancy
-# If you want to display an element of a vector, use square brackets
+```
+To display an element of a vector, use square brackets.
+
+```{r}
 Country[1] # To get the first
 LifeExpectancy[3] # To get the third
-# Another nice function to create vectors is the 'seq' function
-seq(0, 100, 2) # This give a sequence of numbers from 0 to 100 and the numbers increment of two
-# Some algorithms require all of the data to be in a sigle object like a data frame
+```
+
+Another nice function to create vectors is the 'seq' function.
+
+This give a sequence of numbers from 0 to 100 and the numbers increment of two
+
+```{r}
+seq(0, 100, 2)
+```
+
+Some algorithms require all of the data to be in a sigle object like a data frame
+
+```{r}
 CountryData = data.frame(Country, LifeExpectancy)
 CountryData
-# To add another variable to the data
+```
+
+To add another variable to the data
+
+```{r}
 CountryData$Population=c(199000, 1390000, 1240000, 7997, 318000)
 CountryData
-# To add two new observations
+```
+
+To add two new observations
+
+```{r}
 Country = c("Australia", "Greece")
 LifeExpectancy = c(82, 81)
 Population = c(23050, 11125)
-# Then we create a new data frame
+```
+
+Then create a new data frame
+
+```{r}
 NewCountryData = data.frame(Country, LifeExpectancy, Population)
 NewCountryData
-# The 'rbind' function combines both data frames by stacking the rows
+```
+
+The rbind() function combines both data frames by stacking the rows.
+
+```{r}
 AllCountryData = rbind(CountryData, NewCountryData)
 AllCountryData
 ```
 ### Loading Data Files
 
+Read the data file WHO.csv and save it in data frame
+
 ```{r}
 getwd()
-# Read the data file WHO.csv and save it in data frame
 WHO = read.csv("WHO.csv")
-# To look at our data, there are two useful commands
-str(WHO) # Show the structure of the data
-# For each variable, str() gives the name of the variable, a description of 
-# the type of the variable, followed by a first few values of the variable
-# The other useful function is the summary() function
+```
+
+To look at the data, there are two useful commands: str() and summary()
+
+str() show the structure of the data, for each variable, str() gives the name of 
+the variable, a description of the type of the variable, followed by a first 
+few values of the variable.
+
+summary() for the factor variables it count the number of observations in each 
+of the levels or categories. For each of the numerical values, it's calculated the min, max, mean,first quartile, third quartile, median
+
+```{r}
+str(WHO)
 summary(WHO)
-# For the factor variables it count the number of observations in each of the
-# levels or categories
-# For each of the numerical values, they're calculated the min, max, mean,
-# first quartile, third quartile, median
-# It's possible to subset the data with the subset() function
+```
+
+It's possible to subset the data with the subset() function. The function take two
+arguments, the first is the data frame, the second is the criteria for which
+observation we want subset
+
+```{r}
 WHO_Europe = subset(WHO, Region == "Europe")
-# The function take two arguments, the first is the data frame, 
-# the second is the criteria for which observation we want subset
-# To save this new data frame to a csv file, there is the write.csv() function
+```
+
+To save this new data frame to a csv file, there is the write.csv() function
+
+```{r}
 write.csv(WHO_Europe, "WHO_Europe.csv")
-# After the saving, it's possible to remove the data frame from the current session
+```
+
+After the saving, it's possible to remove the data frame from the current session
+
+```{r}
 ls()
 rm(WHO_Europe)
 ls()
@@ -94,58 +161,110 @@ ls()
 
 ### Summary Statistics and Scatterplot
 
+To access a variable in a data frame, it has to be linked to the data frame
+it belongs to with the dollar sign. The output is a vector of the data frame WHO.
+It's possible to compute some statistics about the variable like the mean or
+the standard deviation.
+
 ```{r}
-# To access a variable in a data frame, it has to be linked to the data frame
-# it belongs to with the dollar sign
-WHO$Under15 # The output is a vector of the data frame WHO
-# It's possible to compute some statistics about the variable like the mean
+WHO$Under15
 mean(WHO$Under15)
-# or the standard deviation
 sd(WHO$Under15)
-# it's possible to get the statistical summary of just one variable
+```
+
+It's possible to get the statistical summary of just one variable
+
+```{r}
 summary(WHO$Under15)
-# this output tells us that there's a country with only 13% of the population under 15
-# it's possible to see which country it is using the which.min() function
+```
+
+This output tells us that there's a country with only 13% of the population 
+under 15.
+
+It's possible to see which country it is using the which.min() function. The
+returned number is the row number of the observation and it's easy to see which country is in this row.
+
+```{r}
 which.min(WHO$Under15)
-# the returned number is the row number of the observation and it's possible
-# to see which country is in this row
 WHO$Country[86]
-# to see the country that has the maximum percentage of the population under 15
+``` 
+
+Example, to see the country that has the maximum percentage of the population 
+under 15.
+
+```{r}
 WHO$Country[which.max(WHO$Under15)]
-# To create a scatter plot of GNI vs fertility rate with the plot() function
+```
+
+To create a scatter plot of GNI vs fertility rate using the plot() function
+
+```{r}
 plot(WHO$GNI, WHO$FertilityRate)
-# there are few countries for which both the GNI and the fertility rate are high
+```
+
+There are few countries for which both the GNI and the fertility rate are high, 
+and using the nrow() function to see how many rows are in the subset.
+
+```{r}
 Outliers = subset(WHO, GNI > 10000 & FertilityRate > 2.5)
-# It's possible to see how many rows are in the subset with the nrow() function
 nrow(Outliers)
-# there's an easy way to extract a few variables from a dataset
+```
+
+There's an easy way to extract a few variables from a dataset
+
+```{r}
 Outliers[c("Country", "GNI", "FertilityRate")]
 ```
 
 ### Plots and Summary Tables
 
+In addition to scatter plots, there are several other types of plots in R.
+
+Create an histogram with the hist() function. A histogram is useful for
+understanding the distribution of a variable
+
 ```{r}
-# In addition to scatter plots, there are several other types of plots in R
-# To create an histogram with the hist() function
 hist(WHO$CellularSubscribers)
-# A histogram is useful for understanding the distribution of a variable
-# It's easy to create a boxplot of Life expecancy sorted by region
+```
+
+It's easy to create a boxplot of Life expecancy sorted by region. A box plot is
+useful for understanding the statistical range of a variable. 
+The box for each region shows the range between the first and third quartiles with
+the middle line marking the median value. 
+The dashed lines at the top and bottom of the box show the range from 
+
+- the minimum: first quartile minus 1.5*IQR (inter-quartile range) and
+- the maximum: third qurtile plus 1.5*IQR (inter-quartile range) 
+
+excluding the outliers
+
+```{r}
 boxplot(WHO$LifeExpectancy ~ WHO$Region)
-# A box plot is useful for understanding the statistical range of a variable
-# The box for each region shows the range between the first and third quartiles with the middle line marking the median value
-# The dashed lines at the top and bottom of the box show the range from 
-# the minimum: first quartile minus 1.5*IQR (inter-quartile range) and
-# the maximum: third qurtile plus 1.5*IQR (inter-quartile range)
-# excluding the outliers
-# in order to have nice labels it's necessary to add a few arguments
+```
+
+In order to have nice labels it's necessary to add a few arguments
+
+```{r}
 boxplot(WHO$LifeExpectancy ~ WHO$Region, ylab = "Life Expectancy", main = "Life Expectancy of Countries by Region")
-# To take a look at some summary tables
-table(WHO$Region) # this counts the number of obs in each category
-# Table works well for variables with only a few possible values.
-# In order to see some nice information about numerical variables by using tapply() function
-tapply(WHO$Over60, WHO$Region, mean) # this split the obs by region and then computes the mean of the variable Over60
-# tapply splits the data by the second argument given and then apply the third argument function
+```
+
+Look at the data using  some summary tables This counts the number of obs in each
+category. Table works well for variables with only a few possible values.
+
+```{r}
+table(WHO$Region)
+```
+
+In order to see some nice information about numerical variables by using tapply()
+function. This split the obs by region and then computes the mean of the variable
+Over60. Tapply splits the data by the second argument given and then apply the 
+third argument function
+
+```{r}
+tapply(WHO$Over60, WHO$Region, mean)
 # Another example
 tapply(WHO$LiteracyRate, WHO$Region, min)
-tapply(WHO$LiteracyRate, WHO$Region, min, na.rm=TRUE) # this option removes all missing value before doing the computation
+tapply(WHO$LiteracyRate, WHO$Region, min, na.rm=TRUE)
 ```
+
+The 'na.rm' option removes all missing value before doing the computation
