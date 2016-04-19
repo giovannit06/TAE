@@ -1,0 +1,167 @@
+---
+title: "TAE - Unit 2 - Lecture 1"
+author: "GT"
+date: "19 avril 2016"
+output: html_document
+---
+
+## Unit 2 - Lecture 1 - The Statistical Sommelier
+
+In this lecture, the linear regression is introduced. A simple but very powerful method to analyze data and
+make predictions and apply it here in a very unexpected context - predicting the quality of wines.
+
+### One-variable - Linear Regression
+
+This method just uses one independent variable to predict the dependent variable. The goal of linear regression
+is to create a predictive line through the data.
+
+In general form a one-variable linear regression model is a linear equation to predict the dependent variable,
+y, using the independent variable, x.
+
+$y^i = \beta_0 + \beta_{1}x^i + \epsilon^i$
+
+- $\beta_0$ is the intercept term or intercept coefficient
+- $\beta_1$ is the slope of the line or coefficient for the independent variable, x.
+
+For each observation, $i$, there are data for the dependent variable $y^i$ and data for the independent
+variable $x^i$. Using this equation it's possible to make a prediction for each data point, $i$. 
+Since the coefficients have to be the same for all data points, the small error made it's called $\epsilon^i$, 
+called often a *redidual*.
+The best mode or best choice of coefficients has the smallest error terms or smallest residuals.
+
+It's possible to compute the residual of the line for each data point. One measure of the quality of a
+regression line is the sum of squared errors, or *SSE*. This is the sum of the squared residuals.
+
+$SSE = (\epsilon^1)^2+(\epsilon^2)^2+...+(\epsilon^N)^2$
+
+$N$ = number of data points
+
+Although $SSE$ value allows us to compare lines on the same data set, it's hard to interpret for two reason.
+
+1. It scales with $N$, the number of data points. The same model can have twice as much data then the $SSE$
+can be twice as big.
+2. The units are hard to understand.
+
+Because of these problems, *Root Means Squared Error*, or *RMSE* is often used.
+
+$RMSE = \sqrt{\frac{SSE}{N}}$
+
+This is normalized by n and is in the same units as the dependend variable.
+
+Another common error measure for linear regression is $R^2$. This error measure compares the best model to
+a baseline mode, the model that does not use any variables. The baseline model predicts the average value of 
+the dependent variable regardless of the value of the independent variable.
+
+The sum of squared errors for the baseline model is also known as the *Total Sum of Squares* or *SST*.
+
+$R^2 = 1-\frac{SSE}{SST}$
+
+R squared captures the value added from using a linear regression model over just predicting the average
+outcome for every data point. 
+
+What value do we expect to see for $R^2$?
+
+- The linear regression model will never be worse than the baseline model --> $SSE$ = $SST$ --> $R^2=0$
+- In the best case the linear regression model makes no error --> $SSE = 0$ --> $R^2=1$
+
+So an $R^2$ equal or close to 1 means a perfect or almost perfect predictive model.
+
+### Multiple Linear Regression
+
+It's possible to use more than one variable to predict values. For example, we can use each variable
+in a one-variable regression model and choose the best one, that gives higher values for $R^2$. But
+multiple linear regression allows you to use multiple variables at once to improve the model.
+
+The multiple linear regression model is similar to the one variable regression model that has a coefficient
+beta for each independent variables.
+
+$y^i=\beta_0+\beta_1x_1^i+\beta_2x_2^i+...+\beta_kx_k^i+\epsilon^i$
+
+The dependent variable, $y$, is predicted using the independent vaniables, $x_1$, $x_2$, through, $x_k$, 
+where $k$ denotes the number of independent variables. The best model is selected in the same way as before.
+To minimize the sum of squared errors, using the error term, $\epsilon$.
+
+We can start by building a linear regression model that just uses the variable with the best $R^2$. Then we can
+add variables one at a time and look at improvement in $R^2$. The improvement is not equal for eache variables
+add since they're interactions between the independent variables.
+
+So with model should be used? Often not all variables should be used. Because this creates a more 
+complicated model and this often cause an *overfitting*.
+
+### Linear Regression in R
+
+Load the dataset. Look at the structure of the data using the str() function and at the statistical
+summary of the data using the summary() function.
+
+```{r}
+wine = read.csv("wine.csv")
+str(wine)
+summary(wine)
+```
+
+Create now a one-variable linear regression equation using AGST to predict Price. The regression
+model will be called `model1` and we'll use the lm() fuction, which stands for linear model.
+
+```{r}
+model1 = lm(Price ~ AGST, data=wine) # First argument: dependent variable ~ independent variable, Second argument: dataset used to build the model
+```
+
+Take a look at the summary of model1.
+
+```{r}
+summary(model1)
+```
+
+First thing we see is a description of the function we used to build the model, then a summaary of the
+residual or error terms. Following that is a description of the coefficients of the model. The first row
+corresponds to the intercept term, and the second row corresopnds to the independent variable, AGST.
+The Estimat column gives estimates of the beta values for the model. Towards the bottom of the output, you
+can see Multiple R-squared, 0.435, which is the R-squared value discussed before. Beside it is a number
+labeled Adjusted R-squared, 0.41. This number take into account the number of independent variables used
+relative to the number of data points. Multiple R-squared will always increase if you add more independent
+variables. But Adjusted R-squared will decrease if you add independent variable that doesn't help the model.
+
+Compute the sum of squared errors, or SSE. The residuals are stored in the vector `model1$rediduals`.
+
+```{r}
+model1$residuals
+SSE = sum(model1$residuals^2)
+SSE
+```
+
+Add now another variable to the regression model, `HarvestRain` and call the new model `model2`. Then take
+a look at the summary.
+
+```{r}
+model2 = lm(Price ~ AGST + HarvestRain, data=wine)
+summary(model2)
+```
+
+There is a third row in the Coefficient table now corresponding to HarvestRain. This coefficient is negative
+0.00457. And if you look at the R-squared value, you can see that this variable really helped the model.
+
+Compute now the sum of squared errors for this new model.
+
+```{r}
+SSE = sum(model2$residuals^2)
+SSE
+```
+
+Build now a third model, `model3`, with all the independent variables and look at the summary.
+
+```{r}
+model3 = lm(Price ~ AGST + HarvestRain + WinterRain + Age + FrancePop, data=wine)
+summary(model3)
+```
+
+If we look at the bottom of the output, we can again see that the Multiple R-squared and Adjusted R-squared
+have both increased.
+
+Compute the sum of squared errors, SSE.
+
+```{r}
+SSE = sum(model3$residuals^2)
+SSE
+```
+
+See that the SSE is better than before,
