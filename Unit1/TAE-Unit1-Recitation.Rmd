@@ -20,106 +20,208 @@ food database. These database is about over 7000 food items including the amount
 
 Start by reading the dataset `USDA.csv`, which contains all foods in the USDA database in 100 grams amounts.
 
+Use the function read.csv() and save the output to a data frame, USDA
+Learn about the data using the functino str()
+
 ```{r}
-# Use the function read.csv() and save the output to a data frame, USDA
 USDA = read.csv("USDA.csv")
-# Learn about the data using the functino str()
 str(USDA)
-# The first variable is a unique identification number for each of the foods starting with 1001...
-# To obtain high-level statistical information about the dataset, it can be used the summary() function
+```
+
+The first variable is a unique identification number for each of the foods 
+starting with 1001...
+
+To obtain high-level statistical information about the dataset, it can be used the
+summary() function
+
+```{r}
 summary(USDA)
 ```
 
 ### Data Analysis
 
+The maximum level of Sodium is 38758, which is very high.
+
+To see which food this correspends to, first is necessary to select the vector of 
+data associated with the variable Sodium, then find which food is associated with
+the function which.max() and use the answer (the index) to look at the vector
+corresponding to the text descriptor of the foods
+
 ```{r}
-# The maximum level of Sodium is 38758, which is very high.
-# To see which food this correspends to, first is necessary to select the vector of data associated with the variable Sodium
 head(USDA$Sodium, 20)
-# find which food is associated with the function which.max()
 which.max(USDA$Sodium)  # 265
-# and use the answer (the index) to look at the vector corresponding to the text descriptor of the foods
-# in order to remember the name of the variable, it can be used the names() function
-names(USDA)
-# it's possible now to check for the corresponding food
-USDA$Description[265] # salt, table
-# find out which foods contain more than 10000 mg of sodium creating a subset of the origina data frame
-HighSodium = subset(USDA, Sodium > 10000)
-# check how many foods exist in this new data frame with the function nrow()
-nrow(HighSodium) # 10
-# check the name of foodss by looking at their Description vector
-HighSodium$Description
-# Find how much sodium is contained in 100 gr of caviar
-# get the index of caviar first using the function match() and track down the word 'caviar' in the text description
-match("CAVIAR", USDA$Description) # 4154
-# then find the sodium level
-USDA$Sodium[4154] # 1500 mg
-# this sequence of operations can be done with just one expression
-USDA$Sodium[match("CAVIAR", USDA$Description)]
-# Evaluate this value by comparing it to the mean and the standard deviation of the sodium levels
-summary(USDA$Sodium)
-# and to get the sd
-sd(USDA$Sodium)
-# remove the missing values
-sd(USDA$Sodium, na.rm = TRUE) # 1045.417
-# if mean and sd are summed
-322.1+1045.417 # 1367.517
-# the result is still smaller than the amount of sodium in 100 gr of caviar
 ```
+
+In order to remember the name of the variable, it can be used the names() function
+
+```{r}
+names(USDA)
+```
+
+It's possible now to check for the corresponding food
+
+```{r}
+USDA$Description[265] # salt, table
+```
+
+Find out which foods contain more than 10000 mg of sodium creating a subset 
+of the original data frame
+
+```{r}
+HighSodium = subset(USDA, Sodium > 10000)
+```
+
+Check how many foods exist in this new data frame with the function nrow()
+
+```{r}
+nrow(HighSodium) # 10
+```
+
+Check the name of foodss by looking at their Description vector.
+
+```{r}
+HighSodium$Description
+```
+
+Find how much sodium is contained in 100 gr of caviar, get the index of caviar 
+first using the function match() and track down the word 'caviar' in the text
+description, then find the sodium level.
+
+```{r}
+match("CAVIAR", USDA$Description) # 4154
+USDA$Sodium[4154] # 1500 mg
+```
+
+This sequence of operations can be done with just one expression
+
+```{r}
+USDA$Sodium[match("CAVIAR", USDA$Description)]
+```
+
+Evaluate this value by comparing it to the mean and the standard deviation of the
+sodium levels.
+
+```{r}
+summary(USDA$Sodium)
+sd(USDA$Sodium)
+```
+
+Don't forget to remove the missing values.
+
+```{r}
+sd(USDA$Sodium, na.rm = TRUE) # 1045.417
+```
+
+If mean and sd are summed `322.1+1045.417 = 1367.517`, 
+the result is still smaller than the amount of sodium in 100 gr of caviar
 
 ### Creating Plots in R
 
 Visualization is a crucial step for initial data exploration.
+
+First create a scatterplot with Protein on the x-axis and Fat on the y-axis
+using the plot() function
+
 ```{r}
-# First create a scatterplot with Protein on the x-axis and Fat on the y-axis
-# using the plot() function
 plot(USDA$Protein,USDA$TotalFat)
-# The plot has a very interesting triangular shape, it looks like foods that are higher in protein are typically lower in fat and vice versa.
-# R gives default names for the axis. It's possible to modify them adding more
-# arguments to the plot function.
-# add also a title and change the color
-plot(USDA$Protein,USDA$TotalFat, xlab="Protein", ylab="Fat", main="Protein vs Fat",col="red")
-# Another way to visualize data is by plotting histograms using the hist() function
-hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels")
-# The histogram groups them all together in one cell. In order to zoom in this section, it's necessary to limit the x-axis to go from zero to 100 mg
-hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100))
-# But now there is only one big cell. To really break the cell into smaller pieces, it's necessary to add the argument 'breaks='
-hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100),breaks=100)
-# There are actually only 5 cells and each cell is 20 mg long. This beacause the orginal interval, 0 to 2000 is divided into 100 cells, 2000/100=20
-# To correct this it's needed to think in terms of the original interval and break it into 2000 cells
-hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100),breaks=2000)
-# In the refined histogram it's possible to see that  more than 5000 foods have less than 1 mg of Vitamim C
-# A third way to visualize data is using box plots using boxplot() function
-boxplot(USDA$Sugar, main="Boxplot of Sugar Levels", ylab="Sugar (g)")
-# The average across the data set seems to be pretty low: around 5 gr.
-# But there are a lot of outliers with extremely high values of sugar
-# There exist some foods that have almost 100 gr of sugar in 100 gr.
 ```
+
+The plot has a very interesting triangular shape, it looks like foods that are higher in protein are typically lower in fat and vice versa.
+
+R gives default names for the axis. It's possible to modify them adding more
+arguments to the plot function, add also a title and change the color
+
+```{r}
+plot(USDA$Protein,USDA$TotalFat, xlab="Protein", ylab="Fat", main="Protein vs Fat",col="red")
+```
+
+Another way to visualize data is by plotting histograms using the hist() function.
+
+```{r}
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels")
+```
+
+The histogram groups them all together in one cell. In order to zoom in this
+section, it's necessary to limit the x-axis to go from zero to 100 mg.
+
+```{r}
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100))
+```
+
+But now there is only one big cell. To really break the cell into smaller pieces,
+it's necessary to add the argument 'breaks='
+
+```{r}
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100),breaks=100)
+```
+
+There are actually only 5 cells and each cell is 20 mg long. This beacause the
+orginal interval, 0 to 2000 is divided into 100 cells, `2000/100=20`.
+
+To correct this it's needed to think in terms of the original interval and break it
+into 2000 cells.
+
+```{r}
+hist(USDA$VitaminC, xlab="Vitamin C (mg)", main="Histogram of Vitamin C Levels",xlim=c(0,100),breaks=2000)
+```
+
+In the refined histogram it's possible to see that  more than 5000 foods have less
+than 1 mg of Vitamim C.
+
+A third way to visualize data is using box plots using boxplot() function
+
+```{r}
+boxplot(USDA$Sugar, main="Boxplot of Sugar Levels", ylab="Sugar (g)")
+```
+
+The average across the data set seems to be pretty low: around 5 gr.
+But there are a lot of outliers with extremely high values of sugar
+There exist some foods that have almost 100 gr of sugar in 100 gr.
+
 
 ### Adding Variables
 
 Suppose that it's needed to add a variable in the USDA data frame that takes a 
 value 1 if the food has higher sodium than average and 0 if the food has lower
 sodium than average.
+
+Compare if a food has more sodium than the avearge, for example the first food
+Dont't forget to remove the non-available entries.
+
 ```{r}
-# Compare if a food has more sodium than the avearge, for example the first food
-# Dont't forget to remove the non-available entries
 USDA$Sodium[1] > mean(USDA$Sodium, na.rm=TRUE) # TRUE
 # What about the 50th food?
 USDA$Sodium[50] > mean(USDA$Sodium, na.rm=TRUE) # FALSE
-# It's possible to write the same command on all the vector Sodium and save the results into a vector called HighSodium
+```
+
+It's possible to write the same command on all the vector Sodium and save the results into a vector called HighSodium, then look at its structure.
+
+```{r}
 HighSodium = USDA$Sodium > mean(USDA$Sodium, na.rm=TRUE) 
-# Look at the structure of the HighSodium
 str(HighSodium)
-# the vector has all these values TRUE and FALSE which are called logicals, so the type of the HighSodium vector is logical
-# But it's expected to have 1 and 0 instead of TRUE and FALSE, to do this it exist the function as.numeric()
+```
+
+The vector has all these values TRUE and FALSE which are called logicals, so the
+type of the HighSodium vector is logical.
+But it's expected to have 1 and 0 instead of TRUE and FALSE, to do this it exist 
+the function as.numeric().
+
+```{r}
 HighSodium = as.numeric(USDA$Sodium > mean(USDA$Sodium, na.rm=TRUE))
 str(HighSodium)
-# This vector is not yet associated with the USDA data frame. 
-# To do this it need to use the dollar notation
+```
+
+This vector is not yet associated with the USDA data frame. 
+To do this it,  use the dollar notation.
+
+```{r}
 USDA$HighSodium = as.numeric(USDA$Sodium > mean(USDA$Sodium, na.rm=TRUE))
 str(USDA)
-# It's possible to do the same and add the variables HighProtein, HighCarbs, HighFat
+```
+
+It's possible to do the same and add the variables HighProtein, HighCarbs, HighFat
+
+```{r}
 USDA$HighProtein = as.numeric(USDA$Protein > mean(USDA$Protein, na.rm=TRUE))
 USDA$HighFat = as.numeric(USDA$TotalFat > mean(USDA$TotalFat, na.rm=TRUE))
 USDA$HighCarbs = as.numeric(USDA$Carbohydrate > mean(USDA$Carbohydrate, na.rm=TRUE))
@@ -130,21 +232,39 @@ str(USDA)
 
 Now we can try to understand the data and the relationships between variables using table() and tapply() functions.
 
-```{r}
-# To figure out how may foods have higher sodium level than average, look at the HighSodium variable and
-# count the foods that have values 1
-table(USDA$HighSodium) # most of the food have lower sodium than average
-# Look at how many foods have both high sodium and high fat
-table(USDA$HighSodium, USDA$HighFat)
-# The rows belong to the first input (HighSodium) and the columns correspond to the second input (HighFat)
-# Compute the average amount of iron sorted by high and low protein
-# The tapply function takes three arguments:
-# tapply(argument1, argument2, argument3)
-# Group argument1 by argument2 and apply argument3
-tapply(USDA$Iron, USDA$HighProtein, mean, na.rm=TRUE)
-# How about the maximum level of vitamin C in food with high and low carbs
-tapply(USDA$VitaminC, USDA$HighCarbs, max, na.rm=TRUE)
-# In order to further analyze these data use the summary function
-tapply(USDA$VitaminC, USDA$HighCarbs, summary, na.rm=TRUE)
+To figure out how may foods have higher sodium level than average, look at the HighSodium variable and count the foods that have values 1.
 
+```{r}
+table(USDA$HighSodium) # most of the food have lower sodium than average
+```
+
+Look at how many foods have both high sodium and high fat
+
+```{r}
+table(USDA$HighSodium, USDA$HighFat)
+```
+
+The rows belong to the first input (HighSodium) and the columns correspond to the second input (HighFat).
+Compute the average amount of iron sorted by high and low protein.
+
+The tapply function takes three arguments:
+
+`tapply(argument1, argument2, argument3)`
+
+Group argument1 by argument2 and apply argument3
+
+```{r}
+tapply(USDA$Iron, USDA$HighProtein, mean, na.rm=TRUE)
+```
+
+How about the maximum level of vitamin C in food with high and low carbs.
+
+```{r}
+tapply(USDA$VitaminC, USDA$HighCarbs, max, na.rm=TRUE)
+```
+
+In order to further analyze these data use the summary function
+
+```{r}
+tapply(USDA$VitaminC, USDA$HighCarbs, summary, na.rm=TRUE)
 ```
