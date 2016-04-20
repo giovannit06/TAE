@@ -422,7 +422,19 @@ str(wineTest)</code></pre>
 predictTest</code></pre>
 <pre><code>##        1        2 
 ## 6.768925 6.684910</code></pre>
-<p>It looks like the predictions are pretty good, but how quantify this by computing the R-squared value.</p>
+<p>It looks like the predictions are pretty good, but it’s possible to quantify this by computing the R-squared value for the test set.</p>
+<p>Start by computing the sum of squared errors, SSE. Then calculate the total sum of squares, SST. Finally calculate R-squared.</p>
+<pre class="r"><code>SSE = sum((wineTest$Price - predictTest)^2)
+SST = sum((wineTest$Price - mean(wine$Price))^2)
+1-SSE/SST</code></pre>
+<pre><code>## [1] 0.7944278</code></pre>
+<p>This is a pretty good out-of-sample R-squared. But keep in mind that the test site is really small. It’s necessary to increase the size of the test set to be more confident about the out-of-sample accuracy.</p>
+</div>
+<div id="comparing-the-model-to-the-experts" class="section level3">
+<h3>Comparing the Model to the Experts</h3>
+<p>A linear regression model with only a few variables can predict wine prices well.</p>
+<p>In many cases, outperforms wine expert’s opinion.</p>
+<p>A quantitative approach to a traditionally qualitative problem.</p>
 </div>
 </div>
 

@@ -322,6 +322,25 @@ predictTest = predict(model4, newdata = wineTest)
 predictTest
 ```
 
-It looks like the predictions are pretty good, but how quantify this by computing
-the R-squared value.
+It looks like the predictions are pretty good, but it's possible to quantify this by computing
+the R-squared value for the test set.
 
+Start by computing the sum of squared errors, SSE. Then calculate the total sum of squares, SST.
+Finally calculate R-squared.
+
+```{r}
+SSE = sum((wineTest$Price - predictTest)^2)
+SST = sum((wineTest$Price - mean(wine$Price))^2)
+1-SSE/SST
+```
+
+This is a pretty good out-of-sample R-squared. But keep in mind that the test site is really small.
+It's necessary to increase the size of the test set to be more confident about the out-of-sample accuracy.
+
+### Comparing the Model to the Experts
+
+A linear regression model with only a few variables can predict wine prices well.
+
+In many cases, outperforms wine expert's opinion.
+
+A quantitative approach to a traditionally qualitative problem.
