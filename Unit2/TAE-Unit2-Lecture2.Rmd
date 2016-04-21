@@ -1,0 +1,97 @@
+---
+title: "TAE - Unit 2 - Lecture 2"
+author: "GT"
+date: "April 21, 2016"
+output: html_document
+---
+
+## Unit 2 - Lecture 2 - Moneyball
+
+Moneyball tells the story of the Oakland A's. The A's is a baseball team near
+San Francisco, California. They were once a rich team, but the team was purchased in 
+1995 by owners who enforced strict budget cuts.
+In 2002, the A's lost three key players. By taking an analytics approach,
+they were able to find underevalued players and form teams that were very efficient.
+The A's selected players based on their statistics.
+
+### Making it to the Playoffs
+
+The goal of a baseball team is to make the playoffs. 
+
+- How we can predict wheter or not a team make the playoffs by knowning how many
+  games they won in the regular season.
+- Use linear regression to predict how many games a team will win using the 
+  difference between runs scored and runs allowed.
+- Use linear regression to predict the number of runs a team will score using
+  batting statistics and the number of runs a team will allow using fielding and
+  pitching statistics
+  
+First question: How many games does a time need to win in the regular season to
+make it to the playoff ?
+
+In moneyball, Paul DePodesta judged that it would take 95 wins for the A's to make
+it to the playoffs.
+
+How does a team win games ?
+
+They score more runs than their opponent does. The A's calculated that they need
+to score 135 more runs than they allowed during the regular season to expect to win
+95 games.
+
+Let's see if we can verify this using linear regression in R.
+
+```{r}
+baseball = read.csv("baseball.csv")
+str(baseball)
+```
+
+THis dataset includes an observation for every team and year pair from 1962 to 2012
+for all seasons with 162 games.
+
+Since we're confirming the claims made in Moneyball we want to build models using
+Paul DePodesta data had in 2002, let's subsetting the data.
+
+```{r}
+moneyball = subset(baseball, Year < 2002)
+str(moneyball)
+```
+
+In order to build a linear regression equation to predict wins using the difference
+between runs scored and runs allowed, we'll create a new variable called, 'RD' for
+Run Difference.
+
+```{r}
+moneyball$RD = moneyball$RS - moneyball$RA
+str(moneyball)
+plot(moneyball$RD, moneyball$W)
+```
+
+The scatter plot shows as that there's a very strong linear relationship between 
+these two variables, which is a good sign for the linear regression equation.
+
+Create now the linear regressino model, which we'll call WinsReg
+
+```{r}
+WinsReg = lm(W ~ RD, data=moneyball)
+summary(WinsReg)
+```
+
+RD is very significant and the R-squared is 0.88. This is a strong model to predict
+wins using difference between runs scored and runs allowed. 
+
+From the model we can extract the equation: $W = 80.8814 + 0.1058*RD$.
+
+We want Wins to be greater than or equal to 95: $W \geq 95$.
+
+```{r}
+RD = (95 - 80.8814) / 0.1058
+RD
+```
+
+This is very close to the claim made in Moneyball that a team needs to score at
+least 135 more runs than they allow to win at least 95 games.
+
+
+
+
+
