@@ -222,6 +222,107 @@ RD</code></pre>
 <pre><code>## [1] 133.4461</code></pre>
 <p>This is very close to the claim made in Moneyball that a team needs to score at least 135 more runs than they allow to win at least 95 games.</p>
 </div>
+<div id="predict-runs" class="section level3">
+<h3>Predict runs</h3>
+<p>Now, we need to know how many runs a team will score, which we’ll show can be predicted with batting statistics, and how many runs a team will allow, wich can be predicted using fielding and pitching statistics.</p>
+<p>The Oakland A’s were interested in answering the question: how does a team score more runs? They discoverd two particular baseball statistics: on-base percentage, OBP, and slugging percentage, SLG.</p>
+<ul>
+<li>On-base percentage is the percentage of time a player gets on base, including walks.</li>
+<li>Slugging percentage measures how far a player gets around the bases on his turn and measures the power a hitter.</li>
+</ul>
+<p>Most baseball teams and experts focused on batting average, which measures how often a hitter gets on base by hitting the ball.</p>
+<p>The Oakland A’s claimed that on-base percentage was the most important statistic for predicting runs.</p>
+<p>Let’s see if we can use linear regression in R, to verify wich baseball statistic are important for predicting runs scored.</p>
+<pre class="r"><code>RunsReg = lm(RS ~ OBP + SLG + BA, data=moneyball)
+summary(RunsReg)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = RS ~ OBP + SLG + BA, data = moneyball)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -70.941 -17.247  -0.621  16.754  90.998 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -788.46      19.70 -40.029  &lt; 2e-16 ***
+## OBP          2917.42     110.47  26.410  &lt; 2e-16 ***
+## SLG          1637.93      45.99  35.612  &lt; 2e-16 ***
+## BA           -368.97     130.58  -2.826  0.00482 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 24.69 on 898 degrees of freedom
+## Multiple R-squared:  0.9302, Adjusted R-squared:   0.93 
+## F-statistic:  3989 on 3 and 898 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We can see that all our independent variable are significant and the R-squared is 0.93. But if we look closer at the coefficients, we can see that the coefficient for batting average is negative.</p>
+<p>This implies that, a team with a lower batting average will score more runs, which is a little counterintuitive</p>
+<p>This seems a case of multicollinearity. These three hitting statistics are highly correlated.</p>
+<p>Let’s try removing batting average to see what happens to our model.</p>
+<pre class="r"><code>RunsReg = lm(RS ~ OBP + SLG, data=moneyball)
+summary(RunsReg)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = RS ~ OBP + SLG, data = moneyball)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -70.838 -17.174  -1.108  16.770  90.036 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -804.63      18.92  -42.53   &lt;2e-16 ***
+## OBP          2737.77      90.68   30.19   &lt;2e-16 ***
+## SLG          1584.91      42.16   37.60   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 24.79 on 899 degrees of freedom
+## Multiple R-squared:  0.9296, Adjusted R-squared:  0.9294 
+## F-statistic:  5934 on 2 and 899 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We can see that our independent variables are still very significant, the coefficients are both positive and the R-squared is still about 0.93.</p>
+<p>This model is simpler, with only two independent variables and has about the same R-squared.</p>
+<p>If we compare the two coefficient, we sse that on-base percentage has a larger coefficient than slugging percentage. This tells us that on-base percentage is probabily worth more than slugging percentage.</p>
+<p>So the claims made in Moneyball are verified.</p>
+<p>We can create a very similar model to predict runs allowed. This model uses pitching statistics: opponents on-base percentage, OOBP, and opponents slugging percentage, OSLG.</p>
+<pre class="r"><code>RunsAllReg = lm(RA ~ OOBP + OSLG, data=moneyball)
+summary(RunsAllReg)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = RA ~ OOBP + OSLG, data = moneyball)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -82.397 -15.178  -0.129  17.679  60.955 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -837.38      60.26 -13.897  &lt; 2e-16 ***
+## OOBP         2913.60     291.97   9.979 4.46e-16 ***
+## OSLG         1514.29     175.43   8.632 2.55e-13 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 25.67 on 87 degrees of freedom
+##   (812 observations deleted due to missingness)
+## Multiple R-squared:  0.9073, Adjusted R-squared:  0.9052 
+## F-statistic: 425.8 on 2 and 87 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>The key message here is that simple models, using only a couple independent variables, can be constructed to answer some of the most important questions in baseball.</p>
+</div>
+<div id="using-the-models-to-make-predictions" class="section level3">
+<h3>Using the Models to Make Predictions</h3>
+<p>We would like to predict before the season starts how many games the 2002 Oakland A’s will win.</p>
+<p>To do this, we first have to predict how many runs the team will score and how many runs they will allow. These models use team statistics. However, when we are predicting for the 2002 Oakland A’s before the season has occurred, the team is probabily different than it was the year before.</p>
+<p>So we don’t know the team statistic. But we can estimate these statistics using past player performance assuming that past performance correlates with future performance and that will be few injuries during the season.</p>
+<p>Let’s start by making a prediction for runs scored.</p>
+<p>At the beginning of the 2002 season, the Oakland A’s had 24 batters on their roster. We can estimate that team on-base percentage will be about 0.339 and team slugging percentage will be about 0.430.</p>
+<p>Using the previous model, we predict that the 2002 Oakland A’s will score about 805 runs.</p>
+<p>Similarly, we can make a prediction for runs allowed. At the beginning of the 2002 season, the Oakland A’s had 17 pitchers on their roster. Using the 2001 regular season statistics for these players, we can estimate that team opponent on-base percentage will be about 0.307 and team opponent slugging percentage will be about 0.373.</p>
+<p>Using the previous model, we predict that he 2002 Oakland A’s will allow 622 runs.</p>
+<p>We can plug the difference 805-622 in the previous model and predict that the A’s will win 100 games in 2002.</p>
+<p>These predictions are similar to Paul DePodesta’s predictions. And it turns out that the 2002 Oakland A’s actually scored 800 and allowed 653 runs. And they won 103 games.</p>
+<p>These predictions show us that by using publicly available data and simple analytics, we can predict very close to what actually happened before the season even started.</p>
+</div>
 </div>
 
 

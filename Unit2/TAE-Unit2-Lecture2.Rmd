@@ -91,7 +91,100 @@ RD
 This is very close to the claim made in Moneyball that a team needs to score at
 least 135 more runs than they allow to win at least 95 games.
 
+### Predict runs
+
+Now, we need to know how many runs a team will score, which we'll show can be predicted with batting
+statistics, and how many runs a team will allow, wich can be predicted using fielding and pitching
+statistics.
+
+The Oakland A's were interested in answering the question: how does a team score more runs?
+They discoverd two particular baseball statistics: on-base percentage, OBP, and slugging percentage, SLG.
+
+- On-base percentage is the percentage of time a player gets on base, including walks.
+- Slugging percentage measures how far a player gets around the bases on his turn and measures the power
+  a hitter.
+  
+Most baseball teams and experts focused on batting average, which measures how often a hitter gets on base
+by hitting the ball.
+
+The Oakland A's claimed that on-base percentage was the most important statistic for predicting runs.
+
+Let's see if we can use linear regression in R, to verify wich baseball statistic are important for
+predicting runs scored.
+
+```{r}
+RunsReg = lm(RS ~ OBP + SLG + BA, data=moneyball)
+summary(RunsReg)
+```
+
+We can see that all our independent variable are significant and the R-squared is 0.93. But if we look closer
+at the coefficients, we can see that the coefficient for batting average is negative.
+
+This implies that, a team with a lower batting average will score more runs, which is a little counterintuitive
+
+This seems a case of multicollinearity. These three hitting statistics are highly correlated.
+
+Let's try removing batting average to see what happens to our model.
+
+```{r}
+RunsReg = lm(RS ~ OBP + SLG, data=moneyball)
+summary(RunsReg)
+```
+
+We can see that our independent variables are still very significant, the coefficients are both positive and
+the R-squared is still about 0.93. 
+
+This model is simpler, with only two independent variables and has about the same R-squared.
+
+If we compare the two coefficient, we sse that on-base percentage has a larger coefficient than slugging
+percentage. This tells us that on-base percentage is probabily worth more than slugging percentage.
+
+So the claims made in Moneyball are verified.
+
+We can create a very similar model to predict runs allowed. This model uses pitching statistics: 
+opponents on-base percentage, OOBP, and opponents slugging percentage, OSLG.
+
+```{r}
+RunsAllReg = lm(RA ~ OOBP + OSLG, data=moneyball)
+summary(RunsAllReg)
+```
+
+The key message here is that simple models, using only a couple independent variables, can be 
+constructed to answer some of the most important questions in baseball.
 
 
+### Using the Models to Make Predictions
 
+We would like to predict before the season starts how many games the 2002 Oakland A's will win.
 
+To do this, we first have to predict how many runs the team will score and how many runs they will allow.
+These models use team statistics. However, when we are predicting for the 2002 Oakland A's before the season
+has occurred, the team is probabily different than it was the year before.
+ 
+So we don't know the team statistic. But we can estimate these statistics using past player performance
+assuming that past performance correlates with future performance and that will be few injuries during
+the season.
+
+Let's start by making a prediction for runs scored.
+
+At the beginning of the 2002 season, the Oakland A's had 24 batters on their roster. We can estimate that
+team on-base percentage will be about 0.339 and team slugging percentage will be about 0.430.
+
+Using the previous model, we predict that the 2002 Oakland A's will score about 805 runs.
+
+Similarly, we can make a prediction for runs allowed. At the beginning of the 2002 season, the Oakland A's 
+had 17 pitchers on their roster. Using the 2001 regular season statistics for these players, we can
+estimate that team opponent on-base percentage will be about 0.307 and team opponent slugging percentage
+will be about 0.373. 
+
+Using the previous model, we predict that he 2002 Oakland A's will allow 622 runs.
+
+We can plug the difference 805-622 in the previous model and predict that the A's will win 100 games in 2002.
+
+These predictions are similar to Paul DePodesta's predictions. And it turns out that the 2002 Oakland A's
+actually scored 800 and allowed 653 runs. And they won 103 games.
+
+These predictions show us that by using publicly available data and simple analytics, we can predict
+very close to what actually happened before the season even started.
+
+ 
