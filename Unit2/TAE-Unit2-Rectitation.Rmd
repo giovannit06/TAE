@@ -41,3 +41,52 @@ less than 82 games.
 The variables 2P, 2PA, 3P and 3PA in the csv file are modified during the 
 import of the data by R. R doesn't like it when a variable begins with a number.
 If a variable begins with a number it will put an 'X' in front of it.
+
+### Playoffs and Wins
+
+The goal of a basketball team is similar to that of a baseball team, making the playoffs.
+
+How many games does a team need to win in order to make the playoffs ?
+
+Let's use the table command to figure this out for the NBA.
+
+```{r}
+table(NBA$W, NBA$Playoffs)
+```
+
+We see that after about 45 wins, teams almost always make it to the playoffs. So it seems like a good goal
+would be to try to win about 42 games.
+
+In basketball, games are won by scoring more points than the other team. Can we use the difference between
+points scored and points allowed throughout the regular season in order to predict the number of games that
+a team will win?
+
+Create a variable that is the difference between points scored and points allowed.
+
+```{r}
+NBA$PTSdiff = NBA$PTS - NBA$oppPTS
+plot(NBA$PTSdiff, NBA$W)
+```
+
+This look like there's a strong linear relationship between these two variables
+
+```{r}
+WinsReg = lm(W ~ PTSdiff, data=NBA)
+summary(WinsReg)
+```
+
+The first thing that we notice is that we've got very significant variables over here and R-squared = 0.9423,
+which is very high.
+
+Let's write down the equation that we found.
+
+`W = 41 + 0.0326 * PTSdiff`
+
+So in order to win at least 42 games and have good chance of making it to the playoffs, we can calculate
+that
+
+```{r}
+(42-41)/0.0326 #30.67
+```
+
+So we need to score at least 31 more points than we allow in order to win at least 42 games.
