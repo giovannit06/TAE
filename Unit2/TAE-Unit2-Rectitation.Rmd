@@ -1,0 +1,43 @@
+---
+title: "TAE - Unit 2 - Recitation"
+author: "GT"
+date: "April 22, 2016"
+output: html_document
+---
+
+### The Data
+
+In this recitation we will apply some of the ideas from Moneyball to data from the
+National Basketball Association (NBA).
+
+```{r}
+NBA = read.csv("NBA_train.csv")
+str(NBA)
+```
+The data contains data from all teams in season since 1980, except for ones with
+less than 82 games.
+
+- *SeasonEnd* is the year the season ended
+- *Team* is the name of the team
+- *Playoff* is a binary variable for whether or not a team made it to the playoffs
+- *W* is the number of regulaar season wins
+- *PTS* are the points scored during the regular season
+- *oppPTS* are the opponent points scored during the regular season.
+- *FG* is the number of _successful_ field goals (2pt and 3pt)
+- *FGA* is the number of field goal _attempts_.
+- *X2P* is the number of successful 2pt.
+- *X2PA* is the number of attempted 2pt.
+- *X3P* is the number of successful 3pt.
+- *X3PA* is the number of attempted 3pt.
+- *FT* is the number of successful free throws.
+- *FTA* is the number of attempted free throws.
+- *ORB* are offensive rebounds
+- *DRB* are defensive rebounds.
+- *AST* stands for assists.
+- *STL* stands for steals.
+- *BLK* stands for blocks.
+- *TOV* stands for turnover.
+
+The variables 2P, 2PA, 3P and 3PA in the csv file are modified during the 
+import of the data by R. R doesn't like it when a variable begins with a number.
+If a variable begins with a number it will put an 'X' in front of it.
