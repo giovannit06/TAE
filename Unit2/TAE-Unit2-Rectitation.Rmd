@@ -90,3 +90,127 @@ that
 ```
 
 So we need to score at least 31 more points than we allow in order to win at least 42 games.
+
+### Points scored
+
+Let's now build an equation to predict points scored. The dependent variable would be PTS and the
+independent variable would be some of the common basketball statistics present in the dataset: number of
+two-point field goal attempts, the number of three-point field goal attempts, offensive rebounds, defensive
+rebounds, assist, steals, blocks, turnovers, free throw attempts.
+
+```{r}
+PointsReg = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB + TOV + STL + BLK, data=NBA)
+summary(PointsReg)
+```
+
+We can see that some variables are very significant, others are less significant, like STL. And other seem
+to be not significant at all, like DRB, TOV, BLK. The R-squared is pretty good, 0.8992, so it shows that
+there are a linear relationship between points and all basketball statistics.
+
+Let's using the residual to calculate the sum of squared errors.
+
+```{r}
+SSE = sum(PointsReg$residuals^2) # 28394314
+SSE 
+```
+
+This is very big, but not directly interpetable quantity. But we can also calculate the root mean 
+squared error, RMSE, that is much more interpretable.
+
+```{r}
+RMSE = sqrt(SSE/nrow(NBA)) # 184.4
+RMSE
+``` 
+
+So on average, we make an error of about 184.4 points. That seems like a lot, but you have to compare it to
+the average number of points in a season.
+
+```{r}
+mean(NBA$PTS)  # 8370
+```
+
+So being off by about 184.4 points is really not so bad. But there is room for improvememt. Not all the
+variables were significant. Let's try to remove some of the insignificant variables one at a time.
+
+The first variable that we would remove is probably, TOV. This is because the p value for turnovers, 0.6859,
+is the highest of all of the p values. That's means that turnovers is the least statistically significant
+variable in the model.
+
+```{r}
+PointsReg2 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + DRB + STL + BLK, data=NBA)
+summary(PointsReg2)
+```
+
+The R-squared is 0.8991, it's almost identical to the previous model. So it seems that wer're justifid in
+removing turnovers.
+
+Let's see if we can remove another one of the insignificant variables. The next one that we want to remove
+based on p-value is  defensive rebound DRB.
+
+```{r}
+PointsReg3 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + STL + BLK, data=NBA)
+summary(PointsReg3)
+```
+
+The R-squared it's the same, 0.8991. So it's justified again in removing defensive reobound.
+
+Let's try one more time to remove a variable, in this case we can remove blocks, BLK.
+
+```{r}
+PointsReg4 = lm(PTS ~ X2PA + X3PA + FTA + AST + ORB + STL, data=NBA)
+summary(PointsReg4)
+```
+
+The R-squared is still 0.8991 and the mode is a bit simpler, all the variables are significant.
+Let's take a look at the sum of squared errors, SSE and RMSE.
+
+```{r}
+SSE_4 = sum(PointsReg4$residuals^2) # 28421465
+SSE_4
+RMSE_4 = sqrt(SSE_4/nrow(NBA)) # 184.5
+RMSE_4
+```
+
+Essentially, we've kept the root mean squared error the same. So it seems like we've narrowed down a much
+better model, because it's simpler and so more interpretable.
+
+### Making Predictions
+
+Now we'll try to make predictions for the 2012-2013 season.
+
+Load the test set, because the training set only included data from 1980 until 2012. 
+
+```{r}
+NBA_test = read.csv("NBA_test.csv")
+str(NBA_test)
+```
+
+Now we predict the points usingthe model made before.
+
+```{r}
+PointsPrediction = predict(PointsReg4, newdata = NBA_test)
+```
+
+Now that we have our prediction, how good is it ? We can compute the out-of-sample R-squared. 
+
+First calculate the sum of squares that is the sum of the predicted amount minus the actual amount of points squared and summed. 
+And we need to calcalate the total sum of squares that is the sum of the average number of points minus the
+actual number of points.
+
+```{r}
+SSE = sum((PointsPrediction - NBA_test$PTS)^2)
+SST = sum((mean(NBA$PTS) - NBA_test$PTS)^2)
+R2 = 1 - (SSE/SST) # 0.8127
+R2
+```
+
+We can also calculate the RMSE the same way as before.
+
+```{r}
+RMSE= sqrt(SSE/nrow(NBA_test)) # 196.37
+RMSE
+```
+
+The value is a little bit higher than before, but it's not too bad.
+
+
