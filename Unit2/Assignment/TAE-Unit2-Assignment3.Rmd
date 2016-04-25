@@ -1,0 +1,69 @@
+---
+title: "TAE - Unit 2 - Assignment 3"
+author: "GT"
+date: "April 25, 2016"
+output: html_document
+---
+
+## DETECTING FLU EPIDEMICS VIA SEARCH ENGINE QUERY DATA
+
+We would like to estimate influeny-like illness (ILI) activity using Google web 
+search logs. 
+
+The CDC publishes on its website the official regional and state-level percentage
+of patients visits to healthcare providers for ILI purposes on a weekly basis.
+
+Google trends allows public retrieval of weekly counts for every query searched by
+users around the world.
+
+The csv file FluTrain.csv aggregates this data from January 1, 2004 until December
+31, 2011 as follows:
+
+- *Week* - The range of dates represented by this observation, in year/month/day 
+  format.
+  
+- *ILI* - This column lists the percentage of ILI-related physician visits for the
+  corresponding week.
+
+- *Queries* - This column lists the fraction of queries that are ILI-related for the
+  corresponding week, adjusted to be between 0 and 1 (higher values correspond to
+  more ILI-related search queries).
+  
+### Problem 1
+  
+```{r}
+FluTrain = read.csv("FluTrain.csv")
+str(FluTrain)
+summary(FluTrain)
+FluTrain$Week[which.max(FluTrain$ILI)]
+FluTrain$Week[which.max(FluTrain$Queries)]
+hist(FluTrain$ILI,breaks = 100)
+plot(FluTrain$Queries,log(FluTrain$ILI))
+```
+
+### Problem 2
+
+```{r}
+FluTrend1 = lm(log(ILI) ~ Queries, data=FluTrain)
+summary(FluTrend1)
+cor(log(FluTrain$ILI), FluTrain$Queries)
+0.842^2
+log(1/0.842)
+exp(-0.5*0.842)
+```
+
+### Problem 3
+
+```{r}
+FluTest = read.csv("FluTest.csv")
+str(FluTest)
+PredTest1 = exp(predict(FluTrend1, newdata=FluTest))
+PredTest1[which(FluTest$Week == "2012-03-11 - 2012-03-17")] # 11
+(FluTest$ILI[11]-PredTest1[11])/FluTest$ILI[11]
+SSE = sum((FluTest$ILI - PredTest1)^2)
+SSE
+RMSE = sqrt(SSE/nrow(FluTest))
+RMSE
+```
+
+
