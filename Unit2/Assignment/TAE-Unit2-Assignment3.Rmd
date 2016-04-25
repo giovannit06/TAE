@@ -66,4 +66,36 @@ RMSE = sqrt(SSE/nrow(FluTest))
 RMSE
 ```
 
+### Problem 4
 
+```{r}
+library(zoo)
+ILILag2 = lag(zoo(FluTrain$ILI),-2,na.pad=TRUE)
+FluTrain$ILILag2 = coredata(ILILag2)
+str(FluTrain)
+summary(FluTrain)
+plot(log(FluTrain$ILILag2), log(FluTrain$ILI))
+FluTrend2 = lm(log(ILI) ~ Queries + log(ILILag2), data=FluTrain)
+summary(FluTrend2)
+```
+
+### Problem 5
+
+```{r}
+library(zoo)
+ILILag2 = lag(zoo(FluTest$ILI),-2,na.pad=TRUE)
+FluTest$ILILag2 = coredata(ILILag2)
+str(FluTest)
+summary(FluTest)
+tail(FluTrain)
+head(FluTest)
+FluTest$ILILag2[1] = FluTrain$ILI[416]
+FluTest$ILILag2[2] = FluTrain$ILI[417]
+tail(FluTrain)
+head(FluTest)
+PredTest2 = exp(predict(FluTrend2, newdata=FluTest))
+SSE = sum((FluTest$ILI - PredTest2)^2)
+SSE
+RMSE = sqrt(SSE/nrow(FluTest))
+RMSE
+```
