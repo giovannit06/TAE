@@ -1,0 +1,81 @@
+---
+title: "Unit 3 - Lecture 1 - Modeling the Expert"
+author: "GT"
+date: "26 avril 2016"
+output: html_document
+---
+
+## Unit 3 - Lecture 1 - Modeling the Expert
+
+In this lecture, we'll examine how analytics can model an expert, in this case a physician, in the context
+of assessing the quality of healthcare patients receive, and introduce a technique called *logistic regression*.
+
+### Building the dataset
+
+Medical claims are generated when a patient visits a doctor. Medical claims include diagnosis code, 
+procedure code, as well as costs. Pharmacy claims involve drugs, the quantity of these drugs, the prescribing
+doctor, as well as the medication costs.
+
+For the dataset, we used a large health insurance claims database, and we randomly selected 131 diabetes 
+patients. Age between 35 and 55 and the costs were near 10000-20000 $. The period for these claims were
+recorded were September 1, 2003 to August 31, 2005.
+
+An expert physician reviewed the claims and wrote descriptive notes, like "ongoing use of narcotics", "not a
+good first choice drug". 
+
+After this review, this expert rated the quality of care on a two-point scale, poor or good.
+
+The dependent variable was the quality of care, the independent variables involve the descriptive notes of 
+the physician expert. And also diabetes treatment variables, patient demographics, health care utilization,
+providers, claims and prescriptions. 
+
+The dependent variable was modeled as a binary variable --> 1 for low-quality care and 0 for high-quality care.
+
+We will explain in this lecture how we can use *logistic regression*, which is an extension of linear
+regression, to environments where the dependent variable is categorical.
+
+### Logistic Regression
+
+Logistic regression predicts the probability of the outcome variable being true. In this example,  we would
+predict the probability that the patient is receiving poor care. 
+
+We denote the PoorCare variable by y --> $P(y = 1)$.
+
+And since the outcome is either 0 or 1, this means that the probabiility that the outcome variable is 0 is
+$P(y = 0) = 1 - P(y = 1)$.
+
+Just like in linear regression, we have a set of independent variables, $x_1, x_2, ..., x_k$ where $k$ is the
+total number of independent variables.
+
+To predict the probability $P(y = 1)$ we use what's called the **Logistic Response Function**.
+
+$P(y = 1) = \frac{1}{1+e^-(\beta_0+\beta_1x_1+\beta_2x_2+...+\beta_kx_k)}$
+
+The Logistic Response Function is used to produce a number between 0 and 1. 
+
+A positive coefficient value for a variable increases the linear regression piece, which increase the the
+probability that y=1. On the other hand, a negative coefficient value for a variable decrease the linear 
+regression piece, which in turn decrease the probability that y=1.
+
+The coefficient are selected to predict a high probability for the actual poor care cases (y=1) and to
+predict a low probability for the actual good care cases (y=0).
+
+Another useful way to think about it is in terms of Odds, like in gambling.
+
+$Odds=\frac{P(y=1)}{P(y=0)}$
+
+- Odds > 1 if y = 1 is more likely
+- Odds < 1 if y = 0 is more likely
+
+If you substitute the Logistic Response Function for the probabilities in the Odds equation you can see that
+
+$Odds=e^\beta_0+\beta_1x_1+\beta_2x_2+...+\beta_kx_k$
+
+By taking the log of both sides
+
+$log(Odds)=\beta_0+\beta_1x_1+\beta_2x_2+...+\beta_kx_k$
+
+The log(Odds) or Logit looks exactly like the linear regression equation.
+
+- A positive beta value increases the Logit, which in turn increases the Odds of 1.
+- A negative beta value decreases the Logit, which in turn decreases the Odds of 1.
