@@ -155,6 +155,201 @@ $(document).ready(function () {
 <li>A negative beta value decreases the Logit, which in turn decreases the Odds of 1.</li>
 </ul>
 </div>
+<div id="logistic-regression-in-r" class="section level3">
+<h3>Logistic Regression in R</h3>
+<p>We’ll build a logistic regression model in R to better predict poore car. Start reading the dataset in R.</p>
+<pre class="r"><code>quality = read.csv(&quot;quality.csv&quot;)
+str(quality)</code></pre>
+<pre><code>## 'data.frame':    131 obs. of  14 variables:
+##  $ MemberID            : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ InpatientDays       : int  0 1 0 0 8 2 16 2 2 4 ...
+##  $ ERVisits            : int  0 1 0 1 2 0 1 0 1 2 ...
+##  $ OfficeVisits        : int  18 6 5 19 19 9 8 8 4 0 ...
+##  $ Narcotics           : int  1 1 3 0 3 2 1 0 3 2 ...
+##  $ DaysSinceLastERVisit: num  731 411 731 158 449 ...
+##  $ Pain                : int  10 0 10 34 10 6 4 5 5 2 ...
+##  $ TotalVisits         : int  18 8 5 20 29 11 25 10 7 6 ...
+##  $ ProviderCount       : int  21 27 16 14 24 40 19 11 28 21 ...
+##  $ MedicalClaims       : int  93 19 27 59 51 53 40 28 20 17 ...
+##  $ ClaimLines          : int  222 115 148 242 204 156 261 87 98 66 ...
+##  $ StartedOnCombination: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+##  $ AcuteDrugGapSmall   : int  0 1 5 0 0 4 0 0 0 0 ...
+##  $ PoorCare            : int  0 0 0 0 0 1 0 0 1 0 ...</code></pre>
+<p>We have 131 obs, one for each patients, and 14 different variables.</p>
+<p>The variables in the dataset quality.csv are as follows:</p>
+<ul>
+<li><em>MemberID</em>: numbers the patients from 1 to 131, and is just an identifying number.</li>
+<li><em>InpatientDays</em>: is the number of inpatient visits, or number of days the person spent in the hospital.</li>
+<li><em>ERVisits</em>: is the number of times the patient visited the emergency room.</li>
+<li><em>OfficeVisits</em>: is the number of times the patient visited any doctor’s office.</li>
+<li><em>Narcotics</em>: is the number of prescriptions the patient had for narcotics.</li>
+<li><em>DaysSinceLastERVisit</em>: is the number of days between the patient’s last emergency room visit and the end of the study period (set to the length of the study period if they never visited the ER).</li>
+<li><em>Pain</em>: is the number of visits for which the patient complained about pain.</li>
+<li><em>TotalVisits</em>: is the total number of times the patient visited any healthcare provider.</li>
+<li><em>ProviderCount</em>: is the number of providers that served the patient.</li>
+<li><em>MedicalClaims</em>: is the number of days on which the patient had a medical claim.</li>
+<li><em>ClaimLines</em>: is the total number of medical claims.</li>
+<li><em>StartedOnCombination</em>: is whether or not the patient was started on a combination of drugs to treat their diabetes (TRUE or FALSE).</li>
+<li><em>AcuteDrugGapSmall</em>: is the fraction of acute drugs that were refilled quickly after the prescription ran out.</li>
+<li><em>PoorCare</em>: is the outcome or dependent variable, and is equal to 1 if the patient had poor care, and equal to 0 if the patient had good care.</li>
+</ul>
+<p>Let’s see how many patients received good care by using the table function</p>
+<pre class="r"><code>table(quality$PoorCare)</code></pre>
+<pre><code>## 
+##  0  1 
+## 98 33</code></pre>
+<p>We can see that 98 out of the 131 patients in the data set received good care.</p>
+<p>Before building any models, let’s consider using a simple baseline method.</p>
+<p>When we computed the R-squared for linear regression, we compered our predictions to the baseline method of predicting the average outcome for all data points.</p>
+<p>In a classification problem, a standard baseline method is to just predict the most frequent outcome for all observations. Since good care is more common than poor care, in this case, we would predict that all patient are receiving good care. If we did this, we would get 98 out of the 131 obs correct, or have an accuracy of about 75%. So the baseline has an accaracy of 75% and that is what we’ll try to beat with the logistic regression model.</p>
+<p>In this lesson we have only a dataset, so we want to randomly split our dataset into a training set and a testing set so that we’ll have a test set to measure the out-of-sample accuracy.</p>
+<p>We need to install a new package: <em>caTools</em> and load it in the R session.</p>
+<pre class="r"><code>library(caTools)</code></pre>
+<p>Let’s use now this package to randomly split the data inte a training set and testing set, using the function sample.split. To make sure that we all get the same split, we’ll set the seed. This initializes the random number generator.</p>
+<pre class="r"><code>set.seed(88)
+split = sample.split(quality$PoorCare, SplitRatio = 0.75) # First argument, outcome variable
+# Second argument, percentage of the data that we want in the training set.</code></pre>
+<p>The function makes sure that the outcome variable is well-balanced in each piece. So this function makes sure that in our training set, 75% of our patients are receiving good care and in our testing set 75% of our patients are receiving good care. In this way the test set is representative of the training set.</p>
+<pre class="r"><code>str(split)</code></pre>
+<pre><code>##  logi [1:131] TRUE TRUE TRUE TRUE FALSE TRUE ...</code></pre>
+<p>There is a TRUE or FALSE value for each of our obs. TRUE means that we should put that obs. in the training set, and FALSE means that we should put that obs in the testing set. We do this using the subset function.</p>
+<pre class="r"><code>qualityTrain = subset(quality, split == TRUE)
+qualityTest = subset(quality, split == FALSE)
+str(qualityTrain)</code></pre>
+<pre><code>## 'data.frame':    99 obs. of  14 variables:
+##  $ MemberID            : int  1 2 3 4 6 8 11 13 14 15 ...
+##  $ InpatientDays       : int  0 1 0 0 2 2 6 0 1 6 ...
+##  $ ERVisits            : int  0 1 0 1 0 0 5 1 1 2 ...
+##  $ OfficeVisits        : int  18 6 5 19 9 8 20 3 20 31 ...
+##  $ Narcotics           : int  1 1 3 0 2 0 2 1 3 3 ...
+##  $ DaysSinceLastERVisit: num  731 411 731 158 731 ...
+##  $ Pain                : int  10 0 10 34 6 5 9 23 16 70 ...
+##  $ TotalVisits         : int  18 8 5 20 11 10 31 4 22 39 ...
+##  $ ProviderCount       : int  21 27 16 14 40 11 19 13 18 28 ...
+##  $ MedicalClaims       : int  93 19 27 59 53 28 43 18 48 101 ...
+##  $ ClaimLines          : int  222 115 148 242 156 87 126 70 133 233 ...
+##  $ StartedOnCombination: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+##  $ AcuteDrugGapSmall   : int  0 1 5 0 4 0 2 0 0 0 ...
+##  $ PoorCare            : int  0 0 0 0 1 0 0 0 0 0 ...</code></pre>
+<pre class="r"><code>str(qualityTest)</code></pre>
+<pre><code>## 'data.frame':    32 obs. of  14 variables:
+##  $ MemberID            : int  5 7 9 10 12 25 30 31 32 33 ...
+##  $ InpatientDays       : int  8 16 2 4 0 0 13 5 10 0 ...
+##  $ ERVisits            : int  2 1 1 2 0 0 5 2 4 0 ...
+##  $ OfficeVisits        : int  19 8 4 0 7 14 21 2 45 6 ...
+##  $ Narcotics           : int  3 1 3 2 4 1 6 0 0 0 ...
+##  $ DaysSinceLastERVisit: num  449 174 45 104 731 ...
+##  $ Pain                : int  10 4 5 2 0 0 60 0 32 17 ...
+##  $ TotalVisits         : int  29 25 7 6 7 14 39 9 59 6 ...
+##  $ ProviderCount       : int  24 19 28 21 8 18 36 24 63 14 ...
+##  $ MedicalClaims       : int  51 40 20 17 23 33 45 19 133 35 ...
+##  $ ClaimLines          : int  204 261 98 66 41 82 248 108 577 83 ...
+##  $ StartedOnCombination: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+##  $ AcuteDrugGapSmall   : int  0 0 0 0 2 2 1 0 0 1 ...
+##  $ PoorCare            : int  0 0 1 0 0 0 1 0 0 0 ...</code></pre>
+<p>Now, we are ready to build a logistic regression model usig OfficeVisits and Narcotics as independent variables. We’ll call the model QualityLog and use the glm() function for <em>generalized linear model</em> to build the logistic regression model. The first argument is the equation (dependent var ~ independent var + … + independent var), the second argument is the name of the data. The last argument is <code>family=binomial</code>. This tells the glm function to build a logist regression model.</p>
+<pre class="r"><code>QualityLog = glm(PoorCare ~ OfficeVisits + Narcotics, data=qualityTrain, family=binomial)
+summary(QualityLog)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = PoorCare ~ OfficeVisits + Narcotics, family = binomial, 
+##     data = qualityTrain)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.06303  -0.63155  -0.50503  -0.09689   2.16686  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -2.64613    0.52357  -5.054 4.33e-07 ***
+## OfficeVisits  0.08212    0.03055   2.688  0.00718 ** 
+## Narcotics     0.07630    0.03205   2.381  0.01728 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 111.888  on 98  degrees of freedom
+## Residual deviance:  89.127  on 96  degrees of freedom
+## AIC: 95.127
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<p>The output is similar to that of a linear regression model. We want focus on the coefficient table. Both coefficient for OfficeVisits and Narcotics are both positive, which means that higher values in these two variables are indicative of poor care. Furthermore, both of these variables have at least one star, meaning that they’re significant in the model.</p>
+<p>The AIC value measure the quality of the model and is like Adjusted R-squared in that it accounts of the number of variables used compared to the number of obs. Unfortunately, it can only be compared between models on the same dataset. The preferred model is the on with the minimum AIC.</p>
+<p>Let’s make predictions using the model QualityLog</p>
+<pre class="r"><code>predictTrain = predict(QualityLog, type=&quot;response&quot;) # Tells the predict to give us probabilities.
+summary(predictTrain)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## 0.06623 0.11910 0.15970 0.25250 0.26760 0.98460</code></pre>
+<p>Since we’re expecting probabilities, all of numbers should be between zero and one.</p>
+<p>Let’s see if we’re predicting higher probabilities for the actual poor care cases as we expect. Use the tapply function, giving as arguments predictTrain and then qualityTrain$Poorcare and then mean. This will compute the average prediction for each of the true outcomes.</p>
+<pre class="r"><code>tapply(predictTrain, qualityTrain$PoorCare, mean)</code></pre>
+<pre><code>##         0         1 
+## 0.1894512 0.4392246</code></pre>
+<p>This is a good sign, beacause it look like we’re predicting a higher probability for the actual poor care cases.</p>
+</div>
+<div id="thresholding" class="section level3">
+<h3>Thresholding</h3>
+<p>The outcome of a logistic regression model is a probability. Often, we want make an actual prediction.</p>
+<p>We can convert the probabilities to predictions using what’s called a <em>threshold value, t</em>.</p>
+<p>If the probability of poor care is greater than this threshold value, t, we predict poor quality care. If the probability of poor care is less han the threshold value, t, then we predict good quality care.</p>
+<p>How we choose the threshold ? The threshold value is often selected based on which errors are better.</p>
+<p>There are two type of errors that a model can make:</p>
+<ul>
+<li>one where you predict 1, or poor care, but the actual outcome is 0</li>
+<li>one where you predict 0, or good care, but the actual outcome is 1</li>
+</ul>
+<p>With a <em>large</em> threshold value, we will predict poor care rarely, since the probability of poor care has to be really large to be greater than the threshold, then we’ll make more errors whene we say good care.</p>
+<p>On the other hand, if the threshold value is <em>small</em>, we predict poor care frequently, and we predict good care rarely. This means that we will make more errors where we say poor care, but it’s actually good care.</p>
+<p>If there’s no preference between the errors, the right threshold to select is <code>t = 0.5</code>, since it just predicts the most likely outcome.</p>
+<p>To make this discussion a little more quantitative, we use what’s called a confusion matrix or classification matrix. This compares the actual outcomes to the predict outcomes.</p>
+<pre><code>            Predicted = 0         Predicted = 1
+Actual = 0  True Negatives (TN)   False Positives (FP)
+Actual = 1  False Negatives (FN)  True Positives (TP)</code></pre>
+<p>The rows are labeled with the actual outcome, and the columns are labeled with the predicted outcome. Each entry of the table gives the number of data observations that fall into that category.</p>
+<p>We can compute two outcome measures that help us determine what types of errors we are making.</p>
+<ul>
+<li><span class="math inline">\(Sensitivity = \frac{TP}{TP + FN}\)</span>, measures the percentage of actual poor care that we classify correctly.</li>
+<li><span class="math inline">\(Specificity = \frac{TN}{TN + FP}\)</span>, measures the percentage of actual good care cases that we classify correctly.</li>
+</ul>
+<p>A model with a higher threshold will have a lower sensitivity and a higher specificity.</p>
+<p>A model with a lower threshold will have a higher sensitivity and a lower specificity.</p>
+<p>Let’s compute some confusion matrices in R using different threshold values. Make first some classification tables using different threshold values and the table function. We’ll use a threshold value of 0.5.</p>
+<p>The firt argument is what we want to label the rows, the true outcome. And then the second argument is what we want to label the columns, the predictions greater than 0.5.</p>
+<pre class="r"><code>table(qualityTrain$PoorCare, predictTrain &gt; 0.5)</code></pre>
+<pre><code>##    
+##     FALSE TRUE
+##   0    70    4
+##   1    15   10</code></pre>
+<p>For 70 cases, we predict good care and they actually received good care, and for 10 cases we predict poor care and they actally received poor care. We made four mistakes where we say poor care and it’s actually good care, and we make 15 mistakes where we say good care, but it’s actually poor care.</p>
+<p>Let’s compute the sensitivity and the specificity.</p>
+<pre class="r"><code>10/25</code></pre>
+<pre><code>## [1] 0.4</code></pre>
+<pre class="r"><code>70/74</code></pre>
+<pre><code>## [1] 0.9459459</code></pre>
+<p>Now, let’s try to increase the threshold.</p>
+<pre class="r"><code>table(qualityTrain$PoorCare, predictTrain &gt; 0.7)</code></pre>
+<pre><code>##    
+##     FALSE TRUE
+##   0    73    1
+##   1    17    8</code></pre>
+<pre class="r"><code>8/25</code></pre>
+<pre><code>## [1] 0.32</code></pre>
+<pre class="r"><code>73/74</code></pre>
+<pre><code>## [1] 0.9864865</code></pre>
+<p>So by inrceasing the threshold, the sensitivity went down and the specificity went up.</p>
+<p>Let’s try decreasing the threshold.</p>
+<pre class="r"><code>table(qualityTrain$PoorCare, predictTrain &gt; 0.2)</code></pre>
+<pre><code>##    
+##     FALSE TRUE
+##   0    54   20
+##   1     9   16</code></pre>
+<pre class="r"><code>16/25</code></pre>
+<pre><code>## [1] 0.64</code></pre>
+<pre class="r"><code>54/74</code></pre>
+<pre><code>## [1] 0.7297297</code></pre>
+<p>So with the lower threshold, our sensitivity went up and our specificity went down. But which threshold should we pick ?</p>
+</div>
 </div>
 
 
