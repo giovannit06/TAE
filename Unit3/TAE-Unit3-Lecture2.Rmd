@@ -1,0 +1,63 @@
+---
+title: "Unit 3 - Lecture 2 - The Framingham Heart Study"
+author: "GT"
+date: "28 avril 2016"
+output: html_document
+---
+
+## The Framingham Heart Study
+
+The Framingham Heart Study is one of the most important epidemiological studies ever conducted, We'll 
+describe the underlying analytics that led to our current understanding of cardiovascular disease.
+
+The study included 5209 patients, aget 30 to 58. Patients were given a questionnaire and an examination
+every two years. During the examination, their physical characteristics were recorded, their behavioral
+characteristics, as well as test results.
+
+We will build  models using the Framinghan data to predict and prevent heart disease.
+
+### Risk Factors
+
+The first step is to identify risk factors, or the independent variables, that we will use in the model.
+Then, using the data, we'll create a logistic regression model to predict heart disease. Using more data,
+we'll validate the model to make sure it performs well out-of-sample and on different population than the
+training set population. Lastly, we'll discuss how medical interventions can be defined using the model.
+
+We'll be predicting the 10-year risk of coronary heart disease (CHD) using logistic regression to create 
+a similar model used in the Framingham Study.
+
+CHD is a disease of the blood vessels supplying the heart.
+
+When predicting the risk of a disease, we want to identify what are known as *risk factors*.
+These are the variables that increas the chances of developing a disease. Identifying these risk factors is
+the key to successful prediction of CHD.
+
+The dataset includes several demographic risk factors:
+
+- *male*: sex of patient
+- *age*: age in years at first examination
+- *education*: some high school (1), high school/GED (2), some college/vocational school (3), college (4)
+
+The dataset also includes behavioral risk factors associated with smoking:
+
+- *currentSmoker*
+- *cigsPerDay*
+
+While it is now widely known that smoking increases the risk of heart disease, the idea of smoking being bad
+for you was a novel idea in the 1940s.
+
+Medical history risk factors were also included.
+
+- *BPmeds*: On blood pressure medication at time of  first examination
+- *prevalentStroke*: Previously had a stroke
+- *prevalentHyp*: Currently hypertensive
+- *diabetes*: Currently has diabetes
+
+Lastly, the dataset includes risk factors from first physical examination of the patient.
+
+- *totChol*: Total cholesterol (mg/dL)
+- *sysBP*: Systolic blood pressure
+- *diaBP*: Diastolic blood pressure
+- *BMI*: Body Mass Index, weight (kg)/height (m)^2
+- *heartRate*: Heart rate (beats/minute)
+- *glucose*: Blood glucose level (mg/dL)
