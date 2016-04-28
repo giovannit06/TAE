@@ -298,8 +298,166 @@ table(qualityTrain$PoorCare, predictTrain > 0.2)
 54/74
 ```
 
-So with the lower threshold, our sensitivity went up and our specificity went down. But which threshold
-should we pick ?
+So with the lower threshold, our sensitivity went up and our specificity went down. 
+But which threshold should we pick ?
 
+### ROC Curves
 
+Picking a good threshold value is often challenging. A Receiver Operator Characteristic
+curve or ROC curve, can help you decide which value is best.
 
+The sensitivity, or true positive rate, is on the y-axis and 
+the 1 minus specificity, or false positive rate, is on the x-axis.
+The curve shows how these two outcome measures vary with different threshold values.
+
+The ROC curve always starts at the point (0,0). This corresponds to threshold value
+of 1 --> you will not catch any poor care cases (sensitivity = 0) and you have a false
+positive rate of 0 (1 - specificity).
+
+The ROC curve always ends at the point (1,1). This corresponds to a threshold value of
+0 --> you'll catch all of the poor care cases (sensitivity = 0) and you have a false
+positive rate of 1 (1 - specificity).
+
+The threshold decreases as you move from (0,0) to (1,1).
+
+At the point (0, 0.4) you're correctly labeling about 40% of the poor care cases with a
+very small false positive rate.
+
+At the point (0.6, 0.9) you're correctly labeling about 90% of the poor care cases, but
+have a false positive rate of 60%.
+
+At the point (0.3,0.8) you're correctly labeling about 80% of the poor care cases, with 
+a 30% false positive rate.
+
+The ROC curve captures all thresholds simultaneously. 
+
+So which threshold value should you pick ?
+
+You should select the best threshold fo the trade-off you want to make.
+
+If you're concerned with having a high specificity or low false positive rate, pick
+the threshold that maximizes the true positive rate while keeping the false positive
+rate really low. A threshold around (0.1,0.5).
+
+On the other hand, if your're more concerned with havin a high sensitivity or high
+true positive rate, pick a threshold that minimizes the false positive rate but has a 
+very high true positive rate. A threshold around (0.3, 0.8).
+
+To generate ROC curves in R, we need to install the ROCR package. And load the package
+using the library function.
+
+We'll use the prediction function of ROCR. This function takes two arguments. 
+The first is the predictions we made with our model (predictTrain).
+The second argument is the true outcomes of our data points (qualityTrain$PoorCare)
+
+```{r}
+library(ROCR)
+ROCRpred = prediction(predictTrain, qualityTrain$PoorCare)
+```
+
+Now, we need to use the performance function to define what we'd like to plot
+on the x and y axis of the ROC curve.
+
+```{r}
+ROCRperf = performance(ROCRpred, "tpr", "fpr")
+plot(ROCRperf, colorize=TRUE)
+```
+
+Finally, let's add the threshold labels to the plot.
+
+```{r}
+plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0,1,0.1), text.adj=c(-0.2,1.7))
+```
+
+### Interpreting the model
+
+How to interpret the model developed.
+
+One of the things we should look aftre is that might be what is called multicollinearity.
+
+Multicollinearity occurs when the various independent variables are correlated, and this
+might confuse the coefficients in the model.
+
+So we have to check the correlations of independent variables and verify also that the
+signs of the coefficients make sense. If it agrees with intuition, then multicollinearity
+has not been a problem.
+
+The next important thing is significance.
+
+So how do we interpret the results, and how we understand wheter we have a good model
+or not?
+
+Let's look at what is called Area Under the Curve of ROC, or AUC. The AUC shows an
+absolute measure of quality of prediction. The perfect score is 100% whereas a 50% score
+is pure guessing. In this case 77.5% is a 50% of success.
+
+Other outcome measures that are important to discuss is the so called confusion matrix.
+The actual class = 0 means, good quality of care and the actual class = 1 means poor
+quality of care. The predicted class = 0 means that will predict good quality and the
+predicted class = 1 means that we predict poor quality.
+
+```
+            Predicted = 0         Predicted = 1
+Actual = 0  True Negatives (TN)   False Positives (FP)
+Actual = 1  False Negatives (FN)  True Positives (TP)
+
+N = number of observations
+```
+
+$Overall Accuracy = \frac{TN + TP}{N}$
+
+$Overall Error Rate = \frac{FP + FN}{N}$
+
+$Sensitivity = \frac{TP}{TP + FN}$
+
+This is total number of times that we predict poor quality, and it is, indeed, poor
+quality, versus the total number of times the actual quality is, in fact, poor.
+
+$False Negative Error Rate = \frac{FN}{TP + FN}$
+
+$Specificity = \frac{TN}{TN + FP}$
+
+This is the number of times we predict good quality and, in fact, quality is good,
+versus the toal number of times the actual quality is good.
+
+$False Positive Error Rate = \frac{FP}{TN + FP}$
+
+In this particular example we want to make predictions on a test set to compute 
+out-of-sample metrics.
+
+```{r}
+predictTest = predict(QualityLog, type="response", newdata = qualityTest)
+table(qualityTest$PoorCare, predictTest > 0.3)
+```
+
+In this way, we make predictions about probabilities, of course, simply because logistic
+regression makes predictions about probabilities and then we transform them to a binary
+outcome --> the quality is good or the quality is poor, using a threshold.
+
+The overall accuracy of the model is `(19+6)/32`.
+
+The false positive rate is `5/24`.
+
+The true positive rate is `6/8`.
+
+Comparing this model with one alternative where we predict good care all the time.
+In that situation we will be correct 24/25 times. But notice that predicting always good
+care does not capture the dynamics of what is happening, versus the logistic regression
+model that is far more intelligent in capturing these effects.
+
+```{r}
+ROCRpredTest = prediction(predictTest, qualityTest$PoorCare)
+auc = as.numeric(performance(ROCRpredTest, "auc")@y.values)
+auc
+```
+
+### The Analytic Edge
+
+We built an expert-trained model by a physician that can accurately identify diabetic
+patients receiving low quality care.
+
+The out-of-sample accuracy was 78%, but most importantly, the model identifies moste
+patients receiving poor care, which is the major objective in the study.
+
+The model provide probabilities of somebody receiving poor quality care. These 
+probabilities can be used to prioritize patients for intervention.
