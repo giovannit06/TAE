@@ -169,3 +169,40 @@ as.numeric(performance(ROCRpred, "auc")@y.values)
 
 This value means that the model can differentiate between low risk patients and high
 risk patients pretty well.
+
+
+### Validating the Model
+
+So far, we have used what is known as internal validation to test our model. This means that we took the
+data from one set of patients and split them into a training set and a testing set.
+
+This confirms that our model is good at making predictions for patients in Framingham population, but
+it's unclear if the model generalizes to other populations.
+
+The Framingham cohort of patients were white, middle class adults.To be sure that the model extends to other
+types of patients, we need to test on other populations. This is known as *external* validation.
+
+For some population the Framingham model was accurate. The ARIC study tested the model with black men.
+For most part, the predictions are accurate. There's one group for which the model under-predicted the risk
+and one group for which the model over-predicted the risk.
+
+But for other populations, the Framingham model was not as accurate. The HHS study tested the model with
+Japanese-American men. The model systematically over-predicts a risk of CHD. The model can be recalibrated
+for this population.
+
+For models that will be used on different populations than the one used to create the model external
+validation is critical.
+
+### Interventions
+
+The first intervention has to do with drugs to lower blood pressure.
+
+The Veterans Administration Trial was a randomized, double blind clinical trial, that found decreased
+risk of coronary heart disease to test the effect of blood pressure drugs. And the results found
+decreased risk of coronary heart disease.
+
+Another intervention had to do with lowering the cholesterol levels. 
+
+A study of 4444 patients with CHD revealed that statins cause a 37% risk reduction of a second heart attack.
+
+
