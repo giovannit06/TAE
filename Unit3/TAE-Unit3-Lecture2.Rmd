@@ -61,3 +61,111 @@ Lastly, the dataset includes risk factors from first physical examination of the
 - *BMI*: Body Mass Index, weight (kg)/height (m)^2
 - *heartRate*: Heart rate (beats/minute)
 - *glucose*: Blood glucose level (mg/dL)
+
+### A logistic Regression Model
+
+Randomly split patients into training and testing sets
+
+Use logistic regression on training set to predict whether or not a patient experienced
+CHD within 10 years of first examination
+
+Evaluate predictive power on test set
+
+```{r}
+framingham = read.csv("framingham.csv")
+str(framingham)
+```
+
+Let's split the data into a training set and a testing set
+
+```{r}
+library(caTools)
+set.seed(1000)
+# First argument is the outcome variable framingham$TenYearCHD
+# Second argument is the percentage of data that we want in the training set (SplitRatio)
+split = sample.split(framingham$TenYearCHD, SplitRatio = 0.65)
+```
+
+When you have more data like we do here, you can afford to but less data in the
+training set and more in the testing set.
+
+```{r}
+train = subset(framingham, split == TRUE)
+test = subset(framingham, split == FALSE)
+```
+
+Now we're ready to build the logistic regression model using the training set.
+We predict the dependent variable using all of the other variables in the dataset as
+independent variables.
+
+```{r}
+# First argument is the dependent variable (TenYearCHD) followed by the tilde
+# and then period (all other variables)
+# Second argument is dataset to use, data = train
+# Third argument is for logistic regression model, family = binomial
+framinghamLog = glm(TenYearCHD ~ ., data = train, family = binomial)
+summary(framinghamLog)
+```
+
+male, age, prevalentStroke, totChol, sysBP and glucose are all
+significant in the model.
+
+cigsPerDay and prevalentHyp are almost significant.
+
+All of the significant variables have positive coefficients, meaning that higher
+values in these variables contribute to a higher probability of 10-year CHD.
+
+Now, let's use this model to make predictions on the test set.
+
+```{r}
+# First argument is the name of the model
+# Second argument is the type="response" to get probabilities
+# Third argument is the name of the testing set.
+predictTest = predict(framinghamLog, type = "response", newdata = test)
+```
+
+Then use a threshold value of 0.5 to create a confusion matrix.
+
+```{r}
+# First argument the actual values
+# Second argument the predictions
+table(test$TenYearCHD, predictTest > 0.5)
+```
+
+With a threshold of 0.5, we predict an outcome of 1, the true column, very rarely.
+This means that the model rarely predicts a 10-year CHD risk above 50%.
+
+What is the accuracy of this model?
+
+It's the sum of the cases we get right, `r 1069 + 11`, divede the total number of
+observations in the dataset, `r 1069 + 6 + 187 + 11`.
+
+```{r}
+(1069+11)/(1069+6+187+11)
+```
+
+We need to copmare this to the accuracy of a simple baseline method. The more
+frequent outcome in this case is 0, so the baseline method would get an accuracy
+of `r 1069 + 6` total number of true negative cases divided by the total number of 
+observations `r 1069 + 6 + 187 + 11`.
+
+```{r}
+(1069+6)/(1069+6+187+11)
+```
+
+So our model barely beats the baseline in terms of accuracy.
+
+But do we still have a valuable model by varying the threshold ?
+
+Let's compute the out-of-sample AUC.
+
+```{r}
+library(ROCR)
+# First argument is the predictions
+# Second argument is the true outcome
+ROCRpred = prediction(predictTest, test$TenYearCHD)
+as.numeric(performance(ROCRpred, "auc")@y.values)
+```
+
+This value means that the model can differentiate between low risk patients and high
+risk patients pretty well.
