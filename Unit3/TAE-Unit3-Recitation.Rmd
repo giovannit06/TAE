@@ -221,3 +221,129 @@ Republican would win and made 47 mistakes on the same data.
 
 ### Logistic Regression Model
 
+We need to consider first the possibility that there is multicollinearity within the independent
+variables. And there's a good reason to suspect that there would be multicollinearity amongst the
+variables, because in some sense, they're all measuring the same thing --> how strong the Republican
+candidate is performing in the particular state.
+
+If we do `cor(Train)` will get the error `'x' must be numeric`.
+
+```{r}
+str(Train)
+```
+
+When we look at the structure of the data, we see why we're getting this issue. It's because we're
+trying to take the correlations of the names of states, which doesn't make any sense.
+
+```{r}
+cor(Train[c("Rasmussen", "SurveyUSA", "PropR", "DiffCount", "Republican")])
+```
+
+SurveyUSA and Rasmussen are independent variables that have a correlation of 0.84, which is very large
+and something that would be concerning. So combining them together isn't going to do much to produce a
+working regression model.
+
+Let's firt consider the case where we want to build a logistic regression model with just one variable.
+In this case, it would be the variable that is most highly correlated with the outcome, Republican.
+
+We see thet PropR is probabily the best candidate to include in our single-varible model, because it's
+so highly correlated.
+
+```{r}
+mod1 = glm(Republican ~ PropR, data = Train, family = "binomial")
+summary(mod1)
+```
+
+We can see that it looks pretty nice in terms of its significance and the sign of the coefficients.
+We'll note down that the AIC measuring the strenght of the model is 19.8.
+
+Let's see how it does in terms of actually predicting the Republican outcome on the training set.
+First we want to compute the predictions, the predicted probabilities that the Republican is going
+to win on the training set.
+
+```{r}
+pred1 = predict(mod1, type="response")
+```
+
+Now, we want to see how well it's doing.
+
+```{r}
+table(Train$Republican, pred1 >= 0.5)
+```
+
+We see that on the training set, this model with one variable as a prediction makes 4 mistakes, which
+is just about the same as our smart baseline model. 
+
+Let's see if we can improve on this performance by adding in another variable.
+
+If we go back up to our correlations here, we're going to be searching for a pair of variables that
+has a relatively lower correlation with each other, because they might kind of work together to 
+improve the prediction overall of the Republican outcome.
+
+The least correlated pairs of variables are either Rasmussen and DiffCount or SurveyUSA and DiffCount.
+So the idea would be to try out one of these pairs in our two-variable model.
+
+```{r}
+mod2 = glm(Republican ~ SurveyUSA + DiffCount, data = Train, family = "binomial")
+summary(mod2)
+pred2 = predict(mod2, type="response")
+table(Train$Republican, pred2 >= 0.5)
+```
+
+We can see that we made one less mistake. We made 3 mistakes instead of 4 on the training. So a little
+better than the smart baseline but nothing too impressive. If we look at the model (summary). We can
+see that there are some things that are pluses.
+
+The AIC has a smaller value, which suggests a stronger model. And SurveyUSA and DiffCount both have
+positive coefficients in predicting if the Republican wins the state. But a weakness of this model
+is that neither of these variables has a significance of a star or better, which means that they are
+less significant statistically.
+
+### Test Set Predictions
+
+Now it's time to evaluate our models on the testing set. 
+
+The first model we're going to want to look at is that smart baseline model that basically just took
+a look at the polling results from the Rasmussen poll and used those to determine who was predicted to
+win the election.
+
+```{r}
+table(Test$Republican, sign(Test$Rasmussen))
+```
+
+The results shows that 2 times are inconclusive and 4 mistakes.
+
+This is going to be what we're going to compare our model against.
+
+We need first to obtain final testing set prediction from the model.
+
+```{r}
+# we'll pass newdata = Test since we're actually making testing set predictions
+TestPrediction = predict(mod2, newdata=Test, type="response") 
+```
+And, we're finally going to table the test set Republican value against the test prediction being
+greater than or equal to 0.5.
+
+```{r}
+table(Test$Republican, TestPrediction >= 0.5)
+```
+
+We see that for this particular case, we make only one mistake. Now, we could have tried changing
+this threshold from 0.5 to other values and computed out an ROC curve, bu that doesn't quite make as 
+much sense in this setting where we're just trying to accurately predict the outcome of each staate
+and we dont't care more about one sort of error.
+
+Let's take a look now at the mistake we made and see if we can understand what's going on. So to 
+actually pull out the mistake we made.
+
+```{r}
+subset(Test, TestPrediction >= 0.5 & Republican == 0)
+```
+
+This was the state of Florida for the year 2012. And looking through these predictor variables,
+we see why we made the mistake. The Rasmussen poll gave the Republican a 2% point lead, SurveyUSA 
+called a tie, DiffCount said that were 6 more polls that predicted Republican than Democrat, and two
+third of the polls predicted the Republican was going to win. 
+
+So the models here are not magic, and given this sort of data it's pretty unsurprising that our model
+that our model actually didn't get Florida correct in this case and made the mistake.

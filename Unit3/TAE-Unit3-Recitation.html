@@ -303,6 +303,127 @@ Test = subset(polling, Year == 2012)</code></pre>
 </div>
 <div id="logistic-regression-model" class="section level3">
 <h3>Logistic Regression Model</h3>
+<p>We need to consider first the possibility that there is multicollinearity within the independent variables. And there’s a good reason to suspect that there would be multicollinearity amongst the variables, because in some sense, they’re all measuring the same thing –&gt; how strong the Republican candidate is performing in the particular state.</p>
+<p>If we do <code>cor(Train)</code> will get the error <code>'x' must be numeric</code>.</p>
+<pre class="r"><code>str(Train)</code></pre>
+<pre><code>## 'data.frame':    100 obs. of  7 variables:
+##  $ State     : Factor w/ 50 levels &quot;Alabama&quot;,&quot;Alaska&quot;,..: 1 1 2 2 3 3 4 4 5 5 ...
+##  $ Year      : int  2004 2008 2004 2008 2004 2008 2004 2008 2004 2008 ...
+##  $ Rasmussen : int  11 21 19 16 5 5 7 10 -11 -27 ...
+##  $ SurveyUSA : int  18 25 21 18 15 3 5 7 -11 -24 ...
+##  $ DiffCount : int  5 5 1 6 8 9 8 5 -8 -5 ...
+##  $ PropR     : num  1 1 1 1 1 1 1 1 0 0 ...
+##  $ Republican: int  1 1 1 1 1 1 1 1 0 0 ...</code></pre>
+<p>When we look at the structure of the data, we see why we’re getting this issue. It’s because we’re trying to take the correlations of the names of states, which doesn’t make any sense.</p>
+<pre class="r"><code>cor(Train[c(&quot;Rasmussen&quot;, &quot;SurveyUSA&quot;, &quot;PropR&quot;, &quot;DiffCount&quot;, &quot;Republican&quot;)])</code></pre>
+<pre><code>##            Rasmussen SurveyUSA     PropR DiffCount Republican
+## Rasmussen  1.0000000 0.9365837 0.8431180 0.5109169  0.7929252
+## SurveyUSA  0.9365837 1.0000000 0.8616478 0.5222585  0.8101645
+## PropR      0.8431180 0.8616478 1.0000000 0.8273785  0.9484204
+## DiffCount  0.5109169 0.5222585 0.8273785 1.0000000  0.8092777
+## Republican 0.7929252 0.8101645 0.9484204 0.8092777  1.0000000</code></pre>
+<p>SurveyUSA and Rasmussen are independent variables that have a correlation of 0.84, which is very large and something that would be concerning. So combining them together isn’t going to do much to produce a working regression model.</p>
+<p>Let’s firt consider the case where we want to build a logistic regression model with just one variable. In this case, it would be the variable that is most highly correlated with the outcome, Republican.</p>
+<p>We see thet PropR is probabily the best candidate to include in our single-varible model, because it’s so highly correlated.</p>
+<pre class="r"><code>mod1 = glm(Republican ~ PropR, data = Train, family = &quot;binomial&quot;)
+summary(mod1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Republican ~ PropR, family = &quot;binomial&quot;, data = Train)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.22880  -0.06541   0.10260   0.10260   1.37392  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   -6.146      1.977  -3.108 0.001882 ** 
+## PropR         11.390      3.153   3.613 0.000303 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 138.269  on 99  degrees of freedom
+## Residual deviance:  15.772  on 98  degrees of freedom
+## AIC: 19.772
+## 
+## Number of Fisher Scoring iterations: 8</code></pre>
+<p>We can see that it looks pretty nice in terms of its significance and the sign of the coefficients. We’ll note down that the AIC measuring the strenght of the model is 19.8.</p>
+<p>Let’s see how it does in terms of actually predicting the Republican outcome on the training set. First we want to compute the predictions, the predicted probabilities that the Republican is going to win on the training set.</p>
+<pre class="r"><code>pred1 = predict(mod1, type=&quot;response&quot;)</code></pre>
+<p>Now, we want to see how well it’s doing.</p>
+<pre class="r"><code>table(Train$Republican, pred1 &gt;= 0.5)</code></pre>
+<pre><code>##    
+##     FALSE TRUE
+##   0    45    2
+##   1     2   51</code></pre>
+<p>We see that on the training set, this model with one variable as a prediction makes 4 mistakes, which is just about the same as our smart baseline model.</p>
+<p>Let’s see if we can improve on this performance by adding in another variable.</p>
+<p>If we go back up to our correlations here, we’re going to be searching for a pair of variables that has a relatively lower correlation with each other, because they might kind of work together to improve the prediction overall of the Republican outcome.</p>
+<p>The least correlated pairs of variables are either Rasmussen and DiffCount or SurveyUSA and DiffCount. So the idea would be to try out one of these pairs in our two-variable model.</p>
+<pre class="r"><code>mod2 = glm(Republican ~ SurveyUSA + DiffCount, data = Train, family = &quot;binomial&quot;)
+summary(mod2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Republican ~ SurveyUSA + DiffCount, family = &quot;binomial&quot;, 
+##     data = Train)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.04741  -0.00977   0.00561   0.03751   1.32999  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)  -0.6827     1.0468  -0.652   0.5143  
+## SurveyUSA     0.3309     0.2226   1.487   0.1371  
+## DiffCount     0.6619     0.3663   1.807   0.0708 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 138.269  on 99  degrees of freedom
+## Residual deviance:  11.154  on 97  degrees of freedom
+## AIC: 17.154
+## 
+## Number of Fisher Scoring iterations: 9</code></pre>
+<pre class="r"><code>pred2 = predict(mod2, type=&quot;response&quot;)
+table(Train$Republican, pred2 &gt;= 0.5)</code></pre>
+<pre><code>##    
+##     FALSE TRUE
+##   0    45    2
+##   1     1   52</code></pre>
+<p>We can see that we made one less mistake. We made 3 mistakes instead of 4 on the training. So a little better than the smart baseline but nothing too impressive. If we look at the model (summary). We can see that there are some things that are pluses.</p>
+<p>The AIC has a smaller value, which suggests a stronger model. And SurveyUSA and DiffCount both have positive coefficients in predicting if the Republican wins the state. But a weakness of this model is that neither of these variables has a significance of a star or better, which means that they are less significant statistically.</p>
+</div>
+<div id="test-set-predictions" class="section level3">
+<h3>Test Set Predictions</h3>
+<p>Now it’s time to evaluate our models on the testing set.</p>
+<p>The first model we’re going to want to look at is that smart baseline model that basically just took a look at the polling results from the Rasmussen poll and used those to determine who was predicted to win the election.</p>
+<pre class="r"><code>table(Test$Republican, sign(Test$Rasmussen))</code></pre>
+<pre><code>##    
+##     -1  0  1
+##   0 18  2  4
+##   1  0  0 21</code></pre>
+<p>The results shows that 2 times are inconclusive and 4 mistakes.</p>
+<p>This is going to be what we’re going to compare our model against.</p>
+<p>We need first to obtain final testing set prediction from the model.</p>
+<pre class="r"><code># we'll pass newdata = Test since we're actually making testing set predictions
+TestPrediction = predict(mod2, newdata=Test, type=&quot;response&quot;) </code></pre>
+<p>And, we’re finally going to table the test set Republican value against the test prediction being greater than or equal to 0.5.</p>
+<pre class="r"><code>table(Test$Republican, TestPrediction &gt;= 0.5)</code></pre>
+<pre><code>##    
+##     FALSE TRUE
+##   0    23    1
+##   1     0   21</code></pre>
+<p>We see that for this particular case, we make only one mistake. Now, we could have tried changing this threshold from 0.5 to other values and computed out an ROC curve, bu that doesn’t quite make as much sense in this setting where we’re just trying to accurately predict the outcome of each staate and we dont’t care more about one sort of error.</p>
+<p>Let’s take a look now at the mistake we made and see if we can understand what’s going on. So to actually pull out the mistake we made.</p>
+<pre class="r"><code>subset(Test, TestPrediction &gt;= 0.5 &amp; Republican == 0)</code></pre>
+<pre><code>##      State Year Rasmussen SurveyUSA DiffCount     PropR Republican
+## 24 Florida 2012         2         0         6 0.6666667          0</code></pre>
+<p>This was the state of Florida for the year 2012. And looking through these predictor variables, we see why we made the mistake. The Rasmussen poll gave the Republican a 2% point lead, SurveyUSA called a tie, DiffCount said that were 6 more polls that predicted Republican than Democrat, and two third of the polls predicted the Republican was going to win.</p>
+<p>So the models here are not magic, and given this sort of data it’s pretty unsurprising that our model that our model actually didn’t get Florida correct in this case and made the mistake.</p>
 </div>
 </div>
 
