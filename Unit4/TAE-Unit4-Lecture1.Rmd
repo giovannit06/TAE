@@ -1,0 +1,567 @@
+---
+title: "TAE - Unit 4 - Lecture 1"
+author: "GT"
+date: "May 9, 2016"
+output: html_document
+---
+
+## Judge, Jury and Classifier
+
+In this lecture, we'll see how analytics can be used to predict the outcomes of cases in the United
+States Supreme Court.
+
+This seems like a very unconventional use of analytics, but in 2002 a group of political science
+and law academics decided to test if a model can do better than a group of experts at predicting
+the decisions of the Supreme Court.
+
+In this case, a very interpretable analytics method was used, called classification and regression
+trees.
+
+The legal system of the United States operates at the state level and at the federal or country-wide
+level. The federal level is necessary to deal with cases beyond the scope of state law, like disputes
+between states, and violations of federal laws.
+
+The federal court is divided into three levels
+
+- District courts 
+- Circuit courts
+- Supreme Court.
+
+Cases start at the district courts, where an initial decision is made about the case.
+The circuit courts hear appeals from the district courts, and can change the decision that was made.
+The Supreme Court is the highest level in the American legal system and makes the final decision
+on cases.
+
+The Supreme Court of the United States consists of nine judges, or justices, who are appointed by the
+President.
+
+The people appointed as Supreme Court justices are usually distinguished judges, professors of law,
+or state or federal attorneys. The Supreme Court of the United States, or SCOTUS, decides on the most
+difficult and controversial cases in the United States.
+
+These cases often involve an interpretation of the Constitution, and have significant social, political,
+and economic consequences. 
+
+Since non-profits, voters, and anybody interested in long-term planning can benefit from knowing the
+outcomes of the Supreme Court cases before they happen, legal academics and political scientists
+regularly make predictions of Supreme Court decisions from detailed studies of the cases and individual
+justices.
+
+In 2002, Andrew Martin, a professor of political science at Washington University in St. Louis, decided
+to instead predict decisions using a statistical model built from data. Together with his colleagues, he
+decided to test the model against a panel of experts. They wanted to see if an analytical model could
+outperform the expertise and intuition of a large group of experts.
+
+Martin used a method called *classification and regression trees*, or **CART**.
+
+In this case, the outcome is binary. Will the Supreme Court affirm the case or reject the case?
+
+He could have used logistic regression for this, but logistic regression models are not easily
+interpretable. The model coefficients in logistic regression indicate the importance and relative 
+effect of variables, but do not give a simple explanation of how a decision is made.
+
+### CART
+
+To predict the outcomes of the Supreme Court, Martin used cases from 1994 through 2001.
+
+The Supreme Court was composed of the same nine justices that were justices when he made his 
+predictions in 2002.
+
+These nine justices were Breyer, Ginsburg, Kennedy, O'Connor, Rehnquist (Chief Justice), Scalia, Souter,
+Stevens, and Thomas.
+
+This was a very rare data set, since this was the longest period of time with the same set of justices
+in over 180 years. This allowed Martin to use a larger data set then might have been available if he
+was doing this experiment at a different time.
+
+We'll focus on predicting Justice Stevens's decisions.
+
+**Dependent variable**: Did Justice Stevens voted to reverse the lower court decision? 
+1 = reverse, 0 = affirm
+
+**Independent variables**: Properties of the case.
+
+- *Circuit court of origin* is the circuit or lower court where the case came from.
+  There are 13 different circuit courts in the United States. The 1st through 11th and Washington,
+  DC courts are defined by region. And the federal court is defined by the subject matter of the case.
+- *Issue area of the case* gives each case a category (civil rights or federal taxation).
+- *Type of petitioner* and *type of respondent* define two parties in the case (US, employer or
+  employee).
+- *Ideological direction of the lower court decision* (liberal or a conservative).
+- *Whether or not the petitioner argued that a law or practice was unconstitutional*.
+
+To collect this data, Martin and his colleagues read through all of the cases and coded the information.
+Some of it, like the circuit court, is straightforward. But other information required a judgment call,
+like the ideological direction of the lower court.
+
+Now that we have our data and variables, we are ready to predict the decisions of Justice Stevens.
+
+We can use logistic regression, and we get a model where some of the most significant variables
+are: 
+
+- whether or not the case is from the 2nd circuit court, with a coefficient of 1.66;
+- whether or not the case is from the 4th circuit court, with a coefficient of 2.82;
+- whether or not the lower court decision was liberal, with a coefficient of negative 1.22.
+
+While this tells us that the case being from the 2nd or 4th circuit courts is predictive of Justice
+Stevens reversing the case, and the lower court decision being liberal is predictive of Justice Stevens
+affirming the case, it's difficult to understand which factors are more important due to things like 
+the scales of the variables, and the possibility of multicollinearity. 
+It's also difficult to quickly evaluate what the prediction would be for a new case.
+
+So instead of logistic regression, Martin and his colleagues used a method called 
+*classification and regression trees*, or **CART**.
+
+This method builds what is called a tree by splitting on the values of the independent variables.
+To predict the outcome for a new observation or case, you can follow the splits in the tree and 
+at the end, you predict the most frequent outcome in the training set that followed the same path.
+
+Some advantages of CART are that it does not assume a linear model, like logistic regression
+or linear regression, and it's a very interpretable model.
+
+Let's look at an example. This plot shows sample data for two independent variables, x and y, and 
+each data point is colored by the outcome variable, red or gray. 
+
+CART tries to split this data into subsets so that each subset is as pure or homogeneous as possible.
+The splits that CART would create are shown here. The standard prediction made by a CART model
+is just the majority in each subset.
+
+If a new observation fell into the subset where the majority of the obs are red, then
+we would predict red. However, if a new observation fell into the subset where the majority of the obs
+are gray, we would predict gray.
+
+A CART model is represented by what we call a tree.
+
+```
+      X<60
+       /\
+  yes /  \ no
+     /    \
+   red    Y<20
+           /\
+      yes /  \ no
+         /    \
+       X<85   gray
+        /\
+   yes /  \ no
+      /    \
+    red   gray  
+```
+
+The first split tests whether the variable x is less than 60. If yes, the model says to predict red, 
+and if no, the model moves on to the next split. Then, the second split checks whether or not
+the variable y is less than 20. If no, the model says to predict gray, but if yes, the model moves 
+n to the next split. The third split checks whether or not the variable x is less than 85.
+If yes, then the model says to predict red, and if no, the model says to predict gray.
+
+There are a couple things to keep in mind when reading trees.
+
+In this tree, and for the trees we'll generate in R, a yes response is always to the left and 
+a no response is always to the right.
+
+Also, make sure you always start at the top of the tree.
+The x less than 85 split only counts for observations for which x is greater than 60
+and y is less than 20.
+
+### Splitting and Predictions
+
+We generated a CART tree with three splits, but why not two, or four, or even five?
+
+There are different ways to control how many splits are generated.
+
+One way is by setting a lower bound for the number of data points in each subset.
+
+In R, this is called the `minbucket` parameter, for the minimum number of observations in each bucket 
+or subset. The smaller minbucket is, the more splits will be generated.
+
+But if it's too small, overfitting will occur. This means that CART will fit the training set
+almost perfectly. But this is bad because then the model will probably not perform well on test set 
+data or new data.
+
+On the other hand, if the minbucket parameter is too large, the model will be too simple and the
+accuracy will be poor.
+
+In each subset of a CART tree, we have a bucket of observations, which may contain both possible
+outcomes.
+
+In the Supreme Court case, we'll be classifying observations as either affirm or reverse. Instead of
+just taking the majority outcome to be the prediction, we can compute the percentage of data in a 
+subset of each type of outcome.
+
+As an example, if we have a subset with 10 affirms and two reverses, then 87% of the data is affirm.
+Then, just like in logistic regression, we can use a threshold value to obtain our prediction.
+For this example, we would predict affirm with a threshold of 0.5 since the majority is affirm.
+But if we increase that threshold to 0.9, we would predict reverse for this example.
+
+Then by varying the threshold value, we can compute an ROC curve and compute an AUC value to evaluate
+our model.
+
+### CART in R
+
+Let's start by reading in the data file "stevens.csv". We'll call our data frame stevens
+and use the read.csv function to read in the data file "stevens.csv". Then let's take a look at 
+our data using the str function.
+
+```{r}
+stevens = read.csv("stevens.csv")
+str(stevens)
+```
+
+We have 566 observations, or Supreme Court cases, and nine different variables.
+
+- *Docket* is just a unique identifier for each case
+- *Term* is the year of the case
+
+Then we have our **six independent variables**: 
+
+- *Circuit*: the circuit court of origin
+- *Issue*: the issue area of the case
+- *Petitioner*: the type of petitioner
+- *Respondent*: the type of respondent
+- *LowerCourt*: the lower court direction
+- *Unconst*: whether or not the petitioner argued that a law or practice was unconstitutional.
+
+The last variable is our **dependent variable**:
+
+- *Reverse*: whether or not Justice Stevens voted to reverse the case: 1 for reverse, and 0 for affirm.
+
+Now before building models, we need to split our data into a training set and a testing set.
+We'll do this using the sample.split function like we did  for logistic regression.
+
+```{r}
+library(caTools)
+set.seed(3000)
+spl = sample.split(stevens$Reverse, SplitRatio = 0.7)
+Train = subset(stevens, spl == TRUE)
+Test = subset(stevens, spl == FALSE)
+```
+
+Now, we're ready to build our CART model. First we need to install and load the `rpart` package and 
+the rpart plotting package.
+
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+Now we can create our CART model using the rpart function. We'll use the rpart function, where
+the first argument is the same as if we were building a linear or logistic regression model.
+We'll give two additional arguments here. The first one is method = "class". This tells rpart to build 
+a classification tree, instead of a regression tree. The last argument we'll give is minbucket = 25.
+This limits the tree so that it doesn't overfit to our training set. Let's plot our tree using the prp
+function,
+where the only argument is the name of our model, StevensTree.
+
+```{r}
+StevensTree = rpart(Reverse ~ Circuit + Issue + Petitioner + Respondent + LowerCourt + Unconst, data = Train, method="class", minbucket=25)
+prp(StevensTree)
+```
+
+The first split of our tree is whether or not the lower court decision is liberal. If it is, then we
+move to the left in the tree. And we check the respondent. If the respondent is a criminal defendant,
+injured person, politician, state, or the United States, we predict 0, or affirm.
+
+You can see here that the prp function abbreviates the values of the independent variables.
+If you're not sure what the abbreviations are, you could create a table of the variable to see all of
+the possible values.
+
+So now moving on in our tree, if the respondent is not one of these types, we move on to the next split,
+and we check the petitioner. If the petitioner is a city, employee, employer, government official, or
+politician, then we predict 0, or affirm. If not, then we check the circuit court of origin.
+If it's the 10th, 1st, 3rd, 4th, DC or Federal Court, then we predict 0. Otherwise, we predict 1, or
+reverse.
+
+We can repeat this same process on the other side of the tree if the lower court decision is not
+liberal. 
+
+Comparing this to a logistic regression model, we can see that it's very interpretable. A CART tree 
+is a series of decision rules which can easily be explained.
+
+Now let's see how well our CART model does at making predictions for the test set. We'll use the 
+predict function, where the first argument is the name of our model, StevensTree. The second argument 
+is the new data we want to make predictions for, Test. And we'll add a third argument here, which is
+type = "class". This is like using a threshold of 0.5.
+
+```{r}
+PredictCART = predict(StevensTree, newdata = Test, type="class")
+# let's compute the accuracy of our model
+table(Test$Reverse, PredictCART)
+(41+71)/(41+36+22+71)
+```
+
+If you were to build a logistic regression model, you would get an accuracy of 0.665 and a baseline
+model that always predicts Reverse, the most common outcome, has an accuracy of 0.547.
+ 
+So our CART model significantly beats the baseline and is competitive with logistic regression.
+It's also much more interpretable than a logistic regression model would be.
+
+Lastly, to evaluate our model, let's generate an ROC curve for our CART model using the ROCR package.
+First, we need to load the package with the library
+
+```{r}
+library(ROCR)
+PredictROC = predict(StevensTree, newdata=Test)
+PredictROC
+```
+
+For each observation in the test set, it gives two numbers which can be thought of as the 
+probability of outcome 0 and the probability of outcome 1. These numbers give the percentage of 
+training set data in that subset with outcome 0 and the percentage of data in the training set
+in that subset with outcome 1.
+
+We'll use the second column as our probabilities to generate an ROC curve. We'll start by using 
+the prediction function. We'll call the output pred, and then use prediction, where the first argument
+is the second column of PredictROC, which we can access with square brackets, and the second argument 
+is the true outcome values, Test$Reverse. Now we need to use the performance function, where the first
+argument is the outcome of the prediction function, and then the next two arguments are true positive
+rate and false positive rate, what we want on the x and y-axes of our ROC curve. Then we can just plot
+our ROC curve by typing plot(perf).
+
+```{r}
+pred = prediction(PredictROC[,2], Test$Reverse)
+perf = performance(pred, "tpr", "fpr")
+plot(perf)
+```
+
+### RandomForest
+
+This method was designed to improve the prediction accuracy of CART and works by building a large 
+number of CART trees. Unfortunately, this makes the method less interpretable than CART, so often 
+you need to decide if you value the interpretability or the increase in accuracy more.
+
+To make a prediction for a new observation, each tree in the forest votes on the outcome and we pick 
+the outcome that receives the majority of the votes.
+
+So how does random forests build many CART trees? We can't just run CART multiple times because it 
+would create the same tree every time.
+
+To prevent this, random forests only allows each tree to split on a random subset of the available
+independent variables, and each tree is built from what we call a bagged or bootstrapped sample of 
+the data.
+
+This just means that the data used as the training data for each tree is selected randomly with
+replacement.
+
+Let's look at an example. Suppose we have five data points in our training set.
+We'll call them 1, 2, 3, 4, and 5.
+For the first tree, we'll randomly pick five data points randomly sampled with replacement.
+So the data could be 2, 4, 5, 2, and 1.
+Each time we pick one of the five data points regardless of whether or not it's been selected already.
+These would be the five data points we would use when constructing the first CART tree.
+
+Then we repeat this process for the second tree. This time the data set might be 3, 5, 1, 5, and 2.
+And we would use this data when building the second CART tree. Then we would repeat this process
+for each additional tree we want to create.
+
+So since each tree sees a different set of variables and a different set of data, we get what's called 
+a forest of many different trees.
+
+Just like CART, random forests has some parameter values that need to be selected. 
+
+The first is the minimum number of observations in a subset, or the minbucket parameter from CART. 
+When we create a random forest in R, this will be called nodesize. A smaller value of nodesize, 
+which leads to bigger trees, may take longer in R. Random forests is much more computationally 
+intensive than CART.
+
+The second parameter is the number of trees to build, which is called ntree in R. This should not
+be set too small, but the larger it is the longer it will take. A couple hundred trees is typically
+plenty.
+
+A nice thing about random forests is that it's not as sensitive to the parameter values as CART is.
+
+Let's switch to R and create a random forest model to predict the decisions of Justice Stevens.
+In our R console, let's start by installing and loading the package "randomForest."
+
+We'll call it StevensForest and use the randomForest function, first giving our dependent variable,
+Reverse, followed by a tilde sign, and then our independent variables separated by plus signs.
+We'll use the data set Train. For random forests, we need to give two additional arguments.
+These are nodesize, also known as minbucket for CART, and we'll set this equal to 25, the same value we
+used for our CART model. And then we need to set the parameter ntree. This is the number of trees to
+build. And we'll build 200 trees here.
+
+```{r}
+library(randomForest)
+StevensForest = randomForest(Reverse ~ Circuit + Issue + Petitioner + Respondent + LowerCourt + Unconst, data = Train, nodesize=25, ntree=200)
+```
+
+You should see an interesting warning message here.
+
+In CART, we added the argument method="class", so that it was clear that we're doing a classification
+problem.  The randomForest function does not have a method argument.
+
+So when we want to do a classification problem, we need to make sure outcome is a factor.
+
+Let's convert the variable Reverse to a factor variable in both our training and our testing sets.
+
+```{r}
+Train$Reverse = as.factor(Train$Reverse)
+Test$Reverse = as.factor(Test$Reverse)
+```
+
+Now let's try creating our random forest again.
+
+```{r}
+StevensForest = randomForest(Reverse ~ Circuit + Issue + Petitioner + Respondent + LowerCourt + Unconst, data = Train, nodesize=25, ntree=200)
+```
+
+We didn't get a warning message this time so our model is ready to make predictions.
+
+Let's compute predictions on our test set. We'll call our predictions PredictForest and use
+the predict function to make predictions using our model, StevensForest, and the new data set Test.
+
+```{r}
+PredictForest = predict(StevensForest, newdata=Test)
+table(Test$Reverse, PredictForest)
+(41+74)/(41+36+19+74)
+```
+
+Our accuracy here is about 67%. Recall that our logistic regression model had an accuracy of 66.5% and
+our CART model had an accuracy of 65.9%. So our random forest model improved our accuracy a little bit
+over CART.
+
+Keep in mind that Random Forests has a random component. You may have gotten a different confusion
+matrix than me because there's a random component to this method.
+
+### Cross-Validation
+
+In CART, the value of minbucket can affect the model's out-of-sample accuracy. If minbucket is too
+small, over-fitting might occur. But if minbucket is too large, the model might be too simple.
+
+So how should we set this parameter value?
+
+We could select the value that gives the best testing set accuracy, but this isn't right.
+The idea of the testing set is to measure model performance on data the model has never seen before.
+By picking the value of minbucket to get the best test set performance, the testing set was implicitly
+used to generate the model.
+
+Instead, we'll use a method called **K-fold Cross Validation**, which is one way to properly select 
+the parameter value.
+
+This method works by going through the following steps:
+
+First, we split the training set into k equally sized subsets, or folds. In this example, k equals 5.
+Then we select k - 1, or four folds, to estimate the model, and compute predictions on the remaining 
+one fold, which is often referred to as the validation set. We build a model and make predictions
+for each possible parameter value we're considering.
+
+Then we repeat this for each of the other folds, or pieces of our training set.
+
+So we would build a model using folds 1, 2, 3, and 5 to make predictions on fold 4,
+and then we would build a model using folds 1, 2, 4, and 5 to make predictions on fold 3, etc.
+
+So ultimately, cross validation builds many models, one for each fold and possible parameter value.
+Then, for each candidate parameter value, and for each fold, we can compute the accuracy of the model.
+
+Then we  plot shows the possible parameter values on the x-axis, and the accuracy of the model on the
+y-axis, the average the accuracy over the k folds to determine the final parameter value that we want
+to use.
+
+So far, we've used the parameter minbucket to limit our tree in R. When we use cross validation in R,
+we'll use a parameter called cp instead. This is the complexity parameter. It's like Adjusted R-squared
+for linear regression, and AIC for logistic regression, in that it measures the trade-off between model
+complexity and accuracy on the training set.
+
+A smaller cp value leads to a bigger tree, so a smaller cp value might over-fit the model to the
+training set. But a cp value that's too large might build a model that's too simple. 
+
+Let's go to R, and use cross validation to select the value of cp for our CART tree.
+
+To do this, we need to install and load two new packages. First, we'll install and load the package
+"caret". Now, let's install and load the package "e1071".
+
+```{r}
+library(caret)
+library(e1071)
+```
+
+Now, we'll define our cross validation experiment. First, we need to define how many folds we want.
+We can do this using the trainControl function. we'll say numFolds = trainControl, and then in
+parentheses, method = "cv", for cross validation, and then number = 10, for 10 folds.
+
+```{r}
+numFolds = trainControl(method="cv", number=10)
+```
+
+Then we need to pick the possible values for our cp parameter, using the expand.grid function.
+So we'll call it cpGrid, and then use expand.grid, where the only argument is .cp = seq(0.01,0.5,0.01).
+This will define our cp parameters to test as numbers from 0.01 to 0.5, in increments of 0.01.
+
+
+```{r}
+cpGrid = expand.grid(.cp=seq(0.01, 0.5, 0.01))
+```
+
+Now, we're ready to perform cross validation. We'll do this using the train function, where
+the first argument is similar to that when we're building models. It's the dependent variable, Reverse,
+followed by a tilde symbol, and then the independent variables separated by plus signs.
+Our data set here is Train, with a capital T, and then we need to add the arguments method = "rpart",
+since we want to cross validate a CART model, and then trControl = numFolds, the output of our
+trainControl function, and then tuneGrid = cpGrid, the output of the expand.grid function.
+
+```{r}
+train(Reverse ~ Circuit + Issue + Petitioner + Respondent + LowerCourt + Unconst, data = Train, method="rpart", trControl=numFolds, tuneGrid=cpGrid)
+```
+
+The first column gives the cp parameter that was tested, and the second column gives the cross
+validation accuracy for that cp value. The accuracy starts lower, and then increases, and then will
+start decreasing again, as we saw in the slides. At the bottom of the output, it says, "Accuracy was
+used to select the optimal model using the largest value. The final value used for the model was 
+cp = 0.18."
+
+This is the cp value we want to use in our CART model.
+
+So now let's create a new CART model with this value of cp, instead of the minbucket parameter.
+We'll call this model StevensTreeCV,
+
+
+```{r}
+StevensTreeCV = rpart(Reverse ~ Circuit + Issue + Petitioner + Respondent + LowerCourt + Unconst, data = Train, method="class", cp=0.18)
+PredictCV = predict(StevensTreeCV, newdata = Test, type="class")
+table(Test$Reverse, PredictCV)
+(59+64)/(59+18+29+64)
+```
+
+So the accuracy of this model is 0.724. Remember that the accuracy of our previous CART model was 0.659.
+
+Cross validation helps us make sure we're selecting a good parameter value, and often this will
+significantly increase the accuracy.
+
+### The Model vs The Experts
+
+So can a CART model actually predict Supreme Court case outcomes better than a group of experts?
+
+Martin and his colleagues used 628 previous Supreme Court cases between 1994 and 2001 to build their
+model. They made predictions for the 68 cases that would be decided in October, 2002, before the term
+started.
+
+Their model had two stages of CART trees.
+
+- The first stage involved making predictions using two CART trees. One to predict a unanimous liberal
+  decision and one to predict a unanimous conservative decision. If the trees gave conflicting responses
+  or both predicted no, then they moved on to the next stage.
+- The second stage consisted of predicting the decision of each individual justice, and then use the
+  majority decision of all nine justices as a final prediction for the case.
+  
+Martin and his colleagues also recruited 83 legal experts, 71 academics, and 12 attorneys. 38 had
+previously clerked for a Supreme Court Justice, 33 were chaired professors, and five were current or
+former law school deans. So this was really a dream team of experts.
+
+Additionally, the experts were only asked to predict within their area of expertise. So not all experts
+predicted all cases, but there was more than one expert making predictions for each case. When making
+their predictions, the experts were allowed to consider any source of information, but they were not
+allowed to communicate with each other regarding the predictions.
+
+For predicting the overall decision that was made by the Supreme Court, the models had an accuracy of 
+75%, while the experts only had an accuracy of 59%. 
+
+So the models had a significant edge over the experts in predicting the overall case outcomes.
+
+However, when the predictions were run for individual justices, the model and the experts performed very
+similarly. For some justices, the model performed better, and for some justices, the experts performed
+better. 
+
+Being able to predict Supreme Court decisions is very valuable to firms, politicians, and
+non-governmental organizations.
+
+This example really shows the edge that analytics can provide in traditionally qualitative
+applications.
