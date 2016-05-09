@@ -1,0 +1,216 @@
+---
+title: "TAE - Unit 4 - Lecture 2"
+author: "GT"
+date: "9 mai 2016"
+output: html_document
+---
+
+## Keeping an Eye on Healtcare Costs
+
+This is a story of D2Hawkeye, a medical data mining company located in Waltham, Massachusetts.
+
+The overall process that D2Hawkeye uses is as follows. It starts with medical claims that consist 
+of diagnoses, procedures, and drugs. These medical claims are then processed via process of 
+aggregation, cleaning, and normalization. This data then enters secure databases on which predictive 
+models are applied. The output of predictive models are specific reports that give insight to the 
+various questions that D2Hawkeye aspires to answer.
+
+The company tries to identify high-risk patients, work with patients to manage treatment and associated 
+costs, and arrange specialist care. Medical costs, of course, is a serious matter both for the patient 
+as well as the provider.
+Being able to predict this cost is an important problem that interests both the patients as well as the 
+providers.
+
+The overall goal of D2Hawkeye is to improve the quality of cost predictions.
+
+To analyze the data, the company used what we call a pre-analytics approach. This was based on the human 
+judgment of physicians who manually analyze patient histories and developed medical rules.
+
+The key question we analyze in this lecture is "Can we use analytics instead?"
+
+### Claims Data
+
+So the industry is data-rich, but data may be hard to access. Sometimes it involves unstructured data
+like doctor's notes. Often the data is hard to get due to differences in technology. Hospitals in 
+southern Massachusetts versus California might use different technologies and different platforms.
+Finally there are strong privacy laws, HIPAA, around health care data sharing.
+
+So what is available?
+
+Claims data is a major source. Claims data are requests for reimbursement submitted to insurance companies 
+or state-provided insurance from doctors, hospitals and pharmacies. Another source of data is the 
+eligibility information for employees. And finally demographic information: gender and age.
+
+However, this collection of data does not capture all aspects of a person's treatment or health.
+Many things must be inferred. Unlike electronic medical records, we do not know the results of a test,
+only that the test was administered. For example, we do not know the results of a blood test,
+but we do know that the blood test was administered.
+
+The specific exercise we are going to see in this lecture is an analytics approach to building models 
+starting with 2.4 million people over a three year span.
+
+The observation period was 2001 to 2003. This is where this data is coming from.
+
+And then out of sample, we make predictions for the period of 2003 and 2004.
+
+This was in the early years of D2Hawkeye. Out of the 2.4 million people, we included only people
+with data for at least 10 months in both periods, both in the observation period and the results period.
+This decreased the data to 400,000 people.
+
+### The Variables
+
+To build an analytics model, let us discuss the variables we used.
+
+First, we used the 13,000 diagnoses. It's for the codes for diagnosis that claims data utilize.
+There were also 22,000 different codes for procedures and 45,000 codes for prescription drugs.
+
+To work with this massive amount of variables, we aggregated the variables as follows.
+
+- 13,000 diagnoses --> 217 diagnosis groups.
+- 20,000 procedures --> 213 procedure groups.
+- 45,000 prescription drugs --> 189 therapeutic groups.
+
+To illustrate an example of how we infer further information from the data, the graph here shows
+on the horizontal axis, time, and on the vertical axis, costs in thousands of dollars.
+
+Patient one is a patient who, on a monthly basis, has costs on the order of $10,000 to $15,000, a fairly
+significant cost but fairly constant in time.
+
+Patient two has also an annual cost of a similar size to patient one. But in all but the third month, 
+the costs are almost $0. Whereas in the third month, it cost about $70,000.
+
+This is additional data we defined indicating whether the patient has a chronic or an acute condition.
+
+In addition to the initial variables, the 217 procedure groups, and 189 drugs, and so forth, we also
+defined in collaboration with medical doctors, 269 medically-defined rules.
+
+For example, 
+
+- Interaction between various illnesses.
+- Interaction between diagnosis and age.
+- Noncompliance with treatment.
+- Illness severity.
+
+And the last set of variables involve demographic information like gender and age.
+
+An important aspect of the variables are the variables related to cost. So rather than using costs
+directly,we bucketed costs and considered everyone in the group equally.
+
+So we defined five buckets. So the buckets were partitioned in such a way so that 20% of all costs 
+is in bucket five, 20% is in bucket four, and so forth. So the partitions were from 0 to 3,000, 
+from 3,000 to 8,000, from 8,000 to 19,000, from 19,000 to 55,000, and above 55,000.
+
+The percentage of patients that were below 3,000 was 78%.
+
+Let us interpret the buckets medically. So this shows the various levels of risk. 
+
+- Bucket one consists of patients that have rather low risk. 
+- Bucket two has what is called emerging risk.
+- Bucket three, moderate level of risk.
+- Bucket four, high risk.
+- Bucket five, very high risk.
+
+So from a medical perspective, buckets two and three, the medical and the moderate risk patients,
+are candidates for wellness programs.
+
+Whereas bucket four, the high risk patients, are candidates for disease management programs.
+
+And finally bucket five, the very high risk patients, are candidates for case management.
+
+### Error Measures
+
+Let us introduce the error measures we used in building the analytics models.
+
+The so-called "penalty error," is motivated by the fact that if you classify a very high-risk 
+patient as a low-risk patient, this is more costly than the reverse, namely classifying a low-risk 
+patient as a very high-risk patient.
+
+The idea is to use asymmetric penalties.
+
+```
+               Outcome
+            1  2  3  4  5
+           ---------------
+Forecast 1| 0  2  4  6  8
+Forecast 2| 1  0  2  4  6
+Forecast 3| 2  1  0  2  4
+Forecast 4| 3  2  1  0  2
+Forecast 5| 4  3  2  1  0
+```
+The table here shows a matrix where this is the outcome and this is the forecast.
+
+For example, whenever we classify a low-risk patient as high-risk, we pay a penalty of 2,
+which is a difference of 3 minus 1, the difference in the error. But inversely, when you classify 
+a bucket 3 patient as bucket 1 patient, the penalty is double the amount.
+
+So you observe that the off diagonal penalties are double the corresponding penalties in the lower diagonal.
+
+To judge the quality of the analytics models we developed, we compare it with a baseline. And the baseline
+is to simply predict that the cost in the next "period" will be the cost in the current period.
+
+We have observed that as far as identification of buckets is concerned, the accuracy was 75%
+and the penalty error was 0.56.
+
+### CART to Predict Cost
+
+Let us introduce the method we use for predicting the bucket number.
+
+It  is a method called *classification and regression trees*. 
+
+In this case, we use multi-class classification. There are five classes, buckets one to five.
+To give you an example, let us consider patients that have two types of diagnosis:
+coronary artery disease (CAD) and diabetes.
+
+```
+           Patient
+             /\
+       CAD  /  \  no CAD
+           /    \
+       Patient   |1|
+          /\
+Diabetes /  \ No diabetes
+        /    \
+      |5|    |3| 
+```
+
+So this is an example in which we only have two diagnoses and we will state how the method works.
+
+In the application of Hawkeye, the most important factors were related to cost in the beginning.
+
+```
+            Patient
+               /\
+Paid < $4000  /  \  Paid > $4000
+             /    \
+          |1|   Patient
+                  /\
+   Paid < $40000 /  \ Paid > $40000
+                /    \
+           Patient   Patient    
+              /\        /\
+             /  \      /  \
+```
+
+So in the beginning, the classification tree involved divisions based on cost.
+
+As the tree grows, then the secondary factor is utilized later in the classification tree
+involve various chronic illnesses and some of the medical rules we discussed earlier.
+
+For example, whether or not the patient has asthma and depression or not. If it has asthma and 
+depression, then it's bucket five.If it doesn't, then we consider a particular indicator
+indicating hylan injection, which is an indication of a possible knee replacement or arthroscopy.
+So if this indicator is equal to 1, then it's bucket three. If it's indicator is equal to 0, 
+it's not present, then it's bucket one.
+
+So let us give some examples of bucket five.
+
+- The patient is under 35 years old, he has between 3,300 and 3,900 in claims, coronary artery
+  disease as a diagnosis, but no office visits in the last year.
+- Claims between $3,900 and $43,000 with at least $8,000 paid in the last 12 months, $4,300 
+  in pharmacy claims, and acute cost profile and cancer diagnosis.
+- More than $58,000 in claims, but at least $50,000 paid in the last 12 months, but not an acute profile.
+
+Classification trees have the major advantage as being interpretable by the physicians who
+observe them and judge them. In other words, people were able to identify these cases as reasonable.
+
+### Claims Data in R
