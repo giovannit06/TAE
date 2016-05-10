@@ -214,3 +214,286 @@ Classification trees have the major advantage as being interpretable by the phys
 observe them and judge them. In other words, people were able to identify these cases as reasonable.
 
 ### Claims Data in R
+
+We unfortunately can't use the D2Hawkeye data due to privacy issues. The data set we'll be using
+instead, ClaimsData.csv, is structured to represent a sample of patients in the Medicare program, 
+which provides health insurance to Americans aged 65 and older, as well as some younger people 
+with certain medical conditions.
+
+To protect the privacy of patients represented in this publicly available data set, a number 
+of steps are performed to anonymize the data. So we would need to retrain the models we develop
+in this lecture on de-anonymized data if we wanted to apply our models in the real world.
+
+Let's start by reading our data set into R and taking a look at its structure.
+
+```{r}
+Claims = read.csv("ClaimsData.csv")
+str(Claims)
+```
+
+The observations represent a 1% random sample of Medicare beneficiaries, limited to those 
+still alive at the end of 2008.
+
+Our independent variables are from 2008, and we will be predicting cost in 2009.
+
+Our independent variables are:
+
+- *age*: patient's age in years at the end of 2008
+- *alzheimers*, *arthritis*, *cancer*, *copd*, *depression*, *diabetes*, *heart.failure*,
+  *ihd*, *kidney*, *osteoporosis*, *stroke*: binary variables indicating whether or not 
+   the patient had diagnosis codes for a particular disease or related disorder in 2008
+   Each of these variables will take value 1 if the patient had a diagnosis code for the 
+   particular disease and value 0 otherwise.
+
+- *reimbursement2008* is the total amount of Medicare reimbursements for this patient in 2008.
+- *reimbursement2009* is the total value of all Medicare reimbursements for the patient in 2009.
+- *bucket2008* is the cost bucket the patient fell into in 2008,
+- *bucket2009* is the cost bucket the patient fell into in 2009.
+
+These cost buckets are defined using the thresholds determined by D2Hawkeye.
+So the first cost bucket contains patients with costs less than $3,000, the second cost bucket
+contains patients with costs between $3,000 and $8,000, and so on.
+
+We can verify that the number of patients in each cost bucket has the same structure as what we
+saw for D2Hawkeye by computing the percentage of patients in each cost bucket. This gives the 
+percentage of patients in each of the cost buckets.
+
+```{r}
+table(Claims$bucket2009)/nrow(Claims)
+```
+
+So the vast majority of patients in this data set have low cost.
+
+Our goal will be to predict the cost bucket the patient fell into in 2009 using a CART model.
+
+But before we build our model, we need to split our data into a training set and a testing set.
+
+```{r}
+library(caTools)
+set.seed(88)
+spl = sample.split(Claims$bucket2009, SplitRatio = 0.6)
+ClaimsTrain = subset(Claims, spl == TRUE)
+ClaimsTest = subset(Claims, spl == FALSE)
+```
+
+### Baseline Method and Penalty Matrix
+
+Let's now see how the baseline method used by D2Hawkeye would perform on this data set.
+
+The baseline method would predict that the cost bucket for a patient in 2009 will be the 
+same as it was in 2008. So let's create a classification matrix to compute the accuracy 
+for the baseline method on the test set. The actual outcomes are ClaimsTest$bucket2009, 
+and our predictions are ClaimsTest$bucket2008.
+
+```{r}
+table(ClaimsTest$bucket2009, ClaimsTest$bucket2008)
+```
+
+The accuracy is the sum of the diagonal, the observations that were classified correctly, divided
+by the total number of observations in our test set.
+
+```{r}
+(110138+10721+2774+1539+104)/nrow(ClaimsTest)
+```
+
+So the accuracy of the baseline method is 0.68.
+
+Now how about the penalty error?
+
+To compute this, we need to first create a penalty matrix in R. Keep in mind that we'll put
+the actual outcomes on the left, and the predicted outcomes on the top.
+
+```{r}
+PenaltyMatrix = matrix(c(0,1,2,3,4,2,0,1,2,3,4,2,0,1,2,6,4,2,0,1,8,6,4,2,0),byrow = TRUE, nrow = 5)
+PenaltyMatrix
+```
+
+So what did we just create?
+
+The actual outcomes are on the left, and the predicted outcomes are on the top.
+
+So as we saw in the slides, the worst outcomes are when we predict a low cost bucket,
+but the actual outcome is a high cost bucket.
+
+We still give ourselves a penalty when we predict a high cost bucket and it's actually a 
+low cost bucket, but it's not as bad.
+
+So now to compute the penalty error of the baseline method, we can multiply our classification 
+matrix by the penalty matrix. And we're going to surround the entire table function by as.matrix
+to convert it to a matrix so that we can multiply it by our penalty matrix.
+
+```{r}
+as.matrix(table(ClaimsTest$bucket2009, ClaimsTest$bucket2008))*PenaltyMatrix
+```
+
+So now to compute the penalty error, we just need to sum it up and divide by the number 
+of observations in our test set.
+
+```{r}
+sum(as.matrix(table(ClaimsTest$bucket2009, ClaimsTest$bucket2008))*PenaltyMatrix)/nrow(ClaimsTest)
+```
+
+So the penalty error for the baseline method is 0.74.
+
+### Predict Healtcare Costs in R
+
+First, let's make sure the packages rpart and rpart.plot are loaded with the library function.
+
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+Now, let's build our CART model. 
+
+We'll call it ClaimsTree. And we'll use the rpart function to predict bucket2009, using as 
+independent variables: age, arthritis, alzheimers, cancer, copd, depression, diabetes, 
+heart.failure, ihd, kidney, osteoporosis, and stroke. We'll also use bucket2008 and 
+reimbursement2008. The data set we'll use to build our model is ClaimsTrain.
+And then we'll add the arguments, method = "class", since we have a classification problem here, 
+and cp = 0.00005.
+
+```{r}
+ClaimsTree = rpart(bucket2009 ~ age + arthritis + alzheimers + cancer + copd + depression + heart.failure + ihd + kidney + osteoporosis + stroke + bucket2008 + reimbursement2008, data = ClaimsTest, method = "class", cp = 0.00005)
+```
+
+Note that even though we have a multi-class classification problem here, we build our tree 
+in the same way as a binary classification problem.
+
+The cp value we're using here was selected through cross-validation on the training set.
+We won't perform the cross-validation here, because it takes a significant amount of time
+on a data set of this size.
+
+So now that our model's done, let's take a look at our tree with the prp function.
+
+```{r}
+prp(ClaimsTree)
+```
+
+We have a huge tree here. This makes sense for a few reasons. One is the large number of 
+observations in our training  set. Another is that we have a five-class classification
+problem, so the classification is more complex than a binary classification case, like the one 
+we saw in the previous lecture.
+
+The trees used by D2Hawkeye were also very large CART trees. While this hurts the interpretability 
+of the model, it's still possible to describe each of the buckets of the tree according to 
+the splits.
+
+So now, let's make predictions on the test set.
+
+```{r}
+PredictTest = predict(ClaimsTree, newdata = ClaimsTest, type="class")
+table(ClaimsTest$bucket2009, PredictTest)
+```
+
+To compute the accuracy, we need to add up the numbers on the diagonal and divide by the 
+total number of observations in our test set.
+
+```{r}
+(114141+16102+118+201+0)/nrow(ClaimsTest)
+```
+
+So the accuracy of our model is 0.713.
+
+For the penalty error, we can use our penalty matrix like we did previously.
+
+```{r}
+sum(as.matrix(table(ClaimsTest$bucket2009, PredictTest))*PenaltyMatrix)/nrow(ClaimsTest)
+```
+
+So our penalty error is 0.758.
+
+Previously, we saw that our baseline method had an accuracy of 68% and a penalty error of 0.74.
+
+So while we increased the accuracy, the penalty error also went up. Why?
+
+By default, rpart will try to maximize the overall accuracy, and every type of error is seen 
+as having a penalty of one. Our CART model predicts 3, 4, and 5 so rarely because there are 
+very few observations in these classes. So we don't really expect this model to do better on
+the penalty error than the baseline method.
+
+So how can we fix this?
+
+The rpart function allows us to specify a parameter called loss. This is the penalty matrix
+we want to use when building our model.
+
+```{r}
+ClaimsTree = rpart(bucket2009 ~ age + arthritis + alzheimers + cancer + copd + depression + heart.failure + ihd + kidney + osteoporosis + stroke + bucket2008 + reimbursement2008, data = ClaimsTest, method = "class", cp = 0.00005, parms=list(loss=PenaltyMatrix))
+```
+
+If the rpart function knows that we'll be giving a higher penalty to some types of errors
+over others, it might choose different splits when building the model to minimize the worst 
+types of errors.
+
+We'll probably get a lower overall accuracy with this new model. But hopefully, the penalty 
+error will be much lower too.
+
+So now that our model is done, let's regenerate our test set predictions.
+
+```{r}
+PredictTest = predict(ClaimsTree, newdata = ClaimsTest, type="class")
+table(ClaimsTest$bucket2009, PredictTest)
+(93433+19793+4974+597+4)/nrow(ClaimsTest)
+sum(as.matrix(table(ClaimsTest$bucket2009, PredictTest))*PenaltyMatrix)/nrow(ClaimsTest)
+```
+
+So the accuracy of this model is 0.647 and the penalty error of our new model is 0.642.
+
+Our accuracy is now lower than the baseline method, but our penalty error is also much lower.
+
+Note that we have significantly fewer independent variables than D2Hawkeye had.
+If we had the hundreds of codes and risk factors available to D2Hawkeye, we would hopefully 
+do even better.
+
+### Results
+
+We will discuss the results of the classification tree model.
+
+```
+       |     Accuracy    |   Penalty Error
+----------------------------------------------       
+Bucket | Trees | Baseline|  Trees | Baseline
+----------------------------------------------
+ All   |  80%  |   75%   |  0.52  |  0.56
+----------------------------------------------
+  1    |  85%  |   85%   |  0.42  |  0.44
+
+  2    |  60%  |   31%   |  0.89  |  0.96
+
+  3    |  53%  |   21%   |  1.01  |  1.37
+
+  4    |  39%  |   19%   |  1.01  |  1.72
+
+  5    |  30%  |   23%   |  1.01  |  1.88
+----------------------------------------------
+```
+
+So we first observe that the overall accuracy of the method regarding the percentage that it 
+accurately predicts is 80%, compared to 75% of the baseline. But notice that this is done in an 
+interesting way.
+
+For bucket one patients, the two models are equivalent, this suggests the idea that healthy people 
+stay healthy, which is the idea of the baseline model. The cost repeats is valid in the data.
+
+But then for buckets two to five, notice that the accuracy increases substantially from
+31% to 60%, it doubles, from 21% to 53%, more than doubles, and from 19% to 39%, doubles.
+There's an improvement from 23% to 30%, not as big as before, but there is indeed an improvement 
+for bucket five.
+
+But notice the improvement on the penalty from 0.56 to 0.52 overall.
+
+A small improvement in bucket one, but a significant improvement as we increase on the buckets.
+For example, here for bucket five, the penalty error decreases from 1.88 to 1.01, a substantial 
+improvement. So we observed that there's a substantial improvement over the baseline, 
+especially as we go down on buckets.
+
+So what is the edge of the analytics provided to D2Hawkeye?
+
+First and foremost, there was a substantial improvement in the company's ability to identify
+patients who need more attention.
+
+Another advantage was related to the fact that the model was in fact interpretable by physicians.
+
+So the physicians were able to improve the model by identifying new variables and refining 
+existing variables. That really led to further improvements.
+
