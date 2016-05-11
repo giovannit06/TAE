@@ -197,3 +197,189 @@ So there's definitely some structure to it, but it's certainly not simple in rel
 to latitude and longitude at least.
 
 ### Geographical Predictions
+
+We saw that the house prices were distributed over the area in an interesting way,
+certainly not the kind of linear way. And we wouldn't necessarily expect linear regression
+to do very well at predicting house price, just given latitude and longitude.
+
+We can kind of develop that intuition more by plotting the relationship between 
+latitude and house prices or the longitude and the house prices. They look pretty nonlinear.
+
+```{r}
+plot(boston$LAT, boston$MEDV)
+plot(boston$LON, boston$MEDV)
+```
+
+So, we'll try fitting a linear regression anyway. And we'll use the lm command, linear model,
+to predict house prices based on latitude and longitude using the boston data set.
+
+```{r}
+latlonlm = lm(MEDV ~ LAT + LON, data=boston)
+summary(latlonlm)
+```
+
+If we take a look at our linear regression, we see the R-squared is around 0.1, which is not 
+great. The latitude is not significant, which means the north-south differences aren't
+going to be really used at all. Longitude is significant, and it's negative.
+Which we can interpret as, as we go towards the ocean, towards the east, house prices decrease 
+linearly.
+
+So this all seems kind of unlikely, but let's work with it.
+
+So let's see how this linear regression model looks on a plot.
+
+```{r}
+plot(boston$LON, boston$LAT)
+points(boston$LON[boston$MEDV>=21.2],boston$LAT[boston$MEDV>=21.2],col="red", pch=19)
+```
+
+Now, the question we're going to ask, and then plot, is what does the linear regression model
+think is above median. So we could just do this pretty easily.
+
+We have latlonlm$fitted.values and this is what the linear regression model predicts for each 
+of the 506 census tracts.
+
+```{r}
+head(latlonlm$fitted.values,20)
+```
+
+So we'll plot these on top. If we use the dots again, we'll cover up the red dots
+and cover up some of the black dots. What we won't be able to see is where
+the red dots and the blue dots match up. It turns out that you can actually
+pass in characters to this PCH option.
+
+```{r}
+plot(boston$LON, boston$LAT)
+points(boston$LON[boston$MEDV>=21.2],boston$LAT[boston$MEDV>=21.2],col="red", pch=19)
+points(boston$LON[latlonlm$fitted.values>=21.2],boston$LAT[latlonlm$fitted.values>=21.2],col="blue", pch="$")
+```
+
+So, the linear regression model has plotted a dollar sign for every time it thinks the census
+tract is above median value. And you can see that, indeed, it's almost as you can see the sharp line
+that the linear regression defines.
+
+And how it's pretty much vertical, because remember before, the latitude variable
+was not very significant in the regression. So that's interesting and pretty wrong.
+
+One thing that really stands out is how it says Boston is mostly above median. Even  
+we saw it right from the start, there's a big non-red spot, right in the middle of Boston, 
+where the house prices were below the median.
+
+So the linear regression model isn't really doing a good job. And it's completely ignored 
+everything to the right side of the picture.
+
+### Regression Trees
+
+Let's see how regression trees do. We'll first load the rpart library and also load the rpart 
+plotting library.
+
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+We build a regression tree in the same way we would build a classification tree, using the 
+rpart command. We predict MEDV as a function of latitude and longitude, using the boston dataset.
+
+```{r}
+latlontree = rpart(MEDV ~ LAT + LON, data=boston)
+prp(latlontree)
+```
+
+In the plot the tree using the prp command, which is defined in rpart.plot, we can see it 
+makes a lot of splits and is a little bit hard to interpret.
+But the important thing is to look at the leaves.
+
+In a classification tree, the leaves would be the classification we assign that these splits
+would apply to.
+
+But in regression trees, we instead predict the number. That number is the average of the median house
+prices in that bucket or leaf.
+
+We'll plot again the latitude of the points. And we'll again plot the points with above median 
+prices. Then we want to predict what the tree thinks is above median, just like we did with 
+linear regression. So we'll say the fitted values we can get from using the predict command 
+on the tree we just built.
+
+```{r}
+plot(boston$LON, boston$LAT)
+points(boston$LON[boston$MEDV>=21.2],boston$LAT[boston$MEDV>=21.2],col="red", pch=19)
+fittedvalues = predict(latlontree)
+points(boston$LON[fittedvalues>=21.2],boston$LAT[fittedvalues>=21.2],col="blue", pch="$")
+```
+
+Now we see that we've done a much better job than linear regression was able to do.
+We've correctly left the low value area in Boston and below out, and we've correctly
+managed to classify some of those points in the bottom right and top right.
+
+We're still making mistakes, but we're able to make a nonlinear prediction on latitude and longitude.
+
+So that's interesting, but the tree was very complicated. Maybe it's drastically overfitting.
+
+Can we get most of this effect with a much simpler tree? We can.
+
+We would just change the minbucket size. So let's build a new tree.
+
+```{r}
+latlontree = rpart(MEDV ~ LAT + LON, data=boston, minbucket=50)
+plot(latlontree)
+text(latlontree)
+```
+
+And we see we have far fewer splits, and it's far more interpretable.
+
+The first split says if the longitude is greater than or equal to negative 71.07,
+so if you're on the right side of the picture.
+
+So the left-hand side of the tree corresponds to the right-hand side of the map.
+And the right side of the tree corresponds to the left side of the map.
+
+Let's see what it means visually. So we'll remember these values, and we'll
+plot the longitude and latitude again.
+
+```{r}
+plot(boston$LON, boston$LAT)
+# first split was on longitude = -71.07
+abline(v=-71.07)
+```
+
+It corresponds to being on either the left or right-hand side of this tree.
+
+We'll focus on the lowest price prediction, which is in the bottom left corner of the tree,
+right down at the bottom left after all those splits. So that's where we want to get to.
+
+So let's plot again the points.
+
+```{r}
+plot(boston$LON, boston$LAT)
+# first split was on longitude = -71.07
+abline(v=-71.07)
+# next split on latitude = 42.21, Charles River
+abline(h=42.21)
+# final split on latitude = 42.17
+abline(h=42.17)
+```
+
+And now that's interesting. If we look at the right side of the middle of the three
+rectangles on the right side, that is the bucket we were predicting. And it corresponds to 
+the South Boston low price area we saw before. So maybe we can make that more clear by plotting, now,
+the high value prices.
+
+```{r}
+plot(boston$LON, boston$LAT)
+abline(v=-71.07)
+abline(h=42.21)
+abline(h=42.17)
+points(boston$LON[boston$MEDV>=21.2],boston$LAT[boston$MEDV>=21.2],col="red", pch=19)
+```
+
+So this makes it even more clear.
+
+We've correctly shown how the regression tree carves out that rectangle in the bottom of Boston
+and says that is a low value area. So that's actually very interesting. It's shown us something 
+that regression trees can do that we would never expect linear regression to be able to do.
+
+So the question we're going to answer is given that regression trees can do these fancy things
+with latitude and longitude, is it actually going to help us to be able to build a predictive model,
+predicting house prices? Well, we'll have to see.
+
