@@ -215,6 +215,55 @@ $(document).ready(function () {
 <p>So now we have a bunch of tweets that are labeled with their sentiment.</p>
 <p>But how do we build independent variables from the text of a tweet to be used to predict the sentiment?</p>
 </div>
+<div id="bag-of-words" class="section level3">
+<h3>Bag of Words</h3>
+<p>In this lecture, we’ll use a technique called <strong>Bag of Words</strong> to build text analytics models.</p>
+<p>Fully understanding text is difficult, but Bag of Words provides a very simple approach.</p>
+<p>It just <strong>counts the number of times</strong> each word appears in the text and uses these counts as the independent variables.</p>
+<p>For example, in the sentence,</p>
+<p><em>“This course is great.I would recommend this course my friends,”</em></p>
+<pre><code>-------------------------------------------------
+| THIS | COURSE | GREAT | ... | WOULD | FRIENDS |
+-------------------------------------------------
+|  2   |   2    |   1   | ... |   1   |    1    |
+-------------------------------------------------</code></pre>
+<p>In Bag of Words, there’s one feature for each word. This is a very simple approach, but is often very effective, too.</p>
+<p>It’s used as a baseline in text analytics projects and for natural language processing.</p>
+<p>This isn’t the whole story, though. Preprocessing the text can dramatically improve the performance of the Bag of Words method. One part of preprocessing the text is to clean up irregularities.</p>
+<p>Text data often as many inconsistencies that will cause algorithms trouble. Computers are very literal by default.</p>
+<p>‘Apple’ with just an uppercase A, ‘APPLE’ all in uppercase letters, or ‘ApPLe’ with a mixture of uppercase and lowercase letters will all be counted separately.</p>
+<p>We want to change the text so that all three versions of Apple here will be counted as the same word, by either changing all words to uppercase or to lower case. We’ll typically change all the letters to lowercase.</p>
+<p>Punctuation can also cause problems. The basic approach is to deal with this is to remove everything that isn’t a standard number or letter.</p>
+<p>However, sometimes punctuation is meaningful.</p>
+<ul>
+<li>In the case of Twitter, <code>@Apple</code> denotes a message to Apple, and <code>#Apple</code> is a message about Apple.</li>
+<li>For web addresses, the punctuation often defines the web address.</li>
+</ul>
+<p>For these reasons, the removal of punctuation should be tailored to the specific problem.</p>
+<p>In our case, we will remove all punctuation, so <span class="citation">@Apple</span>, Apple with an exclamation point, Apple with dashes will all count as just Apple.</p>
+<p>Another preprocessing task we want to do is to remove unhelpful terms.</p>
+<p>Many words are frequently used but are only meaningful in a sentence.</p>
+<p>These are called <strong>stop words</strong>. Examples are <em>the</em>, <em>is</em>, <em>at</em>, and <em>which</em>. It’s unlikely that these words will improve the machine learning prediction quality, so we want to remove them to reduce the size of the data.</p>
+<p>There are some potential problems with this approach. Sometimes, two stop words taken together have a very important meaning.</p>
+<p>It no longer has the same meaning as before. So while removing stop words sometimes is not helpful, it generally is a very helpful preprocessing step.</p>
+<p>Lastly, an important preprocessing step is called <strong>stemming</strong>.</p>
+<p>This step is motivated by the desire to represent words with different endings as the same word.</p>
+<p>We probably do not need to draw a distinction between argue, argued, argues, and arguing.</p>
+<p>They could all be represented by a common <em>stem</em>, <strong>argu</strong>.</p>
+<p>There are many ways to approach the problem. One approach is to build a database of words and their stems. A pro is that this approach handles exceptions very nicely, since we have defined all of the stems.</p>
+<p>However, it won’t handle new words at all, since they are not in the database. This is especially bad for problems where we’re using data from the internet, since we have no idea what words will be used.</p>
+<p>A different approach is to write a rule-based algorithm. In this approach, if a word ends in things like <em>ed</em>, <em>ing</em>, or <em>ly</em>, we would remove the ending. A pro of this approach is that it handles new or unknown words well.</p>
+<p>However, there are many exceptions, and this approach would miss all of these.</p>
+<p>Words like child and children would be considered different, but it would get other plurals, like dog and dogs.</p>
+<p>This second approach is widely popular and is called the Porter Stemmer, designed by Martin Porter in 1980, and it’s still used today.</p>
+<p>Stemmers like this one have been written for many languages. Other options for stemming include machine learning, where algorithms are trained to recognize the roots of words and combinations of the approaches explained here.</p>
+<p>As a real example from our data set, the phrase <em>“by far the best customer care service I<em> </em>have ever received”</em> has three words that would be stemmed: ‘customer’, ‘service’, and ‘received’.</p>
+<ul>
+<li>the “er” would be removed in customer</li>
+<li>the “e” would be removed in service</li>
+<li>the “ed” would be removed in received</li>
+</ul>
+</div>
 </div>
 
 
