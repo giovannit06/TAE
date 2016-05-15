@@ -1,0 +1,303 @@
+---
+title: "TAE - Unit 5 - Lecture 2"
+author: "GT"
+date: "14 mai 2016"
+output: html_document
+---
+
+## Man vs Machine
+
+This is a lecture of how IBM built a computer that plays the very popular game of Jeopardy!.
+
+Jeopardy! is a quiz show that asks complex and clever questions like puns,
+obscure facts, and uncommon words.
+
+It originally aired in 1964. It covers a huge variety of topics, and it's generally 
+viewed as an impressive feat to do well in this game.
+
+No computer system has ever been developed that could even come close to competing with 
+humans on Jeopardy!.
+
+IBM Research strives to push the limits of science. It has a tradition of addressing 
+inspiring and difficult challenges over the years.
+
+In the mid '90s, it built Deep Blue, a computer, to compete against the best human chess players,
+and then in the mid '90s, Deep Blue beat Garry Kasparov, who was at that time
+the world champion in chess.
+
+Later it built Blue Gene, a computer to map the human genome.
+
+In 2005, a team at IBM Research started creating a computer that would compete at Jeopardy!
+
+Six years later, a two-game exhibition match aired on television. The winner would
+receive a million dollars.
+
+The contestants were Ken Jennings, the longest winning champion, whose longest
+winning streak was 75 days; Brad Rutter, who was the biggest money winner of over 3.5
+million; and Watson, a supercomputer with 3,000 processors and a database of 200 million
+pages of information.
+
+### The Game of Jeopardy
+
+The game of Jeopardy has three rounds.
+
+Jeopardy, Double Jeopardy, where the dollar values are doubled, and Final Jeopardy, 
+when contestants can wager an amount of money on one single question.
+
+Each round has five questions in six categories. It consists of a wide variety of topics,
+over 2,500 different categories.
+
+Each question has dollar value.
+
+The first to buzz in and answer correctly wins the money. If they answer incorrectly, 
+they lose the money.
+
+### Watson's Database and Tools
+
+So why is the game of Jeopardy hard for a computer?
+
+We said earlier that Watson had 3,000 processors and a database of 200 million 
+pages of information.
+
+So shouldn't it be easy for Watson to play Jeopardy?
+
+Unfortunately, Jeopardy has a wide variety of categories which are purposely made cryptic.
+
+While computers can easily answer precise questions, like computing the square root 
+of a complicated number, understanding natural language is hard for computers.
+
+So how about if we just store answers to all possible questions that could be 
+asked on Jeopardy?
+
+Unfortunately, this would be impossible. An analysis of 200,000 previous Jeopardy
+questions yielded over 2,500 different categories, and new questions are created on 
+Jeopardy all the time.
+
+Well, OK, then let's just search Google for the answer to the question.
+Unfortunately, no links to the outside world are permitted on Jeopardy, and this rule
+applied to Watson as well. And even if Watson could search the internet for the answer
+to a question, it can take considerable skill to find the right web page with the 
+right information.
+
+So instead, Watson used analytics to answer the Jeopardy questions.
+
+Watson received each question in text form. With the question in text form, IBM
+was able to use text analytics and other analytical methods to make Watson a 
+competitive player.
+
+Overall, they used 100 different techniques for analyzing natural language, finding 
+hypotheses for the questions, and ranking these hypotheses to pick an answer.
+
+Watson had a huge database of sources and several basic tools to help understand language.
+
+The database consisted of a massive number of data sources, like encyclopedias, texts, 
+manuals, magazines, and downloaded pages of Wikipedia.
+
+One of the tools Watson had was a **lexicon**, which describes the relationship
+between different words.
+
+For example, the lexicon could tell Watson that water is a clear liquid, but not all 
+clear liquids are water.
+
+Another tool Watson had was a part of speech tagger and parser.
+
+This would identify functions of words in text. For example, it would know that the
+word "race" can be used as a verb or a noun. *"The students had to race to catch the bus"*
+uses race as a verb, while *"Please indicate your race"* uses race as a noun.
+
+Then, using these data sources and tools, Watson would answer a question by going
+through four major steps.
+
+- Step 1: Question analysis, where Watson tries to figure out what the question 
+  is looking for.
+- Step 2: Hypothesis generation, where Watson searches the information
+   sources for possible answers.
+- Step 3: Scoring hypotheses. This means that a confidence level has to be computed for
+ each answer.
+- Step 4: Final ranking: to look for a highly-supported answer.
+
+### How Watson Works - Steps 1 and 2
+
+The first step is **question analysis**.
+
+One of the things Watson tries to figure out in this step is what the question is 
+looking for.
+
+This is defined as trying to find the **Lexical Answer Type**, or LAT, of the question.
+
+The *LAT* is the word or noun in the question that specifies the type of answer. 
+You should be able to replace the LAT with the answer to complete the sentence.
+
+For example, for the question, 
+
+"Mozart's last and perhaps most powerful symphony shares its name with **this planet**," 
+the LAT in this case is "this planet."
+
+If we replace this with the answer "Jupiter," it makes sense.
+
+For the question, 
+
+"Smaller than only Greenland, *it's* the world's second largest island," 
+the LAT is "it's."
+
+If we replace the LAT with the answer "New Guinea," it makes sense.
+Unfortunately, the LAT is not "island," which would be more descriptive.
+
+We can see in these two examples that sometimes the LAT is very
+specific, like "this planet," and sometimes it's very vague, like "it's."
+If we know the LAT, we know what to look for.
+
+However, in an analysis of 20,000 questions, 2,500 distinct LATs were found, and 12% of 
+the questions did not even have an explicit LAT. They had LATs like "it's."
+
+Furthermore, even the most frequent 200 explicit LATs cover less than 50% of the questions.
+
+So to enhance the question analysis step, Watson also performs relation detection
+to find relationships among words and decomposition to split the question into different clues.
+
+The second step in Watson is **hypothesis generation**.
+
+The goal of this step is to use the question analysis of step one to produce 
+candidate answers by searching the databases. In this step several hundred candidate 
+answers are generated.
+
+For the question, 
+
+"Mozart's last and perhaps most powerful symphony shares its name with this planet,"
+
+candidate answers could be *Mercury*, *Earth*, and *Jupiter*.
+
+These are generated using various search techniques.
+
+If the correct answer is not generated at this stage, Watson has no hope of getting the
+question right.
+
+### How Watson Works - Steps 3 and 4
+
+After Watson has completed the initial two steps of question analysis and hypothesis generation,
+it's then time to move on to step three, where each of the hypotheses are scored.
+
+In this step, Watson computes confidence levels for each possible answer or hypothesis.
+This is necessary to accurately estimate the probability of a proposed answer being correct.
+
+Watson will only buzz in to answer a question if a confidence level for one of the
+hypotheses is above a threshold.
+
+To compute these confidence levels, Watson combines a large number of different methods.
+
+First, Watson starts with lightweight scoring algorithms to prune down the large
+set of hypotheses. Recall that in step two, about 200 different hypotheses
+were generated.
+
+An example of a lightweight scoring algorithm is computing the likelihood that a 
+candidate answer is actually an instance of the LAT.
+
+For the Mozart symphony question where the LAT is "this planet," a candidate answer 
+like "Earth" would have a very high score, but a candidate answer like, "the moon"
+would have a lower score.
+
+The candidate answers that pass this step proceed to the next stage of the scoring 
+algorithms. Watson lets about 100 candidate answers pass on to the next stage.
+
+Then Watson moves into more advanced scoring analytics. to gather supporting evidence
+for each candidate answer.
+
+One way of doing this is through a method called passage search, where passages
+are retrieved that contain the hypothesis text.
+
+To simulate this, let's see what happens when we search for two of our hypotheses 
+on Google.
+
+Our first hypothesis is "Mozart's last and perhaps most powerful symphony shares
+its name with Mercury."
+
+And our second hypothesis is "Mozart's last and perhaps most powerful symphony shares
+its name with Jupiter."
+
+On Google, if we search for *Mozart*, *symphony*, and *Mercury*, we get about 900,000 results.
+And we get some good results. They definitely mention the three words we searched for,
+but Mercury is only next to symphony once. And there's no mention about this being his
+last symphony.
+
+Now, if we search for *Mozart*, *symphony*, and *Jupiter*, we get about 1.5 million results,
+and they look much more promising. We see the phrase "last symphony" a couple times
+and "Jupiter symphony" more than once. 
+
+Therefore, the hypothesis with Jupiter seems to be more supported than the hypothesis
+with Mercury.
+
+Now, the scoring analytics determine the degree of certainty that the evidence supports 
+the candidate answers. More than 50 different scoring components are used.
+
+One example is analyzing temporal relationships.
+
+Consider the Jeopardy question
+
+"In 1594, he took a job as a tax collector in Andalusia."
+
+Two candidate answers are Thoreau and Cervantes. However, this algorithm would determine
+that Thoreau was not born until 1817. So it would give a higher score to Cervantes.
+
+Once all of the scoring algorithms are run, Watson needs to select the single best 
+supported hypothesis.
+
+Before this can be done, similar answers need to be merged, since multiple candidate 
+answers may be equivalent. As an example, the candidate answers "Abraham Lincoln" and
+"Honest Abe" refer to the same person. So the scores for these two candidate answers
+need to be combined. Watson should not be viewing similar answers as competing choices.
+
+Now, Watson is ready to rank the hypotheses and estimate an overall confidence for each.
+To do this, predictive analytics are used.
+
+To compute an overall confidence level for each candidate answer, Watson uses logistic 
+regression.
+
+The training data is a set of historical Jeopardy questions and all of the candidate 
+answers. Each of the scoring algorithms is used as an independent variable. Then, logistic 
+regression is used to predict whether or not a candidate answer is correct using the scores.
+
+This gives each score a weight and computes an overall profitability or confidence
+that a candidate answer is correct.
+
+If the highest confidence level for one of the candidate answers for a question is
+high enough, Watson buzzes in to answer the question.
+
+### The Results
+
+So the games were scheduled for February 2011. Two games were played, and the winner
+would be the contestant with the highest winnings over the two games.
+
+In the first day, Watson's winnings were more than double the sum of the winnings of
+both players. And in the second day, it was more than their sum.
+Overall, the winnings for Watson were almost double the sum of the winnings of both players,
+a rather decisive victory.
+
+So what's next for Watson?
+
+So Watson is ideally suited to answer questions which cover a wide range of material and
+often have to deal with inconsistent or incomplete information.
+
+This makes it particularly appropriate for applications like medicine.
+
+As a result, Watson has been utilized for cancer diagnosis
+and selecting the best course of treatment.
+
+So what is the analytics edge of Watson?
+
+First, we have observed that the major technology of Watson is to combine many algorithms 
+that increase the accuracy and the confidence of the overall outcome.
+
+Any one of these algorithms would not have worked, but their combination gives Watson
+a considerable edge.
+
+The second important observation that gives Watson an edge is that it approaches the 
+problem in a very different way than how a human approaches a problem.
+
+A key aspect of the technology is hypothesis generation, and then using different 
+and distinct algorithms to explore this hypothesis and combining them,
+it leads to answers that provide an edge.
+
+Finally, and quite importantly, Watson has a considerable ability to deal
+with massive amounts of data, often in unstructured form.
+
+So the combination of these ideas give Watson a significant edge.

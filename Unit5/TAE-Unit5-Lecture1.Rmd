@@ -294,3 +294,311 @@ As a real example from our data set, the phrase *"by far the best customer care 
 - the "er" would be removed in customer
 - the "e" would be removed in service
 - the "ed" would be removed in received
+
+### Pre-processing in R
+
+Pre-processing the data can be difficult, but, luckily, R's packages provide easy-to-use
+functions for the most common tasks.
+
+In your R console, let's load the data set tweets.csv with the read.csv function.
+But since we're working with text data here, we need one extra argument, which is
+stringsAsFactors=FALSE.
+
+```{r}
+tweets = read.csv("tweets.csv", stringsAsFactors = FALSE)
+str(tweets)
+```
+
+We can see that we have 1,181 observations of two variables, the text of the tweet, 
+called *Tweet*, and the average sentiment score, called *Avg* for average.
+
+The tweet texts are real tweets that we found on the internet directed to Apple with
+a few cleaned up words.
+
+We're more interested in being able to detect the tweets with clear negative sentiment,
+so let's define a new variable in our data set tweets called Negative. And we'll set this 
+equal to as.factor(tweets$Avg <= -1). This will set tweets$Negative equal to true if the 
+average sentiment score is less than or equal to negative 1 and will set tweets$Negative
+equal to false if the average sentiment score is greater than negative 1.
+
+```{r}
+tweets$Negative = as.factor(tweets$Avg <= -1)
+table(tweets$Negative)
+```
+
+We can see that 182 of the 1,181 tweets, or about 15%, are negative.
+
+Now to pre-process our text data so that we can use the bag of words approach,
+we'll be using the tm text mining package. Then we also need to install the package SnowballC.
+This package helps us use the tm package.
+
+```{r}
+library(tm)
+library(SnowballC)
+Sys.setlocale("LC_ALL", "C")
+```
+
+One of the concepts introduced by the tm package is that of a corpus.
+A corpus is a collection of documents.
+
+We'll need to convert our tweets to a corpus for pre-processing. tm can create a corpus 
+in many different ways, but we'll create it from the tweet column of our data frame
+using two functions, *Corpus* and *VectorSource*.
+
+```{r}
+corpus = Corpus(VectorSource(tweets$Tweet))
+corpus
+as.character(corpus[[1]])
+```
+
+
+Now we're ready to start pre-processing our data. Pre-processing is easy in tm.
+Each operation, like stemming or removing stop words, can be done with one line in R, where
+we use the tm_map function. 
+
+Let's try it out by changing all of the text in our tweets to lowercase.
+
+```{r}
+corpus = tm_map(corpus, tolower)
+corpus = tm_map(corpus, PlainTextDocument) # converts all documents in the corpus to PlainTextDocument type
+as.character(corpus[[1]])
+```
+
+Now let's remove all punctuation. This is done in a very similar way,
+except this time we give the argument removePunctuation instead of tolower.
+
+```{r}
+corpus = tm_map(corpus, removePunctuation)
+as.character(corpus[[1]])
+```
+
+Now we want to remove the stop words in our tweets. tm provides a list of stop words for 
+the English language. 
+
+```{r}
+stopwords("english")[1:10]
+length(stopwords("english"))
+```
+
+Removing words can be done with the removeWords argument to the tm_map function, 
+but we need one extra argument, what the stop words are that we want to remove.
+We'll remove all of these English stop words, but we'll also remove the word "apple"
+since all of these tweets have the word "apple" and it probably won't be very useful in 
+our prediction problem.
+
+```{r}
+corpus = tm_map(corpus, removeWords, c("apple", stopwords("english")))
+as.character(corpus[[1]])
+```
+
+Lastly, we want to stem our document with the stemDocument argument.
+
+```{r}
+corpus = tm_map(corpus, stemDocument)
+as.character(corpus[[1]])
+```
+
+We can see that this took off the ending of "customer," "service," "received," and "appstore."
+
+### Bag of Words in R
+
+We're now ready to extract the word frequencies to be used in our prediction problem.
+
+The tm package provides a function called DocumentTermMatrix that generates a matrix 
+where the rows correspond to documents, in our case tweets, and the columns correspond 
+to words in those tweets. The values in the matrix are the number of times that word 
+appears in each document.
+
+Let's go ahead and generate this matrix and call it "frequencies."
+
+```{r}
+frequencies = DocumentTermMatrix(corpus)
+frequencies
+```
+
+We can see that there are 3,289 terms or words in our matrix and 1,181 documents
+or tweets after preprocessing.
+
+Let's see what this matrix looks like using the inspect function.
+
+```{r}
+inspect(frequencies[1000:1005,505:515])
+```
+
+In this range we see that the word "cheer" appears in the tweet 1005, but "cheap" doesn't
+appear in any of these tweets. This data is what we call *sparse*.
+
+This means that there are many zeros in our matrix. 
+
+We can look at what the most popular terms are, or words, with the function findFreqTerms.
+
+```{r}
+findFreqTerms(frequencies, lowfreq = 20) # lowFeq is equal to the minimum number of times a term must be displayed
+```
+
+We see here 56 different words. So out of the 3,289 words in our matrix,
+only 56 words appear at least 20 times in our tweets. This means that we probably have
+a lot of terms that will be pretty useless for our prediction model.
+
+The number of terms is an issue for two main reasons.
+
+One is computational. More terms means more independent variables, which usually means
+it takes longer to build our models.
+
+The other is in building models, as we mentioned before, the ratio of independent 
+variables to observations will affect how good the model will generalize.
+
+So let's remove some terms that don't appear very often. 
+The sparsity threshold works as follows. If we say 0.98, this means to only keep
+terms that appear in 2% or more of the tweets. If we say 0.99, that means to only keep
+terms that appear in 1% or more of the tweets.
+
+```{r}
+sparse = removeSparseTerms(frequencies, 0.995) # terms that appearin 0.5% or more of the tweets
+sparse
+```
+
+There's only 309 terms in our sparse matrix. This is only about 9% of the previous 
+count of 3,289.
+
+Now let's convert the sparse matrix into a data frame that we'll be able to use 
+for our predictive models.
+
+```{r}
+tweetsSparse = as.data.frame(as.matrix(sparse))
+```
+
+Since R struggles with variable names that start with a number, and we probably have
+some words here that start with a number, let's run the make.names function to make sure
+all of our words are appropriate variable names.
+
+```{r}
+colnames(tweetsSparse) = make.names(colnames(tweetsSparse))
+```
+
+This will just convert our variable names to make sure they're all appropriate names
+before we build our predictive models. You should do this each time you've
+built a data frame using text analytics.
+
+Now let's add our dependent variable to this data set. We'll call it tweetsSparse$Negative
+and set it equal to the original Negative variable from the tweets data frame.
+
+```{r}
+tweetsSparse$Negative = tweets$Negative
+```
+
+Lastly, let's split our data into a training set and a testing set, putting 70% of 
+the data in the training set.
+
+```{r}
+library(caTools)
+set.seed(123)
+split = sample.split(tweetsSparse$Negative, SplitRatio = 0.7)
+trainSparse = subset(tweetsSparse, split == TRUE)
+testSparse = subset(tweetsSparse, split == FALSE)
+```
+
+Our data is now ready, and we can build our predictive model.
+
+### Predicting Sentiment
+
+Now that we've prepared our data set, let's use CART to build a predictive model. 
+We'll use the rpart function to predict Negative using all of the other variables
+as our independent variables and the data set trainSparse.
+
+```{r}
+library(rpart)
+library(rpart.plot)
+tweetCART = rpart(Negative ~ ., data=trainSparse, method="class") # to build a classification model
+# we're just using the default parameter setting so we won't add anything for minbucket or cp
+prp(tweetCART)
+```
+
+Our tree says that if the word "freak" is in the tweet, then predict TRUE, or negative sentiment.
+If the word "freak" is not in the tweet, but the word "hate" is, again predict TRUE.
+If neither of these two words are in the tweet, but the word "wtf" is, also predict TRUE,
+or negative sentiment. If none of these three words are in the tweet, then predict FALSE,
+or non-negative sentiment.
+
+This tree makes sense intuitively since these three words are generally seen as negative words.
+
+Now, we'll evaluate the numerical performance of our model by making predictions on the test set.
+
+```{r}
+predictCART = predict(tweetCART, newdata = testSparse, type="class")
+table(testSparse$Negative, predictCART)
+# confusion matrix
+(294+18)/(294+6+37+18) # accuracy
+```
+
+So the accuracy of our CART model is about 0.88.
+
+Let's compare this to a simple baseline model that always predicts non-negative.
+
+To compute the accuracy of the baseline model, let's make a table of just the outcome 
+variable Negative.
+
+```{r}
+table(testSparse$Negative)
+300/(300+355)
+```
+
+So the accuracy of a baseline model that always predicts non-negative is 0.845.
+
+So our CART model does better than the simple baseline model.
+
+How about a random forest model? How well would that do?
+
+Let's first load the random forest package with library(randomForest), and then we'll
+set the seed to 123 so that we can replicate our model if we want to.
+
+```{r}
+library(randomForest)
+set.seed(123)
+```
+
+Now, let's create our model.
+
+```{r}
+tweetRF = randomForest(Negative ~ ., data=trainSparse)
+# The random forest model takes significantly longer to build than the CART model.
+predictRF = predict(tweetRF, newdata = testSparse)
+# confusion matrix
+table(testSparse$Negative, predictRF)
+(293+21)/(293+7+34+21) # accuracy
+```
+
+This is a little better than our CART model, but due to the interpretability of our CART model,
+I'd probably prefer it over the random forest model. If you were to use cross-validation
+to pick the cp parameter for the CART model, the accuracy would increase to about the same 
+as the random forest model.
+
+So by using a bag-of-words approach and these models, we can reasonably predict sentiment even
+with a relatively small data set of tweets.
+
+### Conclusions
+
+
+In this lecture, we have seen a particular application of sentiment analysis on Twitter.
+
+However, the area of sentiment analysis is much broader. Over 7,000 research articles 
+have been written on the topic. Hundreds of start-ups are developing sentiment analysis
+solutions. Many websites perform real-time analysis of tweets. 
+
+For example, "tweetfeel" shows trends given any term, and "The Stock Sonar"
+shows sentiment and stock prices.
+
+Sentiment analysis is a particular application of text analytics. In general,
+the critical aspect of text analytics is to select the specific features that
+are relevant in a particular application.
+
+In addition, it's important to apply specific knowledge that often leads to better results.
+
+For example, using the meaning of the symbols or include features like the number of words.
+
+Let's finally discuss the analytics edge that we have seen in this lecture.
+
+Analytical sentiment analysis we have seen can replace more labor-intensive methods like polling.
+Text analytics can also deal with the massive amounts of unstructured data being generated on the
+internet. Computers are becoming more and more capable of interacting with humans
+and performing human tasks.
