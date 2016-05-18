@@ -1,0 +1,175 @@
+---
+title: "TAE - Unit 6 - Lecture 1"
+author: "GT"
+date: "18 mai 2016"
+output: html_document
+---
+
+## Reccomendations Worth a Million
+
+In this lecture, we'll be discussing the story of Netflix and how their recommendation 
+system is worth a million dollars. 
+
+Through this example, we'll introduce the method of *clustering*.
+
+Netflix is an online DVD rental and streaming video service. Customers can receive movie 
+rentals by mail, and they can also watch selected movies and TV shows online.
+
+Netflix has more than 40 million subscribers worldwide and has an annual revenue of
+$3.6 billion.
+
+A key aspect of the company is being able to offer customers accurate movie recommendations 
+based on a customer's own preferences and viewing history.
+
+From 2006 through 2009, Netflix ran a contest asking the public to submit algorithms to 
+predict user ratings for movies. This algorithm would be useful for Netflix when making 
+recommendations to users.
+
+Netflix provided a training data set of about 100 million user ratings and a test data set
+of about three million user ratings.
+
+They offered a grand prize of one million dollars to the team who could beat Netflix's 
+current algorithm, called Cinematch, by more than 10% measured in terms of root mean squared 
+error.
+
+Netflix believed that their recommendation system was so valuable that it was worth a 
+million dollars to improve.
+
+The contest had a few rules. 
+
+One was that if the grand prize was not yet reached, progress prizes of $50,000 per year
+would be awarded for the best result so far, as long as it was at least a 1% improvement
+over the previous year.
+
+Another rule was that teams must submit their code and a description of the algorithm
+to be awarded any prizes.
+
+And lastly, if a team met the 10% improvement goal, a last call would be issued, and 30 days
+would remain for all teams to submit their best algorithm.
+
+So what happened?
+
+The contest went live on October 2, 2006. 
+
+- By October 8, only six days later, a team submitted an algorithm that beat Cinematch. 
+- A week later, on October 15, there were three teams already submitting algorithms beating 
+  Cinematch.
+- One of these solutions beat Cinematch by more than 1%, already qualifying for a progress prize.
+
+The contest was hugely popular all over the world. By June 2007, over 20,000 teams had
+registered from over 150 countries. The 2007 progress prize went to a team called BellKor,
+with an 8.43% improvement over Cinematch. The following year, several teams from across 
+the world joined forces to improve the accuracy even further.
+
+In 2008, the progress prize again went to team BellKor. But this time, the team included 
+members from the team BigChaos in addition to the original members of BellKor.
+
+This was the last progress prize because another 1% improvement would reach the grand prize 
+goal of 10%. On June 26, 2009, the team BellKor's Pragmatic Chaos, composed of members
+from three different original teams, submitted a 10.05% improvement over Cinematch,
+signaling the last call for the contest.
+
+Other teams had 30 days to submit algorithms before the contest closed. These 30 days were 
+filled with intense competition and even more progress.
+
+### Reccomendation Systems
+
+Now, we'll discuss how recommendation systems work.
+
+Let's start by thinking about the data. When predicting user ratings, what data could 
+be useful?
+
+There are two main types of data that we could use.
+
+The first is that for every movie in Netflix's database, we have a ranking from all users 
+who have ranked that movie.
+
+The second is that we know facts about the movie itself, the actors in the movie, 
+the director, the genre classifications of the movie, the year it was released, et cetera.
+
+As an example, suppose we have the following user ratings for four users and four movies.
+As we discussed in the previous video,
+Our users are Amy, Bob, Carl, and Dan. And our movies are Men in Black, Apollo 13, Top Gun,
+and Terminator. The ratings are on a one to five scale, where one is the lowest
+rating and five is the highest rating. The blank entries mean that the user has not 
+rated the movie.
+
+
+```
+------------------------------------------------------
+     | Men in Black | Apollo 13 | Top Gun | Terminator
+------------------------------------------------------
+Amy  |       5      |      4    |     5   |    4
+------------------------------------------------------
+Bob  |       3      |           |     2   |    5
+------------------------------------------------------
+Carl |              |      5    |     4   |    4
+------------------------------------------------------
+Dan  |       4      |      2    |         |  
+------------------------------------------------------
+```
+
+
+We could suggest to Carl that he watch Men in Black, since Amy rated it highly. 
+She gave it a rating of five, and Amy and Carl seem to have similar ratings
+for the other movies. 
+
+This technique of using other user's ratings to make predictions is called 
+**collaborative filtering**.
+
+Note that we're not using any information about the movie itself here, just the
+similarity between users.
+
+Instead, we could use movie information to predict user 
+
+We saw in the table that Amy liked Men in Black. She gave it a rating of five.
+We know that this movie was directed by Barry Sonnenfeld, is classified in the 
+genres of action, adventure, sci-fi, and comedy, and it stars actor Will Smith.
+Based on this information, we could make recommendations to Amy.
+
+We could recommend to Amy another movie by the same director, Barry Sonnenfeld's
+movie, Get Shorty. We can instead recommend the movie Jurassic Park, which is also 
+classified in the genres of action, adventure, and sci-fi. Or we could recommend to 
+Amy another movie starring Will Smith, Hitch.
+
+Note that we're not using the ratings of other users at all here, just information 
+about the movie.
+
+This technique is called **content filtering**.
+
+There are strengths and weaknesses to both types of recommendation systems.
+
+*Collaborative filtering* 
+
+- can accurately suggest complex items without understanding the nature of the items.
+  We were just comparing user ratings.
+- this requires a lot of data about the user to make accurate recommendations.
+- when there are millions of items, it needs a lot of computing power to compute the
+  user similarities.
+  
+*Content filtering*
+
+- requires very little data to get started.
+- But the major weakness of content filtering is that it can be limited in scope.
+  You're only recommending similar things to what the user has already liked.
+  So the recommendations are often not surprising or particularly insightful.
+
+Netflix actually uses what's called a **hybrid recommendation system**.
+
+They use both collaborative and content filtering. 
+
+As an example, consider a collaborative filtering approach, where we determine that Amy 
+and Carl have similar preferences. We could then do content filtering as well,
+where we could find that the movie Terminator, which they both liked, is classified in 
+almost the same set of genres as Starship Troopers. 
+
+So then we could recommend Starship Troopers to both Amy and Carl, even though neither
+of them have seen it before.
+
+If we were only doing collaborative filtering, one of them would have had to have seen it 
+before. And if we were only doing content filtering, we would only be recommending to one 
+user at a time.
+
+So by combining the two methods, the algorithm can be much more efficient and accurate.
+
+### Movie Data and Clustering
