@@ -69,3 +69,341 @@ The data set contains just two fields:
 
 The labels for these emails were made by attorneys as part of the 2010 text retrieval
 conference legal track, a predictive coding competition.
+
+### The Data
+
+Let's begin by creating a data frame called emails using the read.csv function.
+And as always, in the text analytics week, we're going to pass stringsAsFactors=FALSE 
+to this function.
+
+```{r}
+emails = read.csv("energy_bids.csv", stringsAsFactors = FALSE)
+str(emails)
+```
+
+We can see that there are 855 observations. This means we have 855 labeled emails 
+in the data set. And for each one we have the text of the email and whether or not 
+it's responsive to our query about energy schedules and bids.
+
+So let's take a look at a few example emails in the data set, starting with the first one.
+
+```{r}
+emails$email[1]
+# the strwrap function brakes down the long string into multiple shorter lines that are easier to read
+strwrap(emails$email[1])
+```
+
+We can see just by parsing through the first couple of lines that this is an email that's
+talking about a new working paper, "The Environmental Challenges and Opportunities
+in the Evolving North American Electricity Market" is the name of the paper. And it's being 
+released by the Commission for Environmental Cooperation, or CEC.
+
+So while this certainly deals with electricity markets, it doesn't have to do with 
+energy schedules or bids. So *it is not responsive to our query*.
+
+So we can take a look at the value in the responsive variable 
+
+```{r}
+emails$responsive[1]
+```
+
+So let's take a look at the second email in our data set.
+
+```{R}
+strwrap(emails$email[2])
+```
+
+And scrolling up to the top here we can see that the original message is actually very short,
+it just says FYI (For Your Information), and most of it is a forwarded message.
+
+So we have all the people who originally received the message. And then down at the very 
+bottom is the message itself. "Attached is my report prepared on behalf of the California
+State auditor." And there's an attached report, ca report `new.pdf`. Now our data set contains
+just the text of the emails and not the text of the attachments.
+ 
+But it turns out, as we might expect, that this attachment had to do with Enron's electricity 
+bids in California, and therefore it is responsive to our query.
+
+And we can check this in the responsive variable.
+
+```{r}
+emails$responsive[2]
+```
+
+So now let's look at the breakdown of the number of emails that are responsive to our query 
+using the table function.
+
+```{r}
+table(emails$responsive)
+```
+
+And as we can see the data set is unbalanced, with a relatively small proportion of emails 
+responsive to the query.
+
+*This is typical in predictive coding problems*.
+
+### Pre-Processing
+
+Now it's time to construct and preprocess the corpus.
+
+So we'll start by loading the tm package and SnowballC package.
+
+```{r}
+library(tm)
+library(SnowballC)
+```
+
+And now that we'll have done that, we'll construct a variable called corpus using the Corpus
+and VectorSource functions and passing in all the emails in our data set.
+
+```{r}
+corpus = Corpus(VectorSource(emails$email))
+strwrap(corpus[[1]]$content)
+```
+
+And we can see that this is exactly the same email that we saw originally,
+the email about the working paper.
+
+So now we're ready to preprocess the corpus using the tm_map function.
+First, we'll convert the corpus to lowercase using tm_map and the tolower function.
+
+```{r}
+corpus = tm_map(corpus, content_transformer(tolower))
+corpus = tm_map(corpus, PlainTextDocument)
+```
+
+Then we'll do the exact same thing except removing punctuation
+
+```{r}
+corpus = tm_map(corpus, removePunctuation)
+```
+
+We'll remove the stop words with 
+
+```{r}
+length(stopwords("english"))
+corpus = tm_map(corpus, removeWords, stopwords("english"))
+```
+
+And lastly, we're going to stem the document.
+
+```{r}
+corpus = tm_map(corpus, stemDocument)
+```
+
+Now that we've gone through those four preprocessing steps, we can take a second look at 
+the first email in the corpus.
+
+```{r}
+strwrap(corpus[[1]]$content)
+```
+
+And now it looks quite a bit different. It's a lot harder to read now that we removed
+all the stop words and punctuation and word stems, but now the emails in this corpus
+are ready for our machine learning algorithms.
+
+### Bag of Words
+
+Now let's build the document-term matrix for our corpus.
+
+```{r}
+dtm = DocumentTermMatrix(corpus)
+dtm
+```
+
+
+What we can see is that even though we have only 855 emails in the corpus,
+we have almost 22,000 terms that showed up at least once, which is clearly too many variables
+for the number of observations we have.
+
+So we want to remove the terms that don't appear too often in our data set,
+and we'll do that using the removeSparseTerms function.
+
+```{r}
+dtm = removeSparseTerms(dtm, 0.97) # remove any term that doesn't appear in at least 3% of documents
+dtm
+```
+
+We can see that we've decreased the number of terms to 788, which is a much more reasonable number.
+
+So let's build a data frame called labeledTerms out of this document-term matrix.
+
+```{r}
+labeledTerms = as.data.frame(as.matrix(dtm))
+```
+
+So this data frame is only including right now the frequencies of the words that appeared 
+in at least 3% of the documents, but in order to run our text analytics models, we're also going 
+to have the outcome variable, which is whether or not each email was responsive.
+
+So we need to add in this outcome variable.
+
+```{r}
+labeledTerms$responsive = emails$responsive
+str(labeledTerms)
+```
+
+So as we expect, there are an awful lot of variables, 789 in total. 788 of those variables are 
+the frequencies of various words in the emails, and the last one is responsive,
+the outcome variable.
+
+### Building Models
+
+At long last, we're ready to split our data into a training and testing set, and to actually 
+build a model.
+
+```{r}
+library(caTools)
+set.seed(144)
+split = sample.split(labeledTerms$responsive, 0.7)
+train = subset(labeledTerms, split == TRUE)
+test = subset(labeledTerms, split == FALSE)
+```
+
+Now we're ready to build the model. And we'll build a simple CART model
+using the default parameters. But a random forest would be another good choice
+from our toolset.
+
+```{r}
+library(rpart)
+library(rpart.plot)
+emailCART = rpart(responsive~., data=train, method="class")
+prp(emailCART)
+```
+
+So we can see at the very top is the word California. If California appears at least twice 
+in an email, we're going to take the right part over here and predict that a document is 
+responsive.
+
+It's somewhat unsurprising that California shows up, because we know that Enron had a heavy 
+involvement in the California energy markets.
+
+So further down the tree, we see a number of other terms that we could plausibly expect to be 
+related to energy bids and energy scheduling, like system, demand, bid, and gas.
+
+Down here at the bottom is Jeff, which is perhaps a reference to Enron's CEO, Jeff Skillings,
+who ended up actually being jailed for his involvement in the fraud at the company.
+
+### Evaluating the Model
+
+Now that we've trained a model, we need to evaluate it on the test set.
+
+So let's build an object called pred that has the predicted probabilities
+for each class from our CART model.
+
+```{r}
+pred = predict(emailCART, newdata = test)
+pred[1:10,] # look at the first 10 rows and all columns
+```
+
+The left column here is the predicted probability of the document being non-responsive.
+And the right column is the predicted probability of the document being responsive. 
+They sum to 1.
+
+In our case, we want to extract the predicted probability of the document being responsive.
+So we're looking for the rightmost column.
+
+```{r}
+pred.prob = pred[, 2]
+table(test$responsive, pred.prob >= 0.5)
+# accuracy
+(195+25) / (195 + 25 + 20 + 17)
+```
+
+What we can see here is that in 195 cases, we predict false when the left column and the 
+true outcome was zero, non-responsive. So we were correct.
+And in another 25, we correctly identified a responsive document.
+ 
+In 20 cases, we identified a document as responsive, but it was actually non-responsive.
+And in 17, the opposite happened. We identified a document as non-responsive, but it actually 
+was responsive.
+
+So we have an accuracy in the test set of 85.6%.
+
+And now we want to compare ourselves to the accuracy of the baseline model.
+
+As we've already established, the baseline model is always going to predict the document
+is non-responsive. 
+
+```{r}
+table(test$responsive)
+# accuracy baseline
+215/(215 + 42)
+```
+
+So that's 83.7% accuracy.
+
+So we see just a small improvement in accuracy using the CART model, which, as we know,
+is a common case in unbalanced data sets.
+
+However, as in most document retrieval applications, there are uneven costs for different
+types of errors here.
+
+Typically, a human will still have to manually review all of the predicted responsive documents
+to make sure they are actually responsive.
+
+Therefore, if we have a false positive, in which a non-responsive document is labeled
+as responsive, the mistake translates to a bit of additional work in the manual review
+process but no further harm, since the manual review process will remove this erroneous result.
+
+But on the other hand, if we have a false negative, in which a responsive document is labeled 
+as non-responsive by our model, we will miss the document entirely in our predictive coding 
+process.
+
+Therefore, we're going to assign a higher cost to false negatives than to false positives,
+which makes this a good time to look at other cut-offs on our ROC curve.
+
+### The ROC Curve
+
+Now let's look at the ROC curve so we can understand the performance of our model
+at different cutoffs.
+
+```{r}
+library(ROCR)
+predROCR = prediction(pred.prob, test$responsive)
+perfROCR = performance(predROCR, "tpr", "fpr") # to extract the true positive rate and false positive rate
+plot(perfROCR, colorize=TRUE)
+```
+
+Now, of course, the best cutoff to select is entirely dependent on the costs assigned
+by the decision maker to false positives and true positives.
+
+However, again, we do favor cutoffs that give us a high sensitivity. We want to identify 
+a large number of the responsive documents.
+
+So something that might look promising might be a point where we have a true positive rate 
+of around 70%, meaning that we're getting about 70% of all the responsive documents, 
+and a false positive rate of about 20%, meaning that we're making mistakes and accidentally 
+identifying as responsive 20% of the non-responsive documents.
+
+Now, since, typically, the vast majority of documents are non-responsive, operating at 
+this cutoff would result, perhaps, in a large decrease in the amount of manual effort 
+needed in the eDiscovery process. And we can see from the blue color of the plot at this 
+particular location that we're looking at a threshold around maybe 0.15 or so, significantly 
+lower than 50%, which is definitely what we would expect since we favor false positives to 
+false negatives.
+
+Lastly, we can use the ROCR package to compute our AUC value.
+
+```{r}
+performance(predROCR, "auc")@y.values
+```
+
+We can see that we have an AUC in the test set of 79.4%, which means that our model can 
+differentiate between a randomly selected responsive and non-responsive
+document about 80% of the time.
+
+### Predictive Coding Today
+
+Let's conclude with a word about the status of predictive coding today.
+In legal systems, it's difficult to change existing practice because of laws 
+reliance on past precedent, which causes current decisions to be made on the basis of 
+past ones. 
+
+Because the types of eDiscovery admissible in court have historically been limited to 
+keyword search coupled with manual review, nearly all cases today use this eDiscovery 
+approach.
+
+However, this status quo seems to be starting to change. In 2012, a US District Court ruled 
+that predictive coding was a legitimate eDiscovery tool, which may pave the way for its
+expanded use in coming years.
