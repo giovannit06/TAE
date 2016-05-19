@@ -173,3 +173,347 @@ user at a time.
 So by combining the two methods, the algorithm can be much more efficient and accurate.
 
 ### Movie Data and Clustering
+
+In this lecture, we'll be using data from MovieLens to explain clustering and perform 
+content filtering.
+
+movielens.org is a movie recommendation website run by the GroupLens research lab
+at the University of Minnesota.
+
+They collect user preferences about movies and do collaborative filtering to make 
+recommendations to users, based on the similarities between users.
+
+We'll use their movie database to do content filtering using a technique called **clustering**.
+
+Movies in the MovieLens data set are categorized as belonging to different genres.
+There are 18 different genres as well as an unknown category.
+
+The genres include crime, musical, mystery,and children's.
+
+Each movie may belong to many different genres. So a movie could be classified as drama, adventure,
+and sci-fi.
+
+The question we want to answer is, can we systematically find groups of movies with similar 
+sets of genres?
+
+To answer this question, we'll use a method called *clustering*.
+
+Clustering is different from the other analytics methods we've covered so far.
+
+It's called an **unsupervised** learning method.
+
+This means that we're just trying to segment the data into similar groups,
+instead of trying to predict an outcome.
+
+```
+^
+|
+|     *
+|   ****
+|  **** *          oooo
+| *  *           ooo o
+|             oooo
+|
+|
+|    x
+|     xxxx
+|   x x x
+|     x
++----------------------------->
+```
+
+In this graph, based on the locations of points, we've divided them into three clusters, 
+a '*' cluster, a 'o' cluster, and a 'x' cluster.
+
+This is the goal of clustering, to put each data point into a group with similar values 
+in the data. A clustering algorithm does not predict anything. 
+
+However, clustering can be used to improve predictive methods. You can cluster the data into
+similar groups and then build a predictive model for each group. This can often improve the 
+accuracy of predictive methods. But as a warning, be careful not to over-fit your model
+to the training set.
+
+This works best for large data sets.
+
+There are many different algorithms for clustering.
+
+They differ in what makes a cluster and how the clusters are found.
+
+In this class, we'll cover 
+
+- hierarchical clustering
+- K-means clustering.
+
+There are other clustering methods also, but hierarchical and K-means are two
+of the most popular methods. To cluster data points, we need to compute
+how similar the points are.
+
+### Computing Distnces
+
+So how does clustering work?
+
+The first step in clustering is to define the distance between two data points.
+
+The most popular way to compute the distance is what's called Euclidean distance.
+This is the standard way to compute distance that you might have seen before.
+
+Suppose we have two data points, $i$ and $j$. The distance between the two points,
+which we'll call $d_{ij}$, is equal to
+
+$$d_{ij}=\sqrt{(x_{i1}-x_{j1})^2+(x_{i2}-x_{j2})^2+...+(x_{ik}-x_{jk})^2}$$
+
+where $k$ here is the number of attributes or independent variables.
+
+Let's see how this works by looking at an example.
+
+In our movie lens dataset, we have binary vectors for each movie, classifying that movie 
+into genres.
+
+The movie 'Toy Story' is categorized as an animation, comedy, and children's movie.
+So the data for Toy Story has (0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0).
+
+The movie 'Batman Forever' is categorized as an action, adventure, comedy, and crime movie.
+So Batman Forever has (0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0).
+
+So given these two data observations, let's compute the distance between them.
+
+$$d=\sqrt{(0-0)^2+(0-1)^2+(0-1)^2+(1-0)^2+...}=\sqrt{5}$$
+
+In addition to Euclidean distance, there are many other popular distance
+metrics that could be used.
+
+One is called *Manhattan distance*, where the distance is computed to be the sum of 
+the absolute values instead of the sum of squares.
+
+Another is called *Maximum Coordinate distance*, where we only consider the measurement 
+for which the data points deviate the most.
+
+Another important distance that we have to calculate for clustering is the 
+*Distance Between Clusters*, when a cluster is a group of data points.
+
+How do we compute the distance between groups of points?
+
+One way of doing this is by using what's called the *minimum distance*.
+
+This defines the distance between clusters as the distance between the two data points in
+the clusters that are closest together.
+
+For example, we would define the distance between the '*' and 'o' clusters by computing the 
+Euclidean distance between these two points.
+
+```
+^
+|           distance
+|     *     /|
+|   ****   / |  
+|  **** * *  |      oooo
+| *  *       o  ooo o
+|             oooo
+|
+|
+|    x
+|     xxxx
+|   x x x
+|     x
++----------------------------->
+```
+
+The other points in the clusters could be really far away, but it doesn't matter if we use
+minimum distance.
+
+The only thing we care about is how close together the closest points are.
+
+Alternatively, we could use *maximum distance*. This one computes the distance between the two
+clusters as the distance between the two points that are the farthest apart.
+
+So for example, we would compute the distance between the '*' and 'o' clusters
+by looking at these two points.
+
+```
+^
+|           distance min
+|     *     /|
+|   ****   / |  
+|  **** * *  |      oooo
+| *  *       o  ooo o  o
+|   \          oooo   /
+|    \_distance max__/
+|
+|    x
+|     xxxx
+|   x x x
+|     x
++----------------------------->
+```
+
+Here, it doesn't matter how close together the other points are. All we care about is how 
+close together the furthest points are.
+
+The most common distance metric between clusters is called *centroid distance*.
+And this is what we'll use.
+
+It defines the distance between clusters by computing the centroid of the clusters.
+
+The *centroid* is just the data point that takes the average of all data points in each 
+component. This takes all data points in each cluster into account and can be thought of as 
+the middle data point.
+
+In our example, the centroids between '*' and 'o' are here, and we would compute the distance
+between the clusters by computing the Euclidean distance between those two points.
+
+```
+^     distance centr
+|        /    \
+|     * /      \
+|   ***/*       \
+|  **** * *      \oooo
+| *  *       o  ooo o
+|             oooo
+|
+|
+|    x
+|     xxxx
+|   x x x
+|     x
++----------------------------->
+```
+
+When we are computing distances, it's highly influenced by the scale of the variables.
+
+As an example, suppose you're computing the distance between two data points, where one
+variable is the revenue of a company in thousands of dollars, and another is the age of the
+company in years.
+
+The revenue variable would really dominate in the distance calculation. The differences 
+between the data points for revenue would be in the thousands. Whereas the differences between 
+the year variable would probably be less than 10.
+
+To handle this, it's customary to *normalize* the data first. 
+
+We can normalize by subtracting the mean of the data and dividing by the standard deviation.
+
+In our movie data set, all of our genre variables are on the same scale. So we don't have to worry 
+about normalizing. But if we wanted to add a variable, like box office revenue, we would need 
+to normalize so that this variable didn't dominate all of the others.
+
+### Hierarchical Clustering
+
+In hierarchical clustering, the clusters are formed by each data point starting in its own 
+cluster.
+
+As a small example, suppose we have five data points. Each data point is labeled as belonging 
+in its own cluster. So this data point is in the red cluster, this one's in the blue cluster, 
+this one's in the purple cluster, this one's in the green cluster, and this one's
+in the yellow cluster.
+
+Then hierarchical clustering combines the two nearest clusters into one cluster.
+
+We'll use Euclidean and Centroid distances to decide which two clusters are the closest.
+
+In our example, the green and yellow clusters are closest together.
+
+So we would combine these two clusters into one cluster. So now the green cluster has two points,
+and the yellow cluster is gone. 
+
+Now this process repeats. We again find the two nearest clusters, which this time are the green
+cluster and the purple cluster, and we combine them into one cluster. 
+
+Now the green cluster has three points, and the purple cluster is gone.
+
+Now the two nearest clusters are the red and blue clusters. So we would combine these two clusters
+into one cluster, the red cluster. So now we have just two clusters, the red one and the green one.
+
+So now the final step is to combine these two clusters into one cluster. 
+
+So at the end of hierarchical clustering, all of our data points are in a single cluster.
+
+The hierarchical cluster process can be displayed through what's called a *dendrogram*.
+
+```
+  4+            +---------------------+
+   |            |                     |
+   |            |                     |
+  3+            |                     |
+   |            |                     |
+   |            |                     |
+  2+            |                     |
+   |            |                     |
+   |            |                     |
+  1+  +---------------+         +-----------+
+   |  |               |         |           |
+   |  3          +--------+     2           5
+0.5+             |        |
+                 1        4
+```
+
+The data points are listed along the bottom, and the lines show how the clusters were combined.
+
+The height of the lines represents how far apart the clusters were when they were combined.
+
+So points 1 and 4 were pretty close together when they were combined. But when we combined the 
+two clusters at the end, they were significantly farther apart.
+
+We can use a dendrogram to decide how many clusters we want for our final clustering model.
+
+The easiest way to pick the number of clusters you want is to draw a horizontal line across 
+the dendrogram. The number of vertical lines that line crosses is the number of clusters there
+will be.
+
+The farthest this horizontal line can move up and down in the dendrogram without hitting one
+of the horizontal lines of the dendrogram, the better that choice of the number of clusters is.
+
+But when picking the number of clusters, you should also consider how many clusters make sense 
+for the particular application you're working with.
+
+After selecting the number of clusters you want, you should analyze your clusters to see if
+they're meaningful. This can be done by looking at basic statistics in each cluster, 
+like the mean, maximum, and minimum values in each cluster and each variable.
+
+You can also check to see if the clusters have a feature in common that was not used in the 
+clustering, like an outcome variable. This often indicates that your clusters might help improve
+a predictive model.
+
+### Getting the Data
+
+Let's switch to R and load our data, we'll be using a slightly different command this time
+because the data is not a CSV file. It's a text file, where the entries are separated by a 
+vertical bar.
+
+```{r}
+movies = read.table("movieLens.txt", header=FALSE, sep="|", quote = "\"")
+# the last argument just made sure that our text is read in properly
+str(movies)
+```
+
+We have 1,682 observations of 24 different variables. Since our variables didn't have names, 
+header equaled false, R just labeled them with V1, V2, V3, etc. But from the Movie Lens documentation,
+we know what these variables are.
+
+```{r}
+colnames(movies) = c("ID", "Title", "ReleaseDate", "VideoReleaseDate", "IMDB", "Unknown", "Action", "Adventure", "Animation", "Childrens", "Comedy", "Crime", "Documentary", "Drama", "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery", "Romance", "SciFi", "Thriller", "War", "Western")
+str(movies)
+```
+
+We can see that we have the same number of observations and the same number of variables,
+but each of them now has the name that we just gave.
+
+We won't be using the ID, release date, video release date, or IMDB variables, so let's go 
+ahead and remove them.
+
+```{r}
+movies$ID = NULL
+movies$ReleaseDate = NULL
+movies$VideoReleaseDate = NULL
+movies$IMDB = NULL
+```
+
+And there are a few duplicate entries in our data set, so we'll go ahead and remove them
+with the unique function.
+
+```{r}
+movies = unique(movies)
+str(movies)
+```
+
+Now, we have 1,664 observations, a few less than before, and 20 variables, the title of the movie, 
+the unknown genre label, and then the 18 other genre labels.
