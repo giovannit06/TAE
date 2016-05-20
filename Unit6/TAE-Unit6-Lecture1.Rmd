@@ -517,3 +517,193 @@ str(movies)
 
 Now, we have 1,664 observations, a few less than before, and 20 variables, the title of the movie, 
 the unknown genre label, and then the 18 other genre labels.
+
+### Hierarchical Clustering in R
+
+Now we'll use hierarchical clustering to cluster the movies in the Movie Lens data set by genre.
+After we make our clusters, we'll see how they can be used to make recommendations.
+
+There are two steps to hierarchical clustering.
+
+First we have to compute the distances between all data points, and 
+then we need to cluster the points.
+
+To compute the distances we can use the dist function. We only want to cluster our movies 
+on the genre variable, not on the title variable, so we'll cluster on columns 2 through 20.
+
+```{r}
+distances = dist(movies[2:20], method="euclidean")
+```
+
+Now let's cluster our movies using the hclust function for hierarchical clustering.
+
+```{r}
+clusterMovies = hclust(distances, method="ward.D")
+```
+
+The ward method cares about the distance between clusters using centroid distance, and also 
+the variance in each of the clusters.
+
+Now let's plot the dendrogram of our clustering algorithm.
+
+```{r}
+plot(clusterMovies)
+```
+
+This dendrogram might look a little strange. We have all this black along the bottom.
+Remember that the dendrogram lists all of the data points along the bottom. But when there are 
+over 1,000 data points it's impossible to read.
+
+So looking at this dendrogram, how many clusters would you pick?
+
+It looks like maybe three or four clusters would be a good choice according to the dendrogram,
+but let's keep our application in mind, too.
+
+We probably want more than two, three, or even four clusters of movies to make recommendations to 
+users. It looks like there's a nice spot down here where there's 10 clusters. This is probably
+better for our application.
+
+You need to use your understanding of the problem to pick the number of clusters.
+
+Now back in our R console we can label each of the data points according to what cluster it 
+belongs to using the cutree function.
+
+```{r}
+clusterGroups = cutree(clusterMovies, k=10)
+```
+
+Now let's figure out what the clusters are like. We'll use the tapply function to compute
+the percentage of movies in each genre and cluster.
+
+```{r}
+tapply(movies$Action, clusterGroups, mean)
+```
+
+So what does this do? It divides our data points into the 10 clusters and then computes the 
+average value of the action variable for each cluster. 
+
+Remember that the action variable is a binary variable with value 0 or 1. So by computing 
+the average of this variable we're computing the percentage of movies in that cluster that 
+belong in that genre.
+
+We can see here that in cluster 2, about 78% of the movies have the action genre label, 
+whereas in cluster 4 none of the movies are labeled as action movies.
+
+Let's try this again, but this time let's look at the romance genre.
+
+```{r}
+tapply(movies$Romance, clusterGroups, mean)
+```
+
+Here we can see that all of the movies in clusters six and seven are labeled as romance movies, 
+whereas only 4% of the movies in cluster two are labeled as romance movies.
+
+We can repeat this for each genre.
+
+If you do you can create a large table to better analyze the clusters, which I saved to a 
+csv file ClusterMeans.csv
+
+```{r}
+clusterMeans = read.csv("ClusterMeans.csv")
+clusterMeans
+```
+
+Lets take a look. Here we have in each column the cluster, and in each row the genre.
+
+So we can see here in cluster 2, as we saw before, that cluster 2 has a high number of action 
+movies. 
+
+- Cluster 1 has a little bit of everything, some animation, children's, fantasy, musicals, war and 
+  westerns. So I'm calling this the miscellaneous cluster.
+- Cluster 2 has a lot of the action, adventure, and sci-fi movies.
+- Cluster 3 has the crime, mystery, thriller movies.
+- Cluster 4 exclusively has drama movies.
+- Cluster 5, exclusively has comedies.
+- Cluster 6 has a lot of the romance movies.
+- Cluster 7 has movies that are comedies and romance movies, so I'm calling these the romantic comedies.
+- Cluster 8 has the documentaries.
+- Cluster 9 has the movies that are comedies and dramas, so the dramatic comedies.
+- Cluster 10 has the horror flicks.
+
+Knowing common movie genres, these clusters seem to make a lot of sense.
+
+So now let's see how these clusters could be used in a recommendation system.
+
+Remember that Amy liked the movie Men in Black. Let's figure out what cluster Men in Black is in.
+
+```{r}
+subset(movies, Title=="Men in Black (1997)")
+```
+
+It looks like Men in Black is the 257th row in our data. 
+So which cluster did the 257th movie go into?
+
+```{r}
+clusterGroups[257]
+```
+
+It looks like Men in Black went into cluster 2. That make sense since we just saw
+that cluster 2 is the action, adventure, sci-fi cluster.
+
+So let's create a new data set with just the movies from cluster two.
+
+```{r}
+cluster2 = subset(movies, clusterGroups == 2)
+cluster2$Title[1:10]
+```
+
+So it looks like good movies to recommend to Amy, according to our clustering algorithm,
+would be movies like Apollo 13 and Jurassic Park.
+
+### The Analytics Edge of Recommendation Systems
+
+Recommendation systems are used in many different areas other than movies.
+
+Jeff Bezos, the CEO of Amazon, said that, "If I have 3 million customers on the web,
+I should have 3 million stores on the web."
+
+The internet allows for mass personalization, and recommendation systems are a key part of that.
+Recommendation systems build models about users' preferences to personalize the user
+experience.
+
+This helps users find items they might not have searched for, like a new favorite band, 
+an old friend who uses the same social media network, or a book or song that they're likely to enjoy.
+
+Recommendation systems are a cornerstone of these top businesses. Social networking sites, 
+like Facebook, music streaming sites, like Pandora, and retail companies, like Amazon, 
+all provide recommendation systems for their users.
+
+Both collaborative filtering and content filtering are used in practice.
+
+Collaborative filtering is used by companies like Amazon, Facebook, and Google News.
+
+Content filtering is used by companies like Pandora, Rotten Tomatoes, and See This Next.
+
+And Netflix uses both collaborative filtering and content filtering.
+
+So now let's go back to the Netflix prize.
+
+29 days after last call was announced, on July 25, 2009, the team The Ensemble submitted a 10.09% 
+improvement, beating the 10.05% improvement that was submitted by Bellkor's Pragmatic Chaos 
+to signal last call.
+
+But by the time Netflix stopped accepting submissions the next day, Bellkor's Pragmatic Chaos
+had also submitted a 10.09% improvement, and The Ensemble had submitted a 10.10% improvement.
+
+To really test the algorithms, Netflix tested them on a private test set that the teams had never
+seen before.
+
+This is the true test of predictive ability.
+
+On September 18, 2009, Netflix announced that the winning team was Bellkor's Pragmatic Chaos.
+They won the competition and the $1 million grand prize.
+
+Recommendation systems provide a significant edge to many companies.
+
+In today's digital age, businesses often have hundreds of thousands of items to offer their customers,
+whether they're movies, songs , or people they might know on Facebook.
+
+Excellent recommendation systems can make or break these businesses.
+
+Clustering algorithms, which are tailored to find similar customers or similar items,
+form the backbone of many of these recommendation systems.
