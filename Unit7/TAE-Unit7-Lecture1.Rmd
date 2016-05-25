@@ -1,0 +1,289 @@
+---
+title: "TAE - Unit 7 - Lecture 1"
+author: "GT"
+date: "May 24, 2016"
+output: html_document
+---
+
+## Visualizing the Word
+
+In this lecture, we'll discuss the idea of using visualization to better understand
+data and to provide insights on the problem we're addressing.
+
+*Why visualization?*
+
+People often say that a picture is like a thousand words.
+
+In the same spirit, John Tukey, a major statistician at Princeton, 
+wrote that 
+
+>  "the picture-examining eye is the best finder we have of the 
+   wholly unanticipated."
+  
+Visualizing data allows us to discern relationships, structures, distributions,
+outliers, patterns, behaviors, dependencies, and outcomes.
+
+Visualization is further useful for initial data exploration, for interpreting 
+models, and for communicating results effectively.
+
+We'll see how visualizations can be used to better understand data, communicate
+information more effectively, show the results of analytical models.
+
+### The World Health Organization (WHO)
+
+The World Health Organization, WHO for short, is the authority for health within 
+the United Nations system.
+
+It is responsible for providing leadership on global health matters, shaping the
+health research agenda, setting norms and standards, articulating evidence-based
+policy options, providing technical support to countries, and monitoring and 
+assessing health trends.
+
+WHO communicates information about global health in order to inform citizens,
+donors, policymakers, and organizations around the world.
+
+Their primary publication is World Health Report.
+
+Each issue focuses on a specific aspect of global health, and includes statistics
+and experts' assessments. WHO also maintains an open, online repository
+of global health data. WHO provides some data visualizations, which helps them
+communicate more effectively with the public.
+
+### What is Data Visualization ?
+
+Data visualization is defined as a mapping of data properties to visual properties.
+
+Data properties are usually numerical or categorical, like the mean of a variable,
+the maximum value of a variable, or the number of observations with a certain
+property.
+
+Visual properties can be (x,y) coordinates to plot points on a graph, colors to
+assign labels, sizes, shapes, heights, etc.
+
+Both types of properties are used to better understand the data, but in 
+different ways.
+
+To motivate the need for data visualization, let's look at a famous example 
+called Anscombe's Quartet.
+
+Each of these tables corresponds to a different data set. We have four data sets,
+each with two variables, x and y.
+
+```
+|  X1  |   Y1  |  |  X2  |  Y2  |  |  X3  |   Y3  |   |  X4  |   Y4  |
+|------+-------|  |------+------|  |------+-------|   |------+-------|
+| 10.0 |  8.04 |  | 10.0 | 9.14 |  | 10.0 |  7.46 |   |  8.0 |  6.58 | 
+|  8.0 |  6.95 |  |  8.0 | 8.14 |  |  8.0 |  6.77 |   |  8.0 |  5.76 |
+| 13.0 |  7.58 |  | 13.0 | 8.74 |  | 13.0 | 12.74 |   |  8.0 |  7.71 |
+|  9.0 |  8.81 |  |  9.0 | 8.77 |  |  9.0 |  7.11 |   |  8.0 |  8.84 |
+| 11.0 |  8.33 |  | 11.0 | 9.26 |  | 11.0 |  7.81 |   |  8.0 |  8.47 |
+| 14.0 |  9.96 |  | 14.0 | 8.10 |  | 14.0 |  8.84 |   |  8.0 |  7.04 |
+|  6.0 |  7.24 |  |  6.0 | 6.13 |  |  6.0 |  6.08 |   |  8.0 |  5.25 |
+|  4.0 |  4.62 |  |  4.0 | 3.10 |  |  4.0 |  5.39 |   |  8.0 | 12.50 |  
+| 12.0 | 10.84 |  | 12.0 | 9.13 |  | 12.0 |  8.15 |   | 19.0 |  5.56 |
+|  7.0 |  4.82 |  |  7.0 | 7.26 |  |  7.0 |  6.42 |   |  8.0 |  7.91 |  
+|  5.0 |  5.68 |  |  5.0 | 4.74 |  |  5.0 |  5.73 |   |  8.0 |  6.89 |
+
+Mean of X: 9.0          Mean of Y: 7.50         Correl(X,Y): 0.816
+Variance of X: 11.0     Variance of Y: 4.12     Regression eq.: Y=3.00+0.50X
+```
+
+Just looking at the tables of data, it's hard to notice anything special about it.
+It turns out that the mean and variance of the x variable is the same for all four
+data sets, the mean and variance of the y variable is the same for all four data
+sets, and the correlation between x and y, as well as the regression equation to
+predict y from x, is the exact same for all four data sets.
+
+So just by looking at data properties, we might conclude that these data sets 
+are very similar.
+
+But if we plot the four data sets, they're very different.
+
+```
+y1^                                     y2^
+  |                 *    *                |
+  |                                       |             
+  |             *    *                    |           *  *
+  |         *    *                        |         *       *
+  |    * *                                |       *          *
+  |   *   *                               |      *
+  |  *                                    |     *
+  +---------------------------->          +---------------------------->
+                               x1                                      x2
+y3^                                     y4^
+  |                  *                    |                         *
+  |                                       |             
+  |                +  *                   |      *    
+  |           +*                          |      *
+  |      +*                               |      *
+  |   *                                   |      *
+  |                                       |     
+  +---------------------------->          +---------------------------->
+                               x3                                      x4
+```
+
+
+These plots show the four data sets, with the x variable on the x-axis,
+and the y variable on the y-axis.
+
+Visually, these data sets look very different. But without visualizing them, 
+we might not have noticed this.
+
+This is one example of why visualizing data can be very important.
+
+We'll use the **ggplot2** package in R to create data visualizations.
+
+This package was created by Hadley Wickham, who described ggplot as 
+
+> "a plotting system for R based on the grammar of graphics, which
+tries to take the good parts of base and lattice graphics and none 
+of the bad parts. It takes care of many of the fiddly details that
+make plotting a hassle (like drawing legends) as well as providing a 
+powerful model of graphics that makes it easy to produce complex 
+multi-layered graphics."
+
+So what do we gain from using ggplot over just making plots using the basic R
+functions, or what's referred to as base R?
+
+Well, in base R, each mapping of data properties to visual properties is its 
+own special case. 
+
+When we create a scatter plot, or a box plot, or a histogram, we have to use a
+completely different function. Additionally, the graphics are composed of simple
+elements, like points or lines.
+
+It's challenging to create any sophisticated visualizations. It's also difficult 
+to add elements to existing plots.
+
+But in ggplot, the mapping of data properties to visual properties is done by
+just adding layers to the plot. This makes it much easier to create sophisticated
+plots and to add to existing plots.
+
+So what is the grammar of graphics that ggplot is based on?
+
+All ggplot graphics consist of three elements.
+
+1. **Data**, in a data frame.
+2. **Aesthetic mapping**, which describes how variables in the data frame
+   are mapped to graphical attributes. 
+   *Color, shape, scale, x-y axes, subsets,...*
+3. **Geometric objects** determine how the data values are rendered graphically.
+   *Points, lines, bars, boxes, etc.*
+
+### Basic Scatterplots Using ggplot
+
+Let's start by reading in our data. 
+
+```{r}
+WHO = read.csv("WHO.csv")
+str(WHO)
+```
+
+We can see that we have 194 observations, or countries, and 13 different 
+variables.
+
+In week one, the very first plot we made in R was a scatterplot of fertility rate
+versus gross national income.
+
+Let's make this plot again, just like we did in week one.
+
+```{r}
+plot(WHO$GNI, WHO$FertilityRate)
+```
+
+This plot shows us that a higher fertility rate is correlated with a lower income.
+
+Now, let's redo this scatterplot, but this time using ggplot. We'll see how ggplot
+can be used to make more visually appealing and complex scatterplots.
+
+First, we need to install and load the ggplot2 package.
+
+```{r}
+library(ggplot2)
+```
+
+Now, remember we need at least three things to create a plot using ggplot, 
+data, an aesthetic mapping of variables in the data frame to visual output,
+and a geometric object.
+
+So first, let's create the ggplot object with the data and the aesthetic mapping.
+
+```{r}
+scatterplot = ggplot(WHO, aes(x = GNI, y = FertilityRate))
+```
+
+Now, we need to tell ggplot what geometric objects to put in the plot. We could use
+bars, lines, points, or something else.
+
+This is a big difference between ggplot and regular plotting in R. You can build
+different types of graphs by using the same ggplot object.
+
+So first, let's just create a straightforward scatterplot.
+
+```{r}
+scatterplot + geom_point()
+```
+
+You should see a new plot in the Graphics window that looks similar to our 
+original plot, but there are already a few nice improvements.
+
+One is that we don't have the data set name with a dollar sign in front of the 
+label on each axis, just the variable name. Another is that we have these nice
+grid lines in the background and solid points that pop out from the background.
+
+We could have made a line graph just as easily by changing point to line.
+
+```{r}
+scatterplot + geom_line()
+```
+
+Now, you can see a line graph in the Graphics window. However, a line doesn't 
+really make sense for this particular plot. 
+
+In addition to specifying that the geometry we want is points, we can add other
+options, like the color, shape, and size of the points.
+
+Let's redo our plot with blue triangles instead of circles. 
+
+```{r}
+scatterplot + geom_point(color="blue", size=3, shape=17)
+scatterplot + geom_point(color="darkred", size=3, shape=8)
+```
+
+There are many different colors and shapes that you can specify.
+
+Now, let's add a title to the plot.
+
+```{r}
+scatterplot + geom_point(color="darkred", size=3, shape=8) + 
+  ggtitle("Fertility Rate vs. Gross National Income")
+```
+
+You should now see that it has a nice title at the top. 
+
+Now, let's save our plot to a file.
+
+We can do this by first saving our plot to a variable.
+
+```{r}
+fertilityGNIplot = scatterplot + geom_point(color="darkred", size=3, shape=8) + 
+  ggtitle("Fertility Rate vs. Gross National Income")
+```
+
+This will save our scatterplot to the variable, fertilityGNIplot.
+
+Now, let's create a file we want to save our plot to. We can do that with the pdf
+function.
+
+```{r}
+pdf("MyPlot.pdf")
+print(fertilityGNIplot)
+dev.off() # to close the file
+```
+
+Now, if you look at the folder where WHO.csv is, you should see another file
+called MyPlot.pdf, containing the plot we made.
+
+### Advanced Scatterplots Using ggplot
+
+
