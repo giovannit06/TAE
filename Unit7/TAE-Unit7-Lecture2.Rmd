@@ -1,0 +1,256 @@
+---
+title: "TEA - Unit 7 - Lecture 2"
+author: "GT"
+date: "25 mai 2016"
+output: html_document
+---
+
+##  The Analytical Policeman
+
+In this lecture, we will discuss how visualization can offer insights in the area of policing
+in urban environments.
+
+The explosion of computerized data affects all parts of society, including policing.
+
+In the past, human judgment and experience was the only tool in identifying patterns in criminal 
+behavior. 
+
+Police forces around the United States and the world are augmenting human judgment with
+analytics - sometimes described as **predictive analysis**.
+
+These days the LAPD is on an offensive to prevent crime. Its latest weapon is a computer program
+that can actually predict where crimes will happen.
+
+In the Foothill Division north of downtown Los Angeles, police are patrolling the largely
+working-class neighborhoods with specially marked maps. The small red squares are hot spots,
+where computers project property crimes are most likely.
+
+It's called predictive policing.
+
+These crime prediction boxes come from the same kind of mathematical calculation used
+to predict earthquakes and aftershocks. By analyzing the times, dates, and places of recent crimes
+computers project hot spots for burglaries, break-ins, and car thefts.
+
+LA's Police Chief Charlie Beck says increasing police patrols inside those boxes
+denies criminals opportunity.The real measure of this is not how many people you catch,
+it's how much crime you prevent.
+
+The LAPD began testing the predictive policing model here in the Foothill Division in November,
+and the early results are encouraging. Burglaries are down 33%, and violent crime is also down 21%.
+T
+hat success will allow Beck to expand the program to other parts of the city and leverage 
+limited resources.
+
+The Los Angeles Police Chief Charlie Beck writes, 
+
+> "I'm not going to get more money. I'm not going to get more cops. I have to be better at using 
+  what I have, and that's what predictive policing is about. If this old street cop can change the way
+  that he thinks about this stuff, then I know that my officers can do the same."
+
+Let me comment on the role of analytics.
+
+The analytical tools you have learned in this class can be used to make these predictive policing 
+models possible.
+
+However, *communicating* the results of these models is critical. A *linear* regression output table
+will not be of use to a *police* person on patrol.
+
+Visualization bridges the gap between the *analytics* and the *end user*.
+
+### Visualizing Crime Over Time
+
+In almost every application, before we even consider a predictive model, we should 
+try to understand the historical data.
+
+Many cities in the United States and around the world, provide logs of reported crimes, 
+usually the time, location, and nature of the event.
+
+In this lecture, we'll use data from the city of Chicago, in the United States, 
+about motor vehicle thefts.
+
+Given this data on crimes, suppose we wanted to communicate crime patterns
+over the course of an average week.
+
+We could display daily crime averages using a line graph, like the one shown here, 
+but this doesn't seem too useful.
+
+We can see that crime tends to be higher on Saturday, but when on Saturday, and where?
+
+We could replace our x-axis with the hour of the day and have a different line for
+every day of the week to understand when crime occurs in more detail.
+
+But this would be a jumbled mess with seven lines, and probably very hard to read.
+
+We could instead use no visualization at all, and instead present information in a 
+table.
+
+For each hour and day, we have the total number of crimes that occurred. This is a 
+valid representation of the data, but large tables of numbers can be hard to read and
+understand.
+
+So how can we make the table more interesting and usable?
+
+A great way to visualize information in a two-dimensional table is with a **heatmap**.
+
+**Heatmaps** visualize data using three attributes. Two of the attributes are on the 
+*x and y-axes*, typically displayed horizontally and vertically.
+
+The *third attribute* is represented by **shades of color**.
+
+In this example, lower values in the third attribute correspond to colors closer to blue,
+and higher values in the third attribute correspond to colors closer to red.
+
+For example, the x-axis could be hours of the day, the y-axis could be days of the week,
+and the colors could correspond to the amount of crime.
+
+In a heat map, we can pick different color schemes based on the type of data to convey 
+different messages.
+
+In crime, a yellow to red color scheme might be appropriate because it can highlight
+some of the more dangerous areas in red.
+
+Your eye is naturally drawn to the red areas of the plot.
+
+In other applications, both high and low values are meaningful, so having a more varied 
+color scheme might be useful.
+
+And in other applications, you might only want to see cells with high values,
+so you could use a gray scale to make the cells with low values white.
+
+The x and y-axes in a heat map don't need to be continuous. 
+
+In our example, we have a categorical or factor variable, the day of the week.
+
+And we can even combine a heat map with a geographical map, which we'll discuss 
+later in this lecture.
+
+This type of heat map is frequently used in predictive policing to show crime hot 
+spots in a city.
+
+In this lecture, we'll use Chicago motor vehicle theft data to explore patterns of
+crime, both over days of the week, and over hours of the day.
+
+We're interested in analyzing the total number of car thefts that occur in any 
+particular hour of a day of the week over our whole data set.
+
+### A Line Plot
+
+In this video, we'll create a basic line plot
+to visualize crime trends.
+Let's start by reading in our data.
+We'll call it mvt for motor vehicle thefts,
+and use the read.csv function to read in the file mvt.csv.
+We'll add the argument stringsAsFactors = FALSE,
+since we have a text field, and we
+want to make sure it's read in properly.
+Let's take a look at the structure of our data
+using the str function.
+We have over 190,000 observations
+of three different variables-- the date of the crime,
+and the location of the crime, in terms
+of latitude and longitude.
+We want to first convert the Date variable to a format
+that R will recognize so that we can extract the day of the week
+and the hour of the day.
+We can do this using the strptime function.
+So we want to replace our variable, Date,
+with the output of the strptime function, which
+takes as a first argument our variable, Date, and then
+as a second argument the format that the date is in.
+Here, we can see in the output from the str function
+that our format is the month slash the day slash the year,
+and then the hour colon minutes.
+So our format equals, "%m/%d/%y %H:%M", close the parentheses,
+and hit Enter.
+In this format, we can extract the hour and the day
+of the week from the Date variable,
+and we can add these as new variables to our data frame.
+We can do this by first defining our new variable,
+mvt$Weekday = weekdays(mvt$Date).
+Then, to add the hour, which we'll call mvt$Hour,
+we just take the hour variable out of Date variable.
+This only exists because we converted the Date variable.
+Let's take a look at the structure of our data
+again to see what it looks like.
+Now, we have two more variables-- Weekday,
+which gives the day of the week, and Hour,
+which gives the hour of the day.
+Now, we're ready to make some line plots.
+Let's start by creating the line plot
+we saw in the previous video with just one line and a value
+for every day of the week.
+We want to plot as that value the total number
+of crimes on each day of the week.
+We can get this information by creating
+a table of the Weekday variable.
+This gives the total amount of crime on each day of the week.
+Let's save this table as a data frame
+so that we can pass it to ggplot as our data.
+We'll call it WeekdayCounts, and use the as.data.frame function
+to convert our table to a data frame.
+Let's see what this looks like with the str function.
+We can see that our data frame has seven observations, one
+for each day of the week, and two different variables.
+The first variable, called Var1, gives
+the name of the day of the week, and the second variable,
+called Freq, for frequency, gives the total amount of crime
+on that day of the week.
+Now, we're ready to make our plot.
+First, we need to load the ggplot2 package.
+So we'll type library(ggplot2).
+Now, we'll create our plot using the ggplot function.
+So type ggplot, and then we need to give
+the name of our data, which is WeekdayCounts.
+And then we need to define our aesthetic.
+So our aesthetic should have x = Var1,
+since we want the day of the week on the x-axis,
+and y = Freq, since we want the frequency,
+the number of crimes, on the y-axis.
+Now, we just need to add geom_line(aes(group=1)).
+This just groups all of our data into one line,
+since we want one line in our plot.
+Go ahead and hit Enter.
+We can see that this is very close to the plot we want.
+We have the total number of crime plotted
+by day of the week, but our days of the week
+are a little bit out of order.
+We have Friday first, then Monday, then Saturday,
+then Sunday, etc.
+What ggplot did was it put the days of the week
+in alphabetical order.
+But we actually want the days of the week in chronological order
+to make this plot a bit easier to read.
+We can do this by making the Var1 variable an ordered factor
+variable.
+This signals to ggplot that the ordering is meaningful.
+We can do this by using the factor function.
+So let's start by typing WeekdayCounts$Var1,
+the variable we want to convert, and set that equal
+to the output of the factor function,
+where the first argument is our variable, WeekdayCounts$Var1,
+the second argument is ordered = TRUE.
+This says that we want an ordered factor.
+And the third argument, which is levels,
+should be equal to a vector of the days
+of the week in the order we want them to be in.
+We'll use the c function to do this.
+So first, in quotes, type "Sunday" --
+we want Sunday first-- and then "Monday", "Tuesday",
+"Wednesday", "Thursday", "Friday", "Saturday".
+Go ahead and close both parentheses and hit Enter.
+Now, let's try our plot again by just hitting the up arrow twice
+and hitting Enter.
+Now, this is the plot we want.
+We have the total crime by day of the week
+with the days of the week in chronological order.
+The last thing we'll want to do to our plot
+is just change the x- and y-axis labels,
+since they're not very helpful as they are now.
+To do this, back in the R console,
+just hit the up arrow to get back to our plotting line,
+and then we'll add xlab("Day of the Week").
+And then we'll add ylab("Total Motor Vehicle Thefts").
+Now, this is the plot we were trying
+to generate with descriptive labels on the x- and y-axis.
+In the next video, we'll add the hour of the day
+to our line plot, and then create a heat map.
