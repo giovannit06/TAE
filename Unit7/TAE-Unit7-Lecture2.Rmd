@@ -239,3 +239,231 @@ since they're not very helpful as they are now.
 ggplot(WeekdayCounts, aes(x = Var1, y = Freq)) + geom_line(aes(group=1)) + xlab("Day of the Week") + ylab("Total Motor Vehicle Theft")
 ```
 
+### A Heatmap
+
+We'll add the hour of the day to our line plot, and then create an alternative visualization 
+using a heat map. 
+
+We can do this by creating a line for each day of the week and making the x-axis the hour of the day.
+
+We first need to create a counts table for the weekday, and hour.
+
+```{r}
+table(mvt$Weekday, mvt$Hour)
+```
+
+This table gives, for each day of the week and each hour, the total number of motor vehicle thefts 
+that occurred.
+
+Let's save this table to a data frame so that we can use it in our visualizations.
+We'll call it DayHourCounts and use the as.data.frame function, run on our table, where the 
+first variable is the Weekday and the second variable is the Hour.
+
+```{r}
+DayHourCounts = as.data.frame(table(mvt$Weekday, mvt$Hour))
+str(DayHourCounts)
+```
+
+We can see that we have 168 observations, one for each day of the week and hour pair, and three 
+different variables:
+
+- *Var1* gives the day of the week.
+- *Var2* gives the hour of the day.
+- *Freq* for frequency gives the total crime count.
+
+Let's convert the second variable, Var2, to actual numbers and call it Hour, since this is the hour of
+the day, and it makes sense that it's numerical.
+
+```{r}
+DayHourCounts$Hour = as.numeric(as.character(DayHourCounts$Var2))
+str(DayHourCounts)
+```
+
+**This is how we convert a factor variable to a numeric variable.**
+
+Now we're ready to create our plot. We just need to change the group to Var1, which is the day 
+of the week. 
+
+```{r}
+ggplot(DayHourCounts, aes(x = Hour, y = Freq)) + geom_line(aes(group = Var1))
+```
+
+You should see a new plot show up in the graphics window. It has seven lines, one for each day 
+of the week. While this is interesting, we can't tell which line is which day, so let's change
+the colors of the lines to correspond to the days of the week.
+
+```{r}
+ggplot(DayHourCounts, aes(x = Hour, y = Freq)) + geom_line(aes(group = Var1, color = Var1), size = 2)
+```
+
+Now in our plot, each line is colored corresponding to the day of the week. This helps us see that on 
+Saturday and Sunday, for example, the green and the teal lines, there's less motor vehicle thefts in 
+the morning.
+
+While we can get some information from this plot, it's still quite hard to interpret. Seven lines 
+is a lot. Let's instead visualize the same information with a heat map.
+
+To make a heat map, we'll use our data in our data frame DayHourCounts. First, though, we need to 
+fix the order of the days so that they'll show up in chronological order instead of in alphabetical
+order.
+
+So for DayHourCounts$Var1, which is the day of the week, we're going to use the factor function.
+
+```{r}
+DayHourCounts$Var1 = factor(DayHourCounts$Var1, ordered = TRUE, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+
+Now let's make our heat map.
+
+`geom_tile()`  is the function we use to make a heat map. And then in the aesthetic for our tiles,
+we want the fill to be equal to Freq. This will define the colors of the rectangles in our heat map
+to correspond to the total crime.
+
+```{r}
+ggplot(DayHourCounts, aes(x = Hour, y = Var1)) + geom_tile(aes(fill = Freq))
+```
+
+You should see a heat map pop up in your graphics window.
+
+So how do we read this? For each hour and each day of the week, we have a rectangle in our heat map.
+The color of that rectangle indicates the frequency,or the number of crimes that occur in that hour
+and on that day. Our legend tells us that lighter colors correspond to more crime. So we can see that 
+a lot of crime happens around midnight, particularly on the weekends.
+
+We can change the label on the legend, and get rid of the y label to make our plot a little nicer.
+
+```{r}
+ggplot(DayHourCounts, aes(x = Hour, y = Var1)) + geom_tile(aes(fill = Freq)) + scale_fill_gradient(name="Total MV Thefts") + theme(axis.title.y = element_blank())
+```
+
+And now on our heat map, the legend is titled "Total MV Thefts" and the y-axis label is gone.
+
+We can also change the color scheme. We'll make lower values correspond to white colors and
+higher values correspond to red colors.
+
+```{r}
+ggplot(DayHourCounts, aes(x = Hour, y = Var1)) + geom_tile(aes(fill = Freq)) + scale_fill_gradient(name="Total MV Thefts", low="white", high="red") + theme(axis.title.y = element_blank())
+```
+
+This is a common color scheme in policing. It shows the hot spots, or the places with more 
+crime, in red. So now the most crime is shown by the red spots and the least crime is shown
+by the lighter areas.
+
+It looks like Friday night is a pretty common time for motor vehicle thefts.
+
+We saw something that we didn't really see in the heat map before.
+
+It's often useful to change the color scheme depending on whether you want high values or 
+low values to pop out, and the feeling you want the plot to portray.
+
+### A Geographical Hot Spot Map
+
+In this video, we'll plot crime on a map of Chicago.
+First, we need to install and load two new packages, the maps
+package and the ggmap package.
+So start by installing the package maps.
+So type install.packages("maps").
+When the CRAN mirror window pops up,
+go ahead and pick a location near you.
+When the package is done installing and you're back
+at the blinking cursor, also type install.packages("ggmap").
+When that package is also done installing,
+load both packages using the library command.
+So type library(maps), and then library(ggmap).
+Now, let's load a map of Chicago into R.
+We can easily do this by using the get_map function.
+So we'll call it chicago = get_map(location = "chicago",
+zoom = 11).
+Let's take a look at the map by using the ggmap function.
+Now, in your R graphics window, you
+should see a geographical map of the city of Chicago.
+Now let's plot the first 100 motor vehicle
+thefts in our data set on this map.
+To do this, we start by typing ggmap(chicago).
+This is instead of using ggplot like we've
+been using in the previous videos.
+Then we want to add geom_point, and here, we'll
+define our data set to be equal to motor vehicle thefts, where
+we'll take the first through 100th observations,
+and in our aesthetic, we'll define our x-axis
+to be the longitude of the points and our y-axis
+to be the latitude of the points.
+Now, in your R graphics window, you
+should see the map of Chicago with black points marking where
+the first 100 motor vehicle thefts were.
+If we plotted all 190,000 motor vehicle thefts,
+we would just see a big black box,
+which wouldn't be helpful at all.
+We're more interested in whether or not
+an area has a high amount of crime,
+so let's round our latitude and longitude
+to two digits of accuracy and create a crime counts data
+frame for each area.
+We'll call it LatLonCounts, and use the as.data.frame function
+run on the table that compares the latitude and longitude
+rounded to two digits of accuracy.
+So our first argument to table is round(mvt$Longitude, 2).
+And our second argument is round(mvt$Latitude, 2).
+This gives us the total crimes at every point on a grid.
+Let's take a look at our data frame using the str function.
+We have 1,638 observations and three variables.
+The first two variables, Var1 and Var2,
+are the latitude and longitude coordinates,
+and the third variable is the number of motor vehicle thefts
+that occur in that area.
+Let's convert our longitude and latitude variables to numbers
+and call them Lat and Long.
+So first, we'll define the variable in our LatLonCounts
+data frame, called Long, and set that equal to as.numeric, run
+on as.character.
+Remember, this is how we convert a factor variable
+to a numerical variable.
+And we'll give the variable, LatLonCounts$Var1.
+Now let's just repeat this for latitude.
+So LatLonCounts$Lat = as.numeric(as.character(LatLonCounts$Var2)).
+Now, let's plot these points on our map,
+making the size and color of the points
+depend on the total number of motor vehicle thefts.
+So first, again we type ggmap(chicago) +
+geom_point(LatLonCounts, aes(x = Long, y = Lat, color = Freq,
+size = Freq)).
+Now, in our R graphics window, our plot
+should have a point for every area defined by our latitude
+and longitude areas, and the points
+have a size and color corresponding
+to the number of crimes in that area.
+So we can see that the lighter and larger points correspond
+to more motor vehicle thefts.
+This helps us see where in Chicago more crimes occur.
+If we want to change the color scheme,
+we can do that too by just hitting the up arrow in our R
+console and then adding scale_color_gradient(low="yellow",
+high="red").
+If you hit Enter, you should see the same plot as before,
+but this time, the areas with more crime are closer to red
+and the areas with less crime are closer to yellow.
+We can also use geom_tile to make something that looks more
+like a traditional heat map.
+To do this, we type ggmap(chicago), just
+like before, but now we're going to use geom_tile, where
+our data frame again is LatLonCounts.
+And in our aesthetic, we have that the x-axis is Long,
+the y-axis is Lat, and then we have alpha=Freq.
+This will define how to scale the colors on the heat map
+according to the crime counts.
+Then close the parentheses and type a comma,
+and then type fill="red", defining our color scheme.
+Close the parentheses and hit Enter.
+This map takes a minute to load.
+While we're waiting, let's discuss
+what we've done in this video.
+We've created a geographical heat map, which in our case
+shows a visualization of the data,
+but it could also show the predictions of a model.
+Now that our heat map is loaded, let's take a look.
+In each area of Chicago, now that area
+is colored in red by the amount of crime there.
+This looks more like a map that people
+use for predictive policing.
+In the next video, we'll use data from the FBI
+to make a heat map on a map of the United States.
