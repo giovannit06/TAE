@@ -74,59 +74,486 @@ Instead, we start at the top with iOS 3.13, with 0%, and then jump to iOS 4.2.10
 with 12.64%, before going back down to iOS 3.2, with 0.00% again. Which brings us to the
 number of labels.
 
-Many of the segments are so narrow that they
-can't be seen, although technically, all data is
+Many of the segments are so narrow that they can't be seen, although technically, all data is
 retained, because every segment is labeled.
-If we look at iOS, we see that there
-are only three major versions, 3, 4, and 5, suggesting
-we can compress down the iOS segments to just three
-segments, while retaining most of the information.
-At the least, the versions that differ in the third number
-should be combined, and all data points of 0% should be removed.
-The more fundamental concern of this visualization
-is that it might really be showing
-the percentage of the phone market
-using each operating system, and says nothing about whether one
-operating system crashes more than the other, which
-is the focus of this visualization.
+
+If we look at iOS, we see that there are only three major versions, 3, 4, and 5, suggesting
+we can compress down the iOS segments to just three segments, while retaining most of the 
+information. At the least, the versions that differ in the third number should be combined, and 
+all data points of 0% should be removed.
+
+The more fundamental concern of this visualization is that it might really be showing
+the percentage of the phone market using each operating system, and says nothing about whether one
+operating system crashes more than the other, which is the focus of this visualization.
+
 Our next pie chart has its own share of problems.
-This is a plot of how many shark attacks have
-been attributed to each type of shark.
-Firstly, the pie chart is, for some reason,
-plotted on a hemisphere, a graphical effect that
-adds nothing, but has the effect of vertically compressing
-the pie chart.
-Next, there is the issue of label orientation.
-While the caption, "Shark species (total/deaths)",
-and the label, "White shark", are horizontal,
-the rest are vertical and hard to read.
+
+This is a plot of how many shark attacks have been attributed to each type of shark.
+
+Firstly, the pie chart is, for some reason, plotted on a hemisphere, a graphical effect that
+adds nothing, but has the effect of vertically compressing the pie chart.
+
+Next, there is the issue of label orientation. While the caption, "Shark species (total/deaths)",
+and the label, "White shark", are horizontal, the rest are vertical and hard to read.
 They are in order, however, which does help.
-Although the "Others" segment is unfortunately large,
-which is unclear if it is due to there being a lot of attacks
-by many species, or if the species is not
-known for many attacks.
-Finally, at a glance, it is hard to distinguish
-the magnitude of differences between the orange, green,
-blue, and brown segments in the top part of the pie chart,
-and we must resort to the labels to distinguish between them.
-There is no meaning in the colors, they are arbitrary.
-Finally, we'll look at a pie chart I made,
-of the origins of the international students at MIT.
-I made this chart with the default settings
-in Google Sheets.
-First of all, not all of the segments
-are labeled, so that data is lost,
-for the Middle East, Africa, Oceania,
-and the unknown regions.
-Second, again, we have colors that are arbitrary and almost
-close enough to be confusing.
-The difference between Asia and Africa's colors is subtle.
-And of course, the 3D-effect on the pie
-chart adds nothing, but does play a subtle trick on the eye.
-Due to the 3D-effect, the blue and red segments
-are actually larger looking, which at a glance,
-may lead the viewer to overestimate their size.
-What we are going to do now is, switch over to R
-and plot this data more appropriately, using ggplot.
-And then we'll return to the slides,
-to discuss some more possibilities for this data.
+
+Although the "Others" segment is unfortunately large, which is unclear if it is due to there
+being a lot of attacks by many species, or if the species is not known for many attacks.
+
+Finally, at a glance, it is hard to distinguish the magnitude of differences between the 
+orange, green, blue, and brown segments in the top part of the pie chart, and we must resort 
+to the labels to distinguish between them.  There is no meaning in the colors, they are arbitrary.
+
+Finally, we'll look at a pie chart I made, of the origins of the international students at MIT.
+I made this chart with the default settings in Google Sheets.
+
+First of all, not all of the segments are labeled, so that data is lost, for the Middle East,
+Africa, Oceania, and the unknown regions.
+
+Second, again, we have colors that are arbitrary and almost close enough to be confusing.
+The difference between Asia and Africa's colors is subtle. 
+
+And of course, the 3D-effect on the pie chart adds nothing, but does play a subtle trick on
+the eye. Due to the 3D-effect, the blue and red segments are actually larger looking, which
+at a glance, may lead the viewer to overestimate their size.
+
+What we are going to do now is, switch over to R and plot this data more appropriately,
+using ggplot. And then we'll return to the slides, to discuss some more possibilities for this data.
+
+### Bar Charts in R
+
+Okay, so now we're going to start with a simple bar plot of the MIT international student data.
+
+So first, let's load the ggplot library, ggplot2, and load the data frame.
+
+```{r}
+library(ggplot2)
+intl = read.csv("intl.csv")
+str(intl)
+```
+The structure of this data frame is very simple. There are two columns, two variables.
+The first one, the region, and the second one is the percentage of international students
+who came from that region.
+
+So making a bar plot from this data isn't too hard. We start off with a ggplot command,
+of course, the first argument being the data frame. The aesthetic in this case is to have Region 
+on the x-axis, and on the y-axis, to have the percentage of international students, the geometry
+we're going to use is geom_bar. We want to label my bars with the value, so it's easy to read 
+in closer detail.
+
+```{r}
+ggplot(intl, aes(x=Region, y=PercentOfIntl)) + geom_bar(stat="identity") + geom_text(aes(label=PercentOfIntl))
+```
+
+So yes, we have a bar for each region. The values are between zero and one, which looks kind 
+of strange. The labels are actually lying over the top of the columns, which isn't very nice,
+and the regions aren't really ordered in any way that's useful. They're actually ordered in 
+alphabetical order, but I think it would be much more interesting to have them in descending order.
+
+So we can work on this.
+
+First of all, though, what is this stat = "identity"? Well, it's pretty simple.
+Geometry bar has multiple modes of operation, and stat = "identity" says, use the value of the
+y variable as is, which is what we want. The height of the bar is the value of the y variable.
+
+Now, there are other modes, including one that counts the number of rows for each value of x, 
+and plots that instead.
+
+But stat = "identity" is what we want right now. Now, the x-axis is out of order. And the reason 
+for this is that ggplot defaults to alphabetical order for the x-axis.
+
+What we need to do is make Region an ordered factor instead of an unordered factor.We can do this 
+with the reorder command and the transform command. So let's write this out.
+
+```{r}
+intl = transform(intl, Region = reorder(Region, -PercentOfIntl)) # reorder based on decreasing order of PercentOfIntl
+str(intl)
+```
+
+We see there's something going on in the Region column that wasn't going before. 
+And that's that ordering. So you might have also noticed that I put a negative sign
+in front of PercentOfIntl. So that negative sign means decreasing order.
+If we had left that out, it would have actually ordered them in increasing order.
+So that's one thing fixed.
+
+Another thing we didn't like was that the numbers  were between zero and one, which looks 
+a little bit messy. 
+
+So let's just simply multiply all the values by 100.
+
+```{r}
+intl$PercentOfIntl = intl$PercentOfIntl*100
+```
+
+And now the other things we have to fix, like the text overlying and the x-axis being all 
+bunched up like that, we're going to do that in a new ggplot command.
+
+```{r}
+ggplot(intl, aes(x=Region, y=PercentOfIntl)) +
+  geom_bar(stat="identity", fill="dark blue") +
+  geom_text(aes(label=PercentOfIntl), vjust = -0.4) + # it moves the labels up a little bit
+  ylab("Percent of International Students") +
+  theme(axis.title.x = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+So we've got our labels vjust-ed above the columns. The bars themselves are dark blue.
+The numbers are now between 0 and 100, instead of zero and one. We can read all the text labels.
+And it's generally a lot more readable than the pie plot or our original ggplot, at that.
+
+Let's go back to the slides now and talk about what we've just done.
+
+### A Better Visualization
+
+When we compare it back to the pie graph, the first thing I notice is that now all the 
+data is visible. We haven't lost the small regions and we can read out the exact share that
+comes from Africa, Oceania, and the unknown or stateless column.
+
+I believe it is also easier to compare the relative sizes of each region because they're all
+put side by side on a similar scale. There's no tricks, or three dimensions, or colors to 
+create a perception issue.
+
+But, I will say that something to consider is, for some people and some applications,
+being not as visually exciting is a negative.
+
+This plot, while very readable and correct, is certainly a little bit dull. In some applications, 
+this is an important consideration. 
+
+Now, wouldn't it be interesting if we could plot this data on a world map?
+
+It would be possible, but a bit tedious to create because we need to determine
+which country lies in which region. Shading all countries in a region of the same color
+might be misleading though.
+
+For example, countries in Latin America will send students at different rates, naturally.
+But, if we color them all the same color, it kind of gives a false impression.
+As it turns out, we actually have access to per country data.
+
+So we will plot that on a world map instead and see if it is an effective way of communicating
+where students come from to MIT.
+
+### World Maps in R
+
+So now we're going to try plotting a world map with a new data set that has the number
+of international students from each country.
+
+So first of all, we're going to need to use the ggmap package, which you may need to install.
+And we're going to load in the data set, which is called intlall.csv.
+
+```{r}
+library(ggmap)
+intlall = read.csv("intlall.csv", stringsAsFactors = FALSE)
+head(intlall)
+```
+
+Let's look at the first few rows of intlall. So you see that each row corresponds to a country.
+There's a citizenship column that's the country name, number of undergraduates, number
+of graduates, special undergraduates and graduates, exchange or visiting, and a total column.
+
+Now there's these NAs in here, but they're not really NAs. They're just 0's. So what we're 
+going to do is say, all these NAs should be 0's.
+
+```{r}
+intlall[is.na(intlall)] = 0
+head(intlall)
+```
+
+Right, so next step is to load the world map. 
+
+```{r}
+world_map = map_data("world")
+str(world_map)
+```
+
+So let's look at the structure of the world_map. So the first two columns are the longitude 
+and latitude; third column is something called group, that's actually a group for each country,
+using a different number for each country; order, we'll get to that later; region is just 
+the country name, and subregion is sometimes used for some countries to describe islands and
+other things like that.
+
+So we want to shove the world_map data frame and the intlall data frame into one data frame,
+so we can use it for ggplot. 
+
+```{r}
+world_map = merge(world_map, intlall, by.x="region", by.y="Citizenship")
+str(world_map)
+```
+
+Looks good.
+
+So to plot a map, we use the geom_polygon geometry.
+
+```{r}
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill="white", color="black") +
+  coord_map("mercator")
+```
+
+So that looks kind of like a world map. There's a few things going on here.
+So first of all, all the countries look like big black blobs. What on earth is going on, 
+you might say.
+
+Well, sometimes the merge can reorder the data. And it turns out that what the world_map data 
+frame really is is actually a list of latitude and longitude points that define the border of 
+each country. So if we accidentally reorder the data frame they no longer make any sense.
+
+And as it goes from point to point, the points might be on the other side of the country
+as it defines the polygon. 
+
+So, we have to reorder the data in the correct order. So this command is a little bit complicated 
+looking, but when you break it down, it's not so bad. So, we take the world_map, and we're 
+going to reorder it.
+
+So world_map, we're going to reorder the rows. First of all, the group, which is pretty much
+equivalent to the country, and then the order variable, which is just the correct order for 
+the border points. And we're going to take all the columns, of course.
+
+```{r}
+world_map = world_map[order(world_map$group, world_map$order),]
+```
+
+Done. So if we go and try plotting it again
+
+```{r}
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill="white", color="black") +
+  coord_map("mercator")
+```
+
+There we go, much easier. Right, so now we have the map, and it looks far more reasonable.
+OK, next problem. Some of the countries are missing. Now of course, the USA is missing
+because MIT is in the USA, so that wouldn't be an international student coming from the USA.
+
+And some parts of Africa are missing, presumably because there are no students at MIT right now
+who are from those countries. But you'll also notice that Russia is missing, and a lot of 
+countries near it, as well as China. Which is definitely not true because I have many friends 
+at MIT who are from Russia and China.
+
+So, what do we do about that?
+
+The reason China is missing is that it has a different name in the MIT data frame than in the 
+world_map data frame. So when we merged them, it was dropped from the data set because it 
+didn't match up.
+
+So to see what it's called in the MIT data frame, let's just do a table.
+
+```{r}
+table(intlall$Citizenship)
+```
+
+If we scroll all the way up, we'll see it says "China (People's Republic Of)".
+Now, in the world_map data frame, it's simply called "China".
+
+So, what we can do is change the MIT data frame. So let's say the citizenship column, 
+the one row where it equals "China (People's Republic Of)" should just be "China".
+
+```{r}
+intlall$Citizenship[intlall$Citizenship=="China (People's Republic Of)"] = "China"
+table(intlall$Citizenship)
+```
+
+OK, let's check. Do the table again. Scroll all the way up. There it is, China.
+So we've fixed that.
+
+```{r}
+world_map = merge(map_data("world"), intlall, by.x="region", by.y="Citizenship")
+world_map = world_map[order(world_map$group, world_map$order),]
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill=Total), color="black") +
+  coord_map("mercator",xlim=c(-180,180), ylim=c(-60, 90)) # the limit fix the horizontal band
+```
+
+This is pretty interesting actually. So we can see that Canada, and China, and India supply
+a large number of international students to MIT. But it is a little bit confusing doing it
+on a per country basis, because Europe, presumably, has quite a few students at MIT.
+
+But because Europe is made up of many small countries, it doesn't look very impressive.
+Maybe if all the European countries were grouped together, it would look about the same
+color as Canada.
+
+But it's hard to tell. There are also other projections we can look at.
+
+What I want to show you is an orthographic projection that allows you to sort of view the 
+map in 3D, like a globe. 
+
+So let's try that out.
+
+```{r}
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill=Total), color="black") +
+  coord_map("ortho",orientation = c(20, 30, 0),xlim=c(-180,180), ylim=c(-60, 90)) 
+```
+.
+If we run this, we should get a map centered above North Africa.
+That's quite a nice visualization because if you want to look just at Africa and Europe,
+this is the way to go.
+
+We can still see China, and Canada, and South America in there, as well.
+
+Let's do something a little bit more personal. I want to change the coordinates, now,
+to -37 and 175. Now it's centered on my hometown of Auckland, New Zealand.
+
+```{r}
+ggplot(world_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill=Total), color="black") +
+  coord_map("ortho",orientation = c(-37, 175, 0),xlim=c(-180,180), ylim=c(-60, 90)) 
+```
+
+### Scale 
+
+This first plot shows the average height of a 21-year-old male in centimeters.
+
+The x-axis is time, starting in 1871, and ending in 1975. Each person represents the height,
+at a different point in time, and the points are evenly spaced in time, so the x-axis is OK.
+The y-axis ranges from just under 160 to 180 centimeters, which isn't inherently bad, but does
+overstate the change.
+
+The real problem is the bars. If it was accurate, we would only really see the heads of the men,
+but instead we see their whole bodies, making it seem as if people have not only doubled 
+in height, but they've also double in width.
+
+This next plot also has issues with scale.
+
+The total range of the plot is 8% to 10%, although all the numbers fall in the range of 
+8.6% to 9.2%.
+
+If we plotted the y-axis on a 0% to 10% scale, the conclusion would be that nothing is really
+changing at all. 
+
+The last point in the chart is at the wrong height, and the size of the markers makes 
+the relative locations hard to distinguish.
+
+Also notice that the gap between 9.0% and the 8.9% markers on the far left side, 
+and the 8.9% and 8.8% markers, have a different gap.
+
+This plot shows the relative breakdown of teachers by race in a certain teaching program.
+The Caucasian bar is truncated, which is a risky choice, but could be appropriate in some 
+situations.
+ 
+A much bigger problem is that the scale of each blue bar is entirely different.
+
+For example, the Native American bar is about a third of the length of the African American bar,
+but there are more than 10 times as many African Americans in this program as Native Americans.
+
+In fact, visually, this plot is completely meaningless. The only useful thing about it is 
+the numbers. But even there, there is a bit of confusion, as Native Americans are given
+to one decimal place, but the others are rounded.
+
+Which when combined with the confusing scales, casts doubt on the correctness of the numbers.
+
+Here is a before and after of the same data. 
+
+On the left, we see the US military expense in the right axis, and troop count on the left axis.
+Both the line and bar plots are individually OK, but the combination is misleading.
+
+Because you have mixed two units, dollars and people, there is a false impression of some sort
+of crossover point in 1995 that does not exist. 
+
+On the right is the same data presented in  a different way. 
+
+We now have troops on the x-axis, and dollars on the y-axis. The line moves through time now, 
+allowing us to see when moments of change occurred, such as decreases in troop count, through 
+the 90s, at the end of the Cold War, the increase in spending of the 2000s, and the recent 
+decreases in military spending.
+
+The final visualization I want to show you today is all about the different types of household.
+
+The US Census Bureau periodically determines how many households are comprised, for example,
+of married couples with and without children, people living alone, and so on.
+
+First of all, I'm not saying this is a bad visualization. In fact, if we are interested 
+in the relative share of each type of household in a particular year, it's actually pretty good.
+
+However, if what we're interested in is the rates of change across the years, this is next to useless.
+
+The key problem is that the x-axis is completely off. The gap between the first two columns 
+is 10 years, but the gap between the last two columns is only 2 years, meaning that the rates
+are hard to read from this.
+
+If we're not interested in the rates of changes, but just want to compare two years at a time, 
+it's not bad, but it's not easy either.
+
+Try comparing 1970 married without children to 2010 married without children,
+without looking at the numbers. Can you tell if it has grown or shrunk?
+
+Finally, and more generally, this chart shows relative numbers. If you look at absolute numbers, 
+we might find the total number of couples married with children is actually constant,
+but the number of other households has increased.
+
+We are now going to change into R to try plotting this data as a line chart.
+
+### Using Line Charts Instead
+
+Now let's load our data frame, which is in households.csv.
+
+```{r}
+households = read.csv("households.csv")
+str(households)
+```
+
+If we look at the structure of households, we see that there is a year column and then
+six other columns for each of the different household types.
+
+So this is actually a problem for us. Given this structure of a data frame,
+what would we put in the aesthetic for our ggplot command?
+
+It's not obvious, to me at least, and in fact, I don't think it's really possible.
+
+The reason is that ggplot needs it in the form of: year, group, and fraction.
+
+The solution is to use the `melt` function from the reshape package.
+
+Melt will take a 2-dimensional data frame like ours, and convert it into exactly the right 
+form we need for ggplot2.
+
+```{r}
+library(reshape2)
+```
+
+Now, let's look at the first two columns of our households data frame
+
+```{r}
+households[,1:2]
+```
+
+So there's a Year and a MarriedWChild for each year. 
+
+Now, let's look at the first few rows of our melted households data frame.
+
+```{r}
+head(melt(households, id="Year"))
+```
+
+So, basically, what's happened is that each value of MarriedWChild has turned into its own 
+row in the new data frame.
+
+So every value in our data frame now corresponds to a new row in our melted data frame,
+which is exactly what we need for ggplot.
+ 
+So let's try plotting this melted data frame.
+
+```{r}
+ggplot(melt(households, id="Year"), aes(x = Year, y = value, color = variable)) + 
+  geom_line(size=2) +
+  geom_point(size=5) + 
+  ylab("Percentage Of Households")
+```
+
+And there you go. Now, this is actually quite interesting when we compare it back to the
+chart we had in the slides.
+
+Now you can see just how quickly MarriedWChild is decreasing as a relative share.
+You can also more clearly see that MarriedWOChild is pretty much flat, and that the differences 
+being made up by the other four types of households is steadily increasing over the years.
+
+So there you have it, the same data, plotted in two different ways. Now, I'm not saying one 
+of these is better than the other one. 
+
+For example, if I want to compare inside a given year, say 1970, it's not the most easy thing, 
+at a glance, to see just how much of a total hundred percent is taken up by each.
+
+But if I want to see across years, it's far superior. And I can clearly see that the last
+data point is pretty much right next to the second to last data point, which is something that was
+hard to tell with the other visualization.
+
+So I hope this has made you think a little bit more about the different ways you can plot the 
+same data. And hopefully improved your ggplot2 skills a little bit more.
